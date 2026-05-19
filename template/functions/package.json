@@ -1,0 +1,25 @@
+{
+  "name": "__APP_PACKAGE__-functions",
+  "version": "1.0.0",
+  "description": "Firebase Cloud Functions for __APP_TITLE__",
+  "engines": {
+    "node": "22"
+  },
+  "main": "lib/index.js",
+  "scripts": {
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "serve": "npm run build && firebase emulators:start --only functions",
+    "deploy:staging": "npm run build && firebase use staging && firebase deploy --only functions",
+    "deploy:prod": "npm run build && firebase use production && firebase deploy --only functions"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.0.0",
+    "firebase-functions": "^7.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.0.0"
+  },
+  "private": true
+}

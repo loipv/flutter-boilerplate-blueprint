@@ -1,0 +1,22 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Xcode
+*.xcuserstate
+xcuserdata/
+
+# Editor
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Temp / test output
+tmp/
+*.log
+
+# Cloud Functions build artifacts (in template — not committed)
+template/functions/node_modules/
+template/functions/lib/

@@ -1,0 +1,1 @@
+Blueprint version: v__BLUEPRINT_VERSION__

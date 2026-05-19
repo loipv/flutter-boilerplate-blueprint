@@ -1,0 +1,16 @@
+include: package:flutter_lints/flutter.yaml
+
+analyzer:
+  exclude:
+    - "**/*.g.dart"
+    - "**/*.freezed.dart"
+  errors:
+    invalid_annotation_target: ignore
+
+linter:
+  rules:
+    - public_member_api_docs: false
+    - sort_constructors_first: true
+    - prefer_relative_imports: false  # Absolute imports only
+    - unawaited_futures: true
+    - discard_wrapped_values: true

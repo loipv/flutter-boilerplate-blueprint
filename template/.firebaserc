@@ -1,0 +1,6 @@
+{
+  "projects": {
+    "staging": "__APP_PACKAGE__-staging",
+    "production": "__APP_PACKAGE__-prod"
+  }
+}
