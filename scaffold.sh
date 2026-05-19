@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # =============================================================================
-# flutter-firebase-blueprint scaffold
+# flutter-boilerplate-blueprint scaffold
 #
 # Creates a production-ready Flutter + Firebase app from the blueprint template.
 #
 # Run remotely (downloads full script before executing; no partial execution):
-#   bash -c "$(curl -fsSL https://raw.githubusercontent.com/sandeshan/flutter-firebase-blueprint/main/scaffold.sh)"
+#   bash -c "$(curl -fsSL https://raw.githubusercontent.com/loipv/flutter-boilerplate-blueprint/main/scaffold.sh)"
 #
 # Run locally (after cloning the repo):
 #   bash scaffold.sh
@@ -16,14 +16,14 @@
 if [ -z "${BASH_VERSION:-}" ]; then
   echo "This scaffold requires bash." >&2
   echo "Run it with: bash scaffold.sh" >&2
-  echo 'Remote usage: bash -c "$(curl -fsSL https://raw.githubusercontent.com/sandeshan/flutter-firebase-blueprint/main/scaffold.sh)"' >&2
+  echo 'Remote usage: bash -c "$(curl -fsSL https://raw.githubusercontent.com/loipv/flutter-boilerplate-blueprint/main/scaffold.sh)"' >&2
   exit 1
 fi
 
 set -euo pipefail
 
-TEMPLATE_REPO="https://github.com/sandeshan/flutter-firebase-blueprint.git"
-BLUEPRINT_VERSION="0.5.0"
+TEMPLATE_REPO="https://github.com/loipv/flutter-boilerplate-blueprint.git"
+BLUEPRINT_VERSION="0.6.0"
 FLUTTER_VERSION="3.41.4"
 HAS_FVM=false
 HAS_FLUTTER=false
@@ -180,7 +180,7 @@ replace_tokens() {
 # =============================================================================
 main() {
   echo ""
-  echo "$(bold '  flutter-firebase-blueprint')"
+  echo "$(bold '  flutter-boilerplate-blueprint')"
   echo "  $(cyan "Production-ready Flutter + Firebase scaffolder v${BLUEPRINT_VERSION}")"
   echo ""
   echo "  Press Enter to accept defaults. Ctrl+C to cancel."

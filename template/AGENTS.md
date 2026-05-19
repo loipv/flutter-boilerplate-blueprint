@@ -8,7 +8,7 @@
 
 ### 1.1 Project Identity
 
-**App:** `flutter-boilerplate-blueprint` — a Flutter + Firebase starter template with feature-first architecture, Riverpod 3.x, auth, onboarding, and release tooling.
+**App:** `__APP_PACKAGE__` — __APP_DESC__
 **Stack:** Flutter + Firebase · Feature-First Clean Architecture · Riverpod 3.x code-gen
 
 ### 1.2 Architectural Vetos
@@ -31,21 +31,6 @@
 2. No assumptions about business logic or implementation details; search first
 3. If no results, state this explicitly and request clarification
 
-### 2.1.1 Blueprint Release Context
-
-This repository has two separate versioning concerns:
-
-- The **blueprint version** for this template repo, defined by `BLUEPRINT_VERSION` in `scaffold.sh`
-- The **generated app version** in each scaffolded app's `pubspec.yaml`
-
-For blueprint release work:
-
-1. Read `README.md` and `CHANGELOG.md` first
-2. Treat `main` as the default install path for the latest stable blueprint
-3. Treat Git tags as reproducible snapshots for older exact blueprint versions
-4. Update blueprint release docs and metadata together: `scaffold.sh`, `README.md`, `CHANGELOG.md`, and any generated version-stamp files
-5. Do not use generated-app Makefile release commands (`make bump-version`, `make tag-release`) as the source of truth for blueprint releases
-
 ### 2.2 Architecture Enforcement
 
 #### Feature-First Clean Architecture
@@ -59,7 +44,7 @@ Every feature lives under `lib/features/<name>/` with up to four layers:
 
 Shared code lives in `lib/core/` (router, theme, domain models, services, error types).
 
-Platform setup and release wiring live outside `lib/` too. When a task touches auth, publishing, or platform configuration, also read the generated app's `docs/setup.md`, `docs/auth_setup.md`, and the `ios/` / `android/` flavor files before changing code.
+Platform setup and release wiring live outside `lib/` too. When a task touches auth, publishing, or platform configuration, also read `docs/setup.md`, `docs/auth_setup.md`, and the `ios/` / `android/` flavor files before changing code.
 
 #### Strictly Forbidden Patterns
 
@@ -100,7 +85,7 @@ class ExampleController extends _$ExampleController {
 After editing annotated classes, run:
 
 ```bash
-fvm flutter pub run build_runner build --delete-conflicting-outputs
+__FLUTTER_CMD__ pub run build_runner build --delete-conflicting-outputs
 ```
 
 ### 2.4 Backend Abstraction Pattern
@@ -184,7 +169,7 @@ lib/
     └── user_profile/           # Firestore user document CRUD
 ```
 
-Generated apps also include platform setup files such as:
+Platform setup files:
 
 ```text
 ios/config/Staging/GoogleService-Info.plist
@@ -205,7 +190,7 @@ Never change one without the others.
 
 ### 3.3 Advanced Environment Configuration
 
-Generated apps may optionally use environment-driven platform and analytics overrides:
+Optional environment-driven platform and analytics overrides:
 
 - `POSTHOG_HOST`: custom PostHog region or self-hosted domain
 - `FIREBASE_AUTH_DOMAIN`: custom Firebase Auth redirect domain
@@ -256,5 +241,5 @@ Never expose admin or other users' data to the client.
 1. **Reference existing patterns**: use `lib/features/auth/` as the full 4-layer reference
 2. **No speculative abstractions**: build what the task requires, not what might be needed later
 3. **No layer-crossing**: presentation never imports from `data/`, domain never imports from `application/`
-4. **Run after every change**: `dart format .` then `fvm flutter analyze`
+4. **Run after every change**: `dart format .` then `__FLUTTER_CMD__ analyze`
 5. **Update `plans/master_plan.md`** when completing tasks (if present)

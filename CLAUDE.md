@@ -16,7 +16,7 @@ For blueprint release or versioning tasks, also read:
 
 ## Project Identity
 
-**flutter-firebase-blueprint**: A Flutter + Firebase starter template with feature-first architecture, Riverpod 3.x, auth, onboarding, and release tooling.
+**flutter-boilerplate-blueprint**: A Flutter + Firebase starter template with feature-first architecture, Riverpod 3.x, auth, onboarding, and release tooling.
 Flutter + Firebase · Feature-First Clean Architecture · Riverpod 3.x code-gen
 
 ## Key Commands
