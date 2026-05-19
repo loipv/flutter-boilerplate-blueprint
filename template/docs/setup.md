@@ -15,7 +15,7 @@ Use this after scaffolding a new app. It covers the pieces required to get the a
 ## 2. Scaffold a New App
 
 ```sh
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/sandeshan/flutter-firebase-blueprint/main/scaffold.sh)"
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/loipv/flutter-boilerplate-blueprint/main/scaffold.sh)"
 ```
 
 The questionnaire asks for:

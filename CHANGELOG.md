@@ -1,8 +1,30 @@
 # Changelog
 
-All notable changes to the `flutter-firebase-blueprint` template should be documented in this file.
+All notable changes to the `flutter-boilerplate-blueprint` template should be documented in this file.
 
 The generated app's `pubspec.yaml` version is separate from the blueprint version. Use this changelog to track scaffold and template changes between blueprint tags.
+
+## v0.6.0 - 2026-05-19
+
+### Added
+
+- `template/AGENTS.md` is now shipped to every generated app. The AI bootloader (`CLAUDE.md` / `CODEX.md` / `GEMINI.md`) referenced `AGENTS.md` as required reading, but the file was missing from `template/`, leaving generated apps without "full rules" documentation.
+
+### Fixed
+
+- `scaffold.sh` now correctly replaces `__APP_PACKAGE__` (and other tokens) in files living under `lib/.../data/` directories and in `.firebaserc`. The previous binary-file skip used `file "$path" | grep 'data'`, which matched the literal string `data` in the printed pathname (e.g. `lib/core/data/...`) or in `file`'s output for JSON files (`JSON data`), causing those files to be skipped entirely. Fixed by using `file -b` (brief, no filename) and tightening the skip pattern to `(font|executable|compiled)`.
+- `template/Makefile` no longer hardcodes `DEVICE=iPhone` and `RELEASE_DEVICE=device-id` defaults. The `-d` flag is now only passed when the user explicitly sets `DEVICE=` or `RELEASE_DEVICE=`, letting Flutter pick the device by default.
+- `template/Makefile` no longer enumerates each env var by name. A new `dart_defines` Make function reads every `KEY=VALUE` line from the env file and emits `--dart-define=KEY=VALUE` flags automatically. Adding a new variable to `.env.staging` / `.env.production` no longer requires editing the Makefile.
+- `template/Makefile` now falls back to a top-level `.env` file when `.env.staging` or `.env.production` is missing, simplifying quick local experiments.
+
+### Changed
+
+- Blueprint repo URL updated from `sandeshan/flutter-firebase-blueprint` to `loipv/flutter-boilerplate-blueprint` across `scaffold.sh`, `README.md`, `CHANGELOG.md`, `AGENTS.md`, `CLAUDE.md`, `CODEX.md`, `template/docs/setup.md`, and `template/docs/next_steps.md`.
+- Removed redundant `template/BLUEPRINT_VERSION.md`. The file is always overwritten by `scaffold.sh` at scaffold time, so the template copy was dead weight.
+
+### Breaking / manual follow-up
+
+- None
 
 ## v0.5.0 - 2026-04-11
 

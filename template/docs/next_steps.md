@@ -2,7 +2,7 @@
 
 Post-scaffold checklist and use-case guide. Detailed setup lives in `docs/setup.md`, and auth-specific platform steps live in `docs/auth_setup.md`.
 
-Scaffolded from `flutter-firebase-blueprint` version `v__BLUEPRINT_VERSION__`. See `BLUEPRINT_VERSION.md` in the project root if you need to report which blueprint snapshot this app started from.
+Scaffolded from `flutter-boilerplate-blueprint` version `v__BLUEPRINT_VERSION__`. See `BLUEPRINT_VERSION.md` in the project root if you need to report which blueprint snapshot this app started from.
 
 ---
 

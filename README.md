@@ -1,13 +1,13 @@
-# flutter-firebase-blueprint
+# flutter-boilerplate-blueprint
 
-[![Latest Blueprint](https://img.shields.io/github/v/tag/sandeshan/flutter-firebase-blueprint?label=blueprint)](https://github.com/sandeshan/flutter-firebase-blueprint/tags)
-[![Last Commit](https://img.shields.io/github/last-commit/sandeshan/flutter-firebase-blueprint)](https://github.com/sandeshan/flutter-firebase-blueprint/commits/main)
-[![License](https://img.shields.io/github/license/sandeshan/flutter-firebase-blueprint)](https://github.com/sandeshan/flutter-firebase-blueprint/blob/main/LICENSE)
-[![Flutter](https://img.shields.io/badge/flutter-starter-blue)](https://github.com/sandeshan/flutter-firebase-blueprint)
-[![Firebase](https://img.shields.io/badge/firebase-ready-orange)](https://github.com/sandeshan/flutter-firebase-blueprint)
-[![Riverpod 3](https://img.shields.io/badge/riverpod-3.x-00bcd4)](https://github.com/sandeshan/flutter-firebase-blueprint)
+[![Latest Blueprint](https://img.shields.io/github/v/tag/loipv/flutter-boilerplate-blueprint?label=blueprint)](https://github.com/loipv/flutter-boilerplate-blueprint/tags)
+[![Last Commit](https://img.shields.io/github/last-commit/loipv/flutter-boilerplate-blueprint)](https://github.com/loipv/flutter-boilerplate-blueprint/commits/main)
+[![License](https://img.shields.io/github/license/loipv/flutter-boilerplate-blueprint)](https://github.com/loipv/flutter-boilerplate-blueprint/blob/main/LICENSE)
+[![Flutter](https://img.shields.io/badge/flutter-starter-blue)](https://github.com/loipv/flutter-boilerplate-blueprint)
+[![Firebase](https://img.shields.io/badge/firebase-ready-orange)](https://github.com/loipv/flutter-boilerplate-blueprint)
+[![Riverpod 3](https://img.shields.io/badge/riverpod-3.x-00bcd4)](https://github.com/loipv/flutter-boilerplate-blueprint)
 
-![flutter-firebase-blueprint repo preview](docs/repo-assets/social-preview.svg)
+![flutter-boilerplate-blueprint repo preview](docs/repo-assets/social-preview.svg)
 
 Production-ready Flutter + Firebase starter template for teams that want a modern base: Riverpod 3.x, feature-first clean architecture, onboarding, anonymous-to-OAuth auth upgrades, staging/production flavors, optional notifications, analytics, and release tooling.
 
@@ -42,20 +42,20 @@ Latest stable blueprint version: `v0.5.0`
 Review the script before running it. This scaffold requires `bash`; do not run it with `sh`. The `bash -c "$(curl ...)"` form downloads the whole script first, so nothing executes until the download finishes.
 
 ```bash
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/sandeshan/flutter-firebase-blueprint/main/scaffold.sh)"
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/loipv/flutter-boilerplate-blueprint/main/scaffold.sh)"
 ```
 
 If you need to reproduce an older blueprint version exactly, use a tag instead:
 
 ```bash
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/sandeshan/flutter-firebase-blueprint/v0.5.0/scaffold.sh)"
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/loipv/flutter-boilerplate-blueprint/v0.5.0/scaffold.sh)"
 ```
 
 If you want to inspect the repo first:
 
 ```bash
-git clone https://github.com/sandeshan/flutter-firebase-blueprint
-cd flutter-firebase-blueprint
+git clone https://github.com/loipv/flutter-boilerplate-blueprint
+cd flutter-boilerplate-blueprint
 bash scaffold.sh
 ```
 

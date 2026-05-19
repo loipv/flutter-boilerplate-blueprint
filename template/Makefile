@@ -1,5 +1,11 @@
-DEVICE ?= iPhone
-RELEASE_DEVICE ?= device-id
+DEVICE ?=
+RELEASE_DEVICE ?=
+
+# Convert every KEY=VALUE line in an env file into --dart-define=KEY=VALUE flags.
+# Accepts a space-separated list of candidate files; first existing wins.
+# Comments (#) and blank lines are ignored.
+# Usage: $(call dart_defines,.env.staging .env)
+dart_defines = $$(for f in $(1); do if [ -f "$$f" ]; then grep -E '^[A-Za-z_][A-Za-z0-9_]*=' "$$f" | sed 's/^/--dart-define=/' | tr '\n' ' '; break; fi; done)
 
 .PHONY: help run-staging run-prod run-prod-release \
         build-staging-ios build-staging-apk \
@@ -52,85 +58,41 @@ help:
 	@echo ""
 
 run-staging:
-	@set -a && . ./.env.staging && set +a && \
-	__FLUTTER_CMD__ run --flavor staging -t lib/main_staging.dart -d "$(DEVICE)" \
-	  --dart-define=APP_ENV=staging \
-	  --dart-define=POSTHOG_API_KEY=$$POSTHOG_API_KEY \
-	  --dart-define=SENTRY_DSN=$$SENTRY_DSN \
-	  --dart-define=GOOGLE_SERVER_CLIENT_ID=$$GOOGLE_SERVER_CLIENT_ID \
-	  --dart-define=APP_CHECK_DEBUG_TOKEN_IOS=$$APP_CHECK_DEBUG_TOKEN_IOS \
-	  --dart-define=APP_CHECK_DEBUG_TOKEN_ANDROID=$$APP_CHECK_DEBUG_TOKEN_ANDROID
+	@__FLUTTER_CMD__ run --flavor staging -t lib/main_staging.dart $(if $(DEVICE),-d "$(DEVICE)") \
+	  --dart-define=APP_ENV=staging $(call dart_defines,.env.staging .env)
 
 run-prod:
-	@set -a && . ./.env.production && set +a && \
-	__FLUTTER_CMD__ run --flavor production -t lib/main_production.dart -d "$(DEVICE)" \
-	  --dart-define=APP_ENV=production \
-	  --dart-define=POSTHOG_API_KEY=$$POSTHOG_API_KEY \
-	  --dart-define=SENTRY_DSN=$$SENTRY_DSN \
-	  --dart-define=GOOGLE_SERVER_CLIENT_ID=$$GOOGLE_SERVER_CLIENT_ID \
-	  --dart-define=APP_CHECK_DEBUG_TOKEN_IOS=$$APP_CHECK_DEBUG_TOKEN_IOS \
-	  --dart-define=APP_CHECK_DEBUG_TOKEN_ANDROID=$$APP_CHECK_DEBUG_TOKEN_ANDROID
+	@__FLUTTER_CMD__ run --flavor production -t lib/main_production.dart $(if $(DEVICE),-d "$(DEVICE)") \
+	  --dart-define=APP_ENV=production $(call dart_defines,.env.production .env)
 
 run-prod-release:
-	@set -a && . ./.env.production && set +a && \
-	__FLUTTER_CMD__ run --flavor production -t lib/main_production.dart \
-	  -d "$(RELEASE_DEVICE)" --release \
-	  --dart-define=APP_ENV=production \
-	  --dart-define=POSTHOG_API_KEY=$$POSTHOG_API_KEY \
-	  --dart-define=SENTRY_DSN=$$SENTRY_DSN \
-	  --dart-define=GOOGLE_SERVER_CLIENT_ID=$$GOOGLE_SERVER_CLIENT_ID
+	@__FLUTTER_CMD__ run --flavor production -t lib/main_production.dart \
+	  $(if $(RELEASE_DEVICE),-d "$(RELEASE_DEVICE)") --release \
+	  --dart-define=APP_ENV=production $(call dart_defines,.env.production .env)
 
 build-staging-ios:
-	@set -a && . ./.env.staging && set +a && \
-	__FLUTTER_CMD__ build ios --flavor staging -t lib/main_staging.dart \
-	  --dart-define=APP_ENV=staging \
-	  --dart-define=POSTHOG_API_KEY=$$POSTHOG_API_KEY \
-	  --dart-define=SENTRY_DSN=$$SENTRY_DSN \
-	  --dart-define=GOOGLE_SERVER_CLIENT_ID=$$GOOGLE_SERVER_CLIENT_ID \
-	  --dart-define=APP_CHECK_DEBUG_TOKEN_IOS=$$APP_CHECK_DEBUG_TOKEN_IOS \
-	  --dart-define=APP_CHECK_DEBUG_TOKEN_ANDROID=$$APP_CHECK_DEBUG_TOKEN_ANDROID
+	@__FLUTTER_CMD__ build ios --flavor staging -t lib/main_staging.dart \
+	  --dart-define=APP_ENV=staging $(call dart_defines,.env.staging .env)
 
 build-staging-apk:
-	@set -a && . ./.env.staging && set +a && \
-	__FLUTTER_CMD__ build apk --flavor staging -t lib/main_staging.dart \
-	  --dart-define=APP_ENV=staging \
-	  --dart-define=POSTHOG_API_KEY=$$POSTHOG_API_KEY \
-	  --dart-define=SENTRY_DSN=$$SENTRY_DSN \
-	  --dart-define=GOOGLE_SERVER_CLIENT_ID=$$GOOGLE_SERVER_CLIENT_ID \
-	  --dart-define=APP_CHECK_DEBUG_TOKEN_IOS=$$APP_CHECK_DEBUG_TOKEN_IOS \
-	  --dart-define=APP_CHECK_DEBUG_TOKEN_ANDROID=$$APP_CHECK_DEBUG_TOKEN_ANDROID
+	@__FLUTTER_CMD__ build apk --flavor staging -t lib/main_staging.dart \
+	  --dart-define=APP_ENV=staging $(call dart_defines,.env.staging .env)
 
 build-prod-ios:
-	@set -a && . ./.env.production && set +a && \
-	__FLUTTER_CMD__ build ios --flavor production -t lib/main_production.dart \
-	  --dart-define=APP_ENV=production \
-	  --dart-define=POSTHOG_API_KEY=$$POSTHOG_API_KEY \
-	  --dart-define=SENTRY_DSN=$$SENTRY_DSN \
-	  --dart-define=GOOGLE_SERVER_CLIENT_ID=$$GOOGLE_SERVER_CLIENT_ID
+	@__FLUTTER_CMD__ build ios --flavor production -t lib/main_production.dart \
+	  --dart-define=APP_ENV=production $(call dart_defines,.env.production .env)
 
 build-prod-apk:
-	@set -a && . ./.env.production && set +a && \
-	__FLUTTER_CMD__ build apk --flavor production -t lib/main_production.dart \
-	  --dart-define=APP_ENV=production \
-	  --dart-define=POSTHOG_API_KEY=$$POSTHOG_API_KEY \
-	  --dart-define=SENTRY_DSN=$$SENTRY_DSN \
-	  --dart-define=GOOGLE_SERVER_CLIENT_ID=$$GOOGLE_SERVER_CLIENT_ID
+	@__FLUTTER_CMD__ build apk --flavor production -t lib/main_production.dart \
+	  --dart-define=APP_ENV=production $(call dart_defines,.env.production .env)
 
 build-prod-ipa:
-	@set -a && . ./.env.production && set +a && \
-	__FLUTTER_CMD__ build ipa --flavor production -t lib/main_production.dart \
-	  --dart-define=APP_ENV=production \
-	  --dart-define=POSTHOG_API_KEY=$$POSTHOG_API_KEY \
-	  --dart-define=SENTRY_DSN=$$SENTRY_DSN \
-	  --dart-define=GOOGLE_SERVER_CLIENT_ID=$$GOOGLE_SERVER_CLIENT_ID
+	@__FLUTTER_CMD__ build ipa --flavor production -t lib/main_production.dart \
+	  --dart-define=APP_ENV=production $(call dart_defines,.env.production .env)
 
 build-prod-aab:
-	@set -a && . ./.env.production && set +a && \
-	__FLUTTER_CMD__ build appbundle --flavor production -t lib/main_production.dart \
-	  --dart-define=APP_ENV=production \
-	  --dart-define=POSTHOG_API_KEY=$$POSTHOG_API_KEY \
-	  --dart-define=SENTRY_DSN=$$SENTRY_DSN \
-	  --dart-define=GOOGLE_SERVER_CLIENT_ID=$$GOOGLE_SERVER_CLIENT_ID \
+	@__FLUTTER_CMD__ build appbundle --flavor production -t lib/main_production.dart \
+	  --dart-define=APP_ENV=production $(call dart_defines,.env.production .env) \
 	  --obfuscate --split-debug-info=build/app/outputs/symbols
 
 release-preflight:

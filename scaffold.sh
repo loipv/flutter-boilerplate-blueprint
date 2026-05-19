@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # =============================================================================
-# flutter-firebase-blueprint scaffold
+# flutter-boilerplate-blueprint scaffold
 #
 # Creates a production-ready Flutter + Firebase app from the blueprint template.
 #
 # Run remotely (downloads full script before executing; no partial execution):
-#   bash -c "$(curl -fsSL https://raw.githubusercontent.com/sandeshan/flutter-firebase-blueprint/main/scaffold.sh)"
+#   bash -c "$(curl -fsSL https://raw.githubusercontent.com/loipv/flutter-boilerplate-blueprint/main/scaffold.sh)"
 #
 # Run locally (after cloning the repo):
 #   bash scaffold.sh
@@ -16,14 +16,14 @@
 if [ -z "${BASH_VERSION:-}" ]; then
   echo "This scaffold requires bash." >&2
   echo "Run it with: bash scaffold.sh" >&2
-  echo 'Remote usage: bash -c "$(curl -fsSL https://raw.githubusercontent.com/sandeshan/flutter-firebase-blueprint/main/scaffold.sh)"' >&2
+  echo 'Remote usage: bash -c "$(curl -fsSL https://raw.githubusercontent.com/loipv/flutter-boilerplate-blueprint/main/scaffold.sh)"' >&2
   exit 1
 fi
 
 set -euo pipefail
 
-TEMPLATE_REPO="https://github.com/sandeshan/flutter-firebase-blueprint.git"
-BLUEPRINT_VERSION="0.5.0"
+TEMPLATE_REPO="https://github.com/loipv/flutter-boilerplate-blueprint.git"
+BLUEPRINT_VERSION="0.6.0"
 FLUTTER_VERSION="3.41.4"
 HAS_FVM=false
 HAS_FLUTTER=false
@@ -156,8 +156,10 @@ replace_tokens() {
     -o -name "*.kts" -o -name "Makefile" \
     -o -name ".env*" -o -name ".firebaserc" \
   \) | while IFS= read -r file; do
-    # Skip binary files (fonts)
-    if file "$file" 2>/dev/null | grep -q 'font\|binary\|data'; then continue; fi
+    # Skip binary files (fonts, compiled assets). Use `file -b` so the path
+    # itself isn't matched — paths like `lib/.../data/` previously caused
+    # text files to be skipped because `file`'s output included the filename.
+    if file -b "$file" 2>/dev/null | grep -qE '(font|executable|compiled)'; then continue; fi
     sed -i '' \
       -e "s|__APP_PACKAGE__|${APP_PACKAGE}|g" \
       -e "s|__APP_TITLE__|${APP_TITLE}|g"      \
@@ -180,7 +182,7 @@ replace_tokens() {
 # =============================================================================
 main() {
   echo ""
-  echo "$(bold '  flutter-firebase-blueprint')"
+  echo "$(bold '  flutter-boilerplate-blueprint')"
   echo "  $(cyan "Production-ready Flutter + Firebase scaffolder v${BLUEPRINT_VERSION}")"
   echo ""
   echo "  Press Enter to accept defaults. Ctrl+C to cancel."
