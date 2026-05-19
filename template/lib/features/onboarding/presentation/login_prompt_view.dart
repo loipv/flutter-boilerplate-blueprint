@@ -24,8 +24,12 @@ class LoginPromptView extends ConsumerStatefulWidget {
 }
 
 class _LoginPromptViewState extends ConsumerState<LoginPromptView> {
+  // BEGIN_APPLE
   bool _isLoadingApple = false;
+  // END_APPLE
+  // BEGIN_GOOGLE
   bool _isLoadingGoogle = false;
+  // END_GOOGLE
 
   Future<void> _signIn(
     Future<void> Function() method, {
@@ -116,6 +120,7 @@ class _LoginPromptViewState extends ConsumerState<LoginPromptView> {
 
           // Sign-in buttons (shown only for anonymous / signed-out users)
           if (isAnon) ...[
+            // BEGIN_APPLE
             AuthButton(
               provider: AuthProvider.apple,
               isLoading: _isLoadingApple,
@@ -127,6 +132,8 @@ class _LoginPromptViewState extends ConsumerState<LoginPromptView> {
               ),
             ),
             const Gap(AppSpacing.p3),
+            // END_APPLE
+            // BEGIN_GOOGLE
             AuthButton(
               provider: AuthProvider.google,
               isLoading: _isLoadingGoogle,
@@ -138,6 +145,7 @@ class _LoginPromptViewState extends ConsumerState<LoginPromptView> {
                 signInMethod: SignInMethod.google,
               ),
             ),
+            // END_GOOGLE
             const Gap(AppSpacing.p6),
           ],
 
@@ -145,19 +153,26 @@ class _LoginPromptViewState extends ConsumerState<LoginPromptView> {
           SizedBox(
             width: double.infinity,
             height: 52,
-            child: isAnon
-                ? OutlinedButton(
-                    onPressed: _continueAsGuest,
-                    child: const Text('Continue as Guest'),
-                  )
-                : FilledButton(
-                    onPressed: _completeOnboarding,
-                    child: const Text('Get Started'),
-                  ),
+            child: _buildBottomButton(isAnon),
           ),
           const Gap(AppSpacing.p4),
         ],
       ),
+    );
+  }
+
+  Widget _buildBottomButton(bool isAnon) {
+    // BEGIN_ANON
+    if (isAnon) {
+      return OutlinedButton(
+        onPressed: _continueAsGuest,
+        child: const Text('Continue as Guest'),
+      );
+    }
+    // END_ANON
+    return FilledButton(
+      onPressed: _completeOnboarding,
+      child: const Text('Get Started'),
     );
   }
 }

@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+// BEGIN_POSTHOG
 import 'package:posthog_flutter/posthog_flutter.dart';
+// END_POSTHOG
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+// BEGIN_SENTRY
 import 'package:sentry_flutter/sentry_flutter.dart';
+// END_SENTRY
 import 'package:__APP_PACKAGE__/core/presentation/main_scaffold.dart';
 import 'package:__APP_PACKAGE__/core/presentation/splash_screen.dart';
 import 'package:__APP_PACKAGE__/core/utils/app_logger.dart';
@@ -44,7 +48,14 @@ GoRouter router(Ref ref) {
     initialLocation: '/splash',
     debugLogDiagnostics: true,
     refreshListenable: notifier,
-    observers: [SentryNavigatorObserver(), PosthogObserver()],
+    observers: [
+      // BEGIN_SENTRY
+      SentryNavigatorObserver(),
+      // END_SENTRY
+      // BEGIN_POSTHOG
+      PosthogObserver(),
+      // END_POSTHOG
+    ],
     redirect: (context, state) {
       final authState = ref.read(
         authControllerProvider.select((v) => v.whenData((u) => u != null)),

@@ -70,6 +70,7 @@ class _AppState extends ConsumerState<App> {
   }
 
   void _checkAuth() {
+    // BEGIN_ANON
     // Create an anonymous session only if no auth session exists.
     // Using the synchronous currentUser prevents overwriting a signed-in
     // Apple/Google session on hot restart.
@@ -77,6 +78,7 @@ class _AppState extends ConsumerState<App> {
     if (!hasUser) {
       ref.read(authControllerProvider.notifier).signInAnonymously();
     }
+    // END_ANON
   }
 
   @override

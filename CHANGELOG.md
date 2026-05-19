@@ -4,6 +4,24 @@ All notable changes to the `flutter-boilerplate-blueprint` template should be do
 
 The generated app's `pubspec.yaml` version is separate from the blueprint version. Use this changelog to track scaffold and template changes between blueprint tags.
 
+## v0.7.0 - 2026-05-19
+
+### Fixed
+
+- Scaffolded apps no longer fail to compile when feature flags are disabled. Previously `USE_POSTHOG`, `USE_SENTRY`, `USE_APPLE`, `USE_GOOGLE`, and `USE_ANON` either silently removed the package from `pubspec.yaml` while leaving every code reference intact (compile error), or did nothing at all (`USE_ANON`). Now scaffold.sh strips matching `BEGIN_<FLAG>/END_<FLAG>` blocks in template files for each disabled feature.
+- Scaffolded apps no longer keep the `notificationTime` field in `user_preferences.dart` when notifications are disabled. The `BEGIN_NOTIFICATIONS_PREF` markers existed in the template but were never stripped by `scaffold.sh`.
+
+### Changed
+
+- `USE_APPLE`, `USE_GOOGLE`, `USE_ANON` are now UI-toggle flags: when disabled, the relevant sign-in UI is hidden but the `sign_in_with_apple` / `google_sign_in` packages stay installed and the auth interface methods remain. This is intentional — full code stripping for these three flags requires cross-cutting interface/impl/controller markers and was deferred to keep the v0.7.0 change safe and verifiable.
+- `USE_POSTHOG=false` now keeps `PostHogAnalyticsRepository` as a no-op implementation of `AnalyticsRepository`. The class + provider remain so callers (e.g. `FirebaseAuthRepository`) work unchanged; only the SDK calls become no-ops.
+- `USE_SENTRY=false` strips `SentryFlutter.init` wrapping; a `BEGIN_NO_SENTRY` block in each `main_*.dart` provides the fallback bare `runApp(...)` call.
+- `scaffold.sh` `strip_marked_block` helper now guards `[ -f "$file" ] || return 0` so strips on files that may not exist (e.g. removed by a prior strip) no longer error.
+
+### Breaking / manual follow-up
+
+- None — but generated apps may show analyzer warnings about unused imports/parameters when many flags are disabled at once. These are non-blocking and easily resolved with a `dart fix --apply`.
+
 ## v0.6.0 - 2026-05-19
 
 ### Added

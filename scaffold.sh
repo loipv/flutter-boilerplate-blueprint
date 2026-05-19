@@ -23,7 +23,7 @@ fi
 set -euo pipefail
 
 TEMPLATE_REPO="https://github.com/loipv/flutter-boilerplate-blueprint.git"
-BLUEPRINT_VERSION="0.6.0"
+BLUEPRINT_VERSION="0.7.0"
 FLUTTER_VERSION="3.41.4"
 HAS_FVM=false
 HAS_FLUTTER=false
@@ -412,6 +412,7 @@ open(path, 'w').write(content)
   strip_marked_block() {
     local file="$1"
     local marker="$2"
+    [ -f "$file" ] || return 0
     sed -i '' "/BEGIN_${marker}/,/END_${marker}/d" "$file"
   }
 
@@ -427,26 +428,57 @@ open(path, 'w').write(content)
     strip_marked_block "$OUTPUT_DIR/lib/features/settings/presentation/settings_screen.dart" "NOTIFICATIONS_IMPORTS"
     strip_marked_block "$OUTPUT_DIR/lib/features/settings/presentation/settings_screen.dart" "NOTIFICATIONS_SECTION"
     strip_marked_block "$OUTPUT_DIR/lib/features/settings/presentation/settings_screen.dart" "NOTIFICATIONS_HELPERS"
+    strip_marked_block "$OUTPUT_DIR/lib/features/auth/domain/user_preferences.dart" "NOTIFICATIONS_PREF"
     strip_marked_block "$OUTPUT_DIR/android/app/src/main/AndroidManifest.xml" "NOTIFICATIONS"
     strip_marked_block "$OUTPUT_DIR/ios/Runner/Info.plist" "NOTIFICATIONS"
     warn "Notifications removed from code scaffold and platform config"
   fi
+
+  # PostHog: strip the SDK SETUP + ANALYTICS IMPLEMENTATION, leaving the
+  # AnalyticsRepository interface + provider intact as a no-op.
   if ! $USE_POSTHOG; then
     sed -i '' '/posthog_flutter/d' "$PUBSPEC"
-    warn "PostHog removed. Replace AnalyticsRepository impl or leave as no-op stub"
+    strip_marked_block "$OUTPUT_DIR/lib/core/data/posthog_analytics_repository.dart" "POSTHOG"
+    strip_marked_block "$OUTPUT_DIR/lib/main_staging.dart" "POSTHOG"
+    strip_marked_block "$OUTPUT_DIR/lib/main_production.dart" "POSTHOG"
+    strip_marked_block "$OUTPUT_DIR/lib/core/router/app_router.dart" "POSTHOG"
+    warn "PostHog removed. AnalyticsRepository is now a no-op."
   fi
-  if ! $USE_SENTRY; then
+
+  # Sentry: strip the SDK init + forward-to-Sentry hook. NO_SENTRY block
+  # provides the fallback runApp() call when Sentry is disabled.
+  if $USE_SENTRY; then
+    strip_marked_block "$OUTPUT_DIR/lib/main_staging.dart" "NO_SENTRY"
+    strip_marked_block "$OUTPUT_DIR/lib/main_production.dart" "NO_SENTRY"
+  else
     sed -i '' '/sentry_flutter/d; /sentry_dart_plugin/d' "$PUBSPEC"
-    sed -i '' '/sentry/Id' "$OUTPUT_DIR/lib/core/utils/app_logger.dart" 2>/dev/null || true
-    warn "Sentry removed. AppLogger will no longer forward errors to Sentry"
+    strip_marked_block "$OUTPUT_DIR/lib/main_staging.dart" "SENTRY"
+    strip_marked_block "$OUTPUT_DIR/lib/main_production.dart" "SENTRY"
+    strip_marked_block "$OUTPUT_DIR/lib/core/utils/app_logger.dart" "SENTRY"
+    strip_marked_block "$OUTPUT_DIR/lib/core/router/app_router.dart" "SENTRY"
+    warn "Sentry removed. AppLogger no longer forwards errors to Sentry."
   fi
+
+  # Apple/Google/Anon are UI-toggle flags: keep packages installed, just
+  # hide the relevant sign-in entry points so the app still compiles.
   if ! $USE_APPLE; then
-    sed -i '' '/sign_in_with_apple/d' "$PUBSPEC"
-    warn "Apple Sign-In removed. Delete signInWithApple() calls from auth_controller.dart"
+    strip_marked_block "$OUTPUT_DIR/lib/features/onboarding/presentation/login_prompt_view.dart" "APPLE"
+    strip_marked_block "$OUTPUT_DIR/lib/features/settings/presentation/settings_screen.dart" "APPLE"
+    strip_marked_block "$OUTPUT_DIR/lib/main_staging.dart" "APPLE"
+    strip_marked_block "$OUTPUT_DIR/lib/main_production.dart" "APPLE"
+    warn "Apple Sign-In UI hidden. signInWithApple() is unreachable from the UI."
   fi
   if ! $USE_GOOGLE; then
-    sed -i '' '/google_sign_in/d' "$PUBSPEC"
-    warn "Google Sign-In removed. Delete signInWithGoogle() calls from auth_controller.dart"
+    strip_marked_block "$OUTPUT_DIR/lib/features/onboarding/presentation/login_prompt_view.dart" "GOOGLE"
+    strip_marked_block "$OUTPUT_DIR/lib/features/settings/presentation/settings_screen.dart" "GOOGLE"
+    strip_marked_block "$OUTPUT_DIR/lib/main_staging.dart" "GOOGLE"
+    strip_marked_block "$OUTPUT_DIR/lib/main_production.dart" "GOOGLE"
+    warn "Google Sign-In UI hidden. signInWithGoogle() is unreachable from the UI."
+  fi
+  if ! $USE_ANON; then
+    strip_marked_block "$OUTPUT_DIR/lib/features/onboarding/presentation/login_prompt_view.dart" "ANON"
+    strip_marked_block "$OUTPUT_DIR/lib/app.dart" "ANON"
+    warn "Anonymous sign-in disabled. Auto-create-anon and 'Continue as Guest' removed."
   fi
 
   if $USE_FUNCTIONS; then

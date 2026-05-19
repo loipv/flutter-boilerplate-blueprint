@@ -4,9 +4,15 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+// BEGIN_GOOGLE
 import 'package:google_sign_in/google_sign_in.dart';
+// END_GOOGLE
+// BEGIN_POSTHOG
 import 'package:posthog_flutter/posthog_flutter.dart';
+// END_POSTHOG
+// BEGIN_SENTRY
 import 'package:sentry_flutter/sentry_flutter.dart';
+// END_SENTRY
 import 'package:__APP_PACKAGE__/app.dart';
 // BEGIN_NOTIFICATIONS
 import 'package:__APP_PACKAGE__/core/services/timezone_sync_service.dart';
@@ -18,19 +24,26 @@ import 'package:__APP_PACKAGE__/core/utils/app_logger.dart';
 //   flutterfire configure --project=<production-project-id> --out=lib/firebase_options_production.dart
 import 'firebase_options_production.dart';
 
+// BEGIN_POSTHOG
 const _postHogKey = String.fromEnvironment('POSTHOG_API_KEY');
 const _postHogHost = String.fromEnvironment('POSTHOG_HOST');
+// END_POSTHOG
+// BEGIN_SENTRY
 const _sentryDsn = String.fromEnvironment('SENTRY_DSN');
+// END_SENTRY
 const _firebaseAuthDomain = String.fromEnvironment('FIREBASE_AUTH_DOMAIN');
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
 
+  // BEGIN_SENTRY
   assert(
     _sentryDsn.isNotEmpty,
     'SENTRY_DSN missing: run __FLUTTER_CMD__ clean then make run-prod',
   );
+  // END_SENTRY
+  // BEGIN_POSTHOG
   assert(
     _postHogKey.isNotEmpty,
     'POSTHOG_API_KEY missing: run __FLUTTER_CMD__ clean then make run-prod',
@@ -47,6 +60,7 @@ Future<void> main() async {
   }
   await Posthog().setup(postHogConfig);
   await Posthog().register('environment', 'production');
+  // END_POSTHOG
 
   // 2. Logging
   initLogging();
@@ -74,6 +88,7 @@ Future<void> main() async {
           ),
   );
 
+  // BEGIN_GOOGLE
   const googleServerClientId = String.fromEnvironment(
     'GOOGLE_SERVER_CLIENT_ID',
   );
@@ -82,6 +97,7 @@ Future<void> main() async {
         ? googleServerClientId
         : null,
   );
+  // END_GOOGLE
 
   const appCheckTokenIos = String.fromEnvironment('APP_CHECK_DEBUG_TOKEN_IOS');
   const appCheckTokenAndroid = String.fromEnvironment(
@@ -110,6 +126,7 @@ Future<void> main() async {
   await TimezoneSyncService.registerPeriodicTask();
   // END_NOTIFICATIONS
 
+  // BEGIN_SENTRY
   // 4. Sentry
   await SentryFlutter.init((options) {
     options.dsn = _sentryDsn;
@@ -117,4 +134,8 @@ Future<void> main() async {
     options.tracesSampleRate = 0.2;
     options.sendDefaultPii = false;
   }, appRunner: () => runApp(const ProviderScope(child: App())));
+  // END_SENTRY
+  // BEGIN_NO_SENTRY
+  runApp(const ProviderScope(child: App()));
+  // END_NO_SENTRY
 }

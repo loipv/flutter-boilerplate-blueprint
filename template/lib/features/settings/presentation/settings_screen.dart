@@ -26,8 +26,12 @@ class SettingsScreen extends ConsumerStatefulWidget {
 }
 
 class _SettingsScreenState extends ConsumerState<SettingsScreen> {
+  // BEGIN_APPLE
   bool _isLoadingApple = false;
+  // END_APPLE
+  // BEGIN_GOOGLE
   bool _isLoadingGoogle = false;
+  // END_GOOGLE
 
   @override
   Widget build(BuildContext context) {
@@ -125,17 +129,21 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   'Link Apple or Google to keep your data across devices.',
                 ),
               ),
+              // BEGIN_APPLE
               AuthButton(
                 provider: AuthProvider.apple,
                 isLoading: _isLoadingApple,
                 onTap: () => _linkAccount(SignInMethod.apple),
               ),
               const Gap(AppSpacing.p3),
+              // END_APPLE
+              // BEGIN_GOOGLE
               AuthButton(
                 provider: AuthProvider.google,
                 isLoading: _isLoadingGoogle,
                 onTap: () => _linkAccount(SignInMethod.google),
               ),
+              // END_GOOGLE
               const Gap(AppSpacing.p4),
             ],
             if (user != null)

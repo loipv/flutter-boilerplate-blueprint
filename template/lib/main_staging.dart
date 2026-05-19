@@ -4,9 +4,15 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+// BEGIN_GOOGLE
 import 'package:google_sign_in/google_sign_in.dart';
+// END_GOOGLE
+// BEGIN_POSTHOG
 import 'package:posthog_flutter/posthog_flutter.dart';
+// END_POSTHOG
+// BEGIN_SENTRY
 import 'package:sentry_flutter/sentry_flutter.dart';
+// END_SENTRY
 import 'package:__APP_PACKAGE__/app.dart';
 // BEGIN_NOTIFICATIONS
 import 'package:__APP_PACKAGE__/core/services/timezone_sync_service.dart';
@@ -20,19 +26,26 @@ import 'firebase_options_staging.dart';
 
 // Keys injected via --dart-define at build time. Source via `make run-staging`.
 // If these are empty at runtime, run `__FLUTTER_CMD__ clean` first.
+// BEGIN_POSTHOG
 const _postHogKey = String.fromEnvironment('POSTHOG_API_KEY');
 const _postHogHost = String.fromEnvironment('POSTHOG_HOST');
+// END_POSTHOG
+// BEGIN_SENTRY
 const _sentryDsn = String.fromEnvironment('SENTRY_DSN');
+// END_SENTRY
 const _firebaseAuthDomain = String.fromEnvironment('FIREBASE_AUTH_DOMAIN');
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
 
+  // BEGIN_SENTRY
   assert(
     _sentryDsn.isNotEmpty,
     'SENTRY_DSN missing: run __FLUTTER_CMD__ clean then make run-staging',
   );
+  // END_SENTRY
+  // BEGIN_POSTHOG
   assert(
     _postHogKey.isNotEmpty,
     'POSTHOG_API_KEY missing: run __FLUTTER_CMD__ clean then make run-staging',
@@ -50,6 +63,7 @@ Future<void> main() async {
   }
   await Posthog().setup(postHogConfig);
   await Posthog().register('environment', 'staging');
+  // END_POSTHOG
 
   // 2. Logging (must be before Firebase/Sentry init)
   initLogging();
@@ -77,6 +91,7 @@ Future<void> main() async {
           ),
   );
 
+  // BEGIN_GOOGLE
   const googleServerClientId = String.fromEnvironment(
     'GOOGLE_SERVER_CLIENT_ID',
   );
@@ -85,6 +100,7 @@ Future<void> main() async {
         ? googleServerClientId
         : null,
   );
+  // END_GOOGLE
 
   // App Check: debug providers for staging (never submit to stores)
   const appCheckTokenIos = String.fromEnvironment('APP_CHECK_DEBUG_TOKEN_IOS');
@@ -109,6 +125,7 @@ Future<void> main() async {
   await TimezoneSyncService.registerPeriodicTask();
   // END_NOTIFICATIONS
 
+  // BEGIN_SENTRY
   // 4. Sentry wraps runApp; captures Flutter framework errors automatically
   await SentryFlutter.init((options) {
     options.dsn = _sentryDsn;
@@ -117,4 +134,8 @@ Future<void> main() async {
     options.sendDefaultPii = false;
     options.debug = kDebugMode;
   }, appRunner: () => runApp(const ProviderScope(child: App())));
+  // END_SENTRY
+  // BEGIN_NO_SENTRY
+  runApp(const ProviderScope(child: App()));
+  // END_NO_SENTRY
 }

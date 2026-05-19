@@ -2,7 +2,9 @@ import 'dart:developer' as developer;
 
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
+// BEGIN_SENTRY
 import 'package:sentry_flutter/sentry_flutter.dart';
+// END_SENTRY
 
 /// Initialise the root logging listener. Call once in `main()` before
 /// `SentryFlutter.init`.
@@ -29,6 +31,7 @@ void initLogging() {
       );
     }
 
+    // BEGIN_SENTRY
     // Forward SEVERE (AppLogger.error) to Sentry in all modes.
     if (record.level >= Level.SEVERE && record.error != null) {
       Sentry.captureException(
@@ -40,6 +43,7 @@ void initLogging() {
         },
       );
     }
+    // END_SENTRY
   });
 }
 
