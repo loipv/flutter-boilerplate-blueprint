@@ -4,6 +4,23 @@ All notable changes to the `flutter-boilerplate-blueprint` template should be do
 
 The generated app's `pubspec.yaml` version is separate from the blueprint version. Use this changelog to track scaffold and template changes between blueprint tags.
 
+## v0.9.0 - 2026-05-20
+
+### Changed
+
+- Adopted Riverpod 3.x provider naming convention: `themeNotifierProvider` renamed to `themeProvider` across the template (riverpod_generator 3.x drops the `Notifier` suffix automatically). Generated `.g.dart` files will produce the new name after running `make codegen`.
+- `main_staging.dart` and `main_production.dart` now use `DefaultFirebaseOptions.currentPlatform` instead of flavor-specific `StagingFirebaseOptions`/`ProductionFirebaseOptions` — aligns with the standard FlutterFire CLI output.
+
+### Added
+
+- `template/assets/icons/app_logo.png` ships a default app logo asset.
+
+## v0.8.1 - 2026-05-20
+
+### Changed
+
+- Docs polish: added FlutterFire CLI prerequisite to setup docs and shipped a `template/README.md` for scaffolded projects.
+
 ## v0.7.0 - 2026-05-19
 
 ### Fixed

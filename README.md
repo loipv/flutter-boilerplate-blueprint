@@ -37,7 +37,7 @@ This repo is designed for teams who want to scaffold a real app foundation quick
 
 ## 4. Quick start
 
-Latest stable blueprint version: `v0.8.1`
+Latest stable blueprint version: `v0.9.0`
 
 Review the script before running it. This scaffold requires `bash`; do not run it with `sh`. The `bash -c "$(curl ...)"` form downloads the whole script first, so nothing executes until the download finishes.
 
