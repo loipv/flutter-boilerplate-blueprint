@@ -47,34 +47,65 @@ For each Firebase project, register:
 
 ## 4. Add Firebase Config Files
 
-Run `flutterfire configure` for each project, then place the generated platform files in the flavor-specific locations below.
+This project uses two flavors (staging, production), so you must run `flutterfire configure` **twice** — once per Firebase project — and pass `--out` to write each Dart options file to a flavor-specific path. After each run, **move** the generated `GoogleService-Info.plist` and `google-services.json` from their default locations into the flavor folders below.
 
-### Flutter config
+> Prerequisite: `dart pub global activate flutterfire_cli` and `firebase login` must already be completed.
 
-Generate:
+### Run for staging
 
-- `lib/firebase_options_staging.dart`
-- `lib/firebase_options_production.dart`
-
-### iOS config
-
-Place the files here exactly:
-
-```text
-ios/config/Staging/GoogleService-Info.plist
-ios/config/Production/GoogleService-Info.plist
+```sh
+flutterfire configure \
+  --project=<your-staging-firebase-project-id> \
+  --out=lib/firebase_options_staging.dart \
+  --ios-bundle-id=<staging bundle id> \
+  --android-package-name=<staging package name> \
+  --platforms=ios,android \
+  --yes
 ```
 
-These paths are already wired into the Xcode project. During build, the right plist is copied into the app bundle automatically.
+Then move the platform files into the staging folders:
 
-### Android config
+```sh
+mv ios/Runner/GoogleService-Info.plist ios/config/Staging/GoogleService-Info.plist
+mv android/app/google-services.json    android/app/src/staging/google-services.json
+```
 
-Place the files here:
+### Run for production
+
+```sh
+flutterfire configure \
+  --project=<your-production-firebase-project-id> \
+  --out=lib/firebase_options_production.dart \
+  --ios-bundle-id=<prod bundle id> \
+  --android-package-name=<prod package name> \
+  --platforms=ios,android \
+  --yes
+```
+
+Then move the platform files into the production folders:
+
+```sh
+mv ios/Runner/GoogleService-Info.plist ios/config/Production/GoogleService-Info.plist
+mv android/app/google-services.json    android/app/src/production/google-services.json
+```
+
+### Final layout
 
 ```text
+lib/firebase_options_staging.dart
+lib/firebase_options_production.dart
+ios/config/Staging/GoogleService-Info.plist
+ios/config/Production/GoogleService-Info.plist
 android/app/src/staging/google-services.json
 android/app/src/production/google-services.json
 ```
+
+These paths are already wired into the Xcode project and Gradle build — the right plist / JSON is selected automatically based on the active flavor.
+
+### Notes
+
+- Do **not** leave the default `lib/firebase_options.dart` in the repo — delete it if it appears. The entrypoints reference the flavor-suffixed files only.
+- If `flutterfire configure` fails parsing `ios/Runner.xcodeproj/project.pbxproj`, check that any build setting whose value contains a space (for example `APP_DISPLAY_NAME`) is wrapped in double quotes, e.g. `APP_DISPLAY_NAME = "My App Name";`.
 
 ## 5. Fill In Environment Files
 
