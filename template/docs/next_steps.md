@@ -11,6 +11,7 @@ Scaffolded from `flutter-boilerplate-blueprint` version `v__BLUEPRINT_VERSION__`
 ### Tier 1: Required (app won't run without these)
 
 - [ ] **Create two Firebase projects** (staging and production) at [console.firebase.google.com](https://console.firebase.google.com)
+- [ ] **Install the FlutterFire CLI** if you haven't already: `dart pub global activate flutterfire_cli`
 - [ ] **Run `flutterfire configure`** for each project to generate `lib/firebase_options_staging.dart` and `lib/firebase_options_production.dart`
 - [ ] **Place platform Firebase files** in `ios/config/Staging/`, `ios/config/Production/`, `android/app/src/staging/`, and `android/app/src/production/`
 - [ ] **Fill in `.env.staging` and `.env.production`** with the values needed for the features you selected during scaffolding

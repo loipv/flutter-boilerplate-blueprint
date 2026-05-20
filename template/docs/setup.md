@@ -8,6 +8,7 @@ Use this after scaffolding a new app. It covers the pieces required to get the a
 | ----------------- | ------------------------------------------------------------- |
 | Flutter (via FVM) | `dart pub global activate fvm`                                |
 | Firebase CLI      | `npm install -g firebase-tools`                               |
+| FlutterFire CLI   | `dart pub global activate flutterfire_cli`                    |
 | Xcode (iOS)       | App Store                                                     |
 | Android Studio    | [developer.android.com](https://developer.android.com/studio) |
 | CocoaPods         | `sudo gem install cocoapods`                                  |
