@@ -85,7 +85,7 @@ class _AppState extends ConsumerState<App> {
   Widget build(BuildContext context) {
     final router = ref.watch(routerProvider);
     final themeMode =
-        ref.watch(themeNotifierProvider).value ?? ThemeMode.system;
+        ref.watch(themeProvider).value ?? ThemeMode.system;
 
     Widget app = MaterialApp.router(
       title: '__APP_TITLE__',

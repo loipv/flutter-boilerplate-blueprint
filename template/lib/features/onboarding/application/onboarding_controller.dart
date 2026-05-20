@@ -22,7 +22,7 @@ class OnboardingController extends _$OnboardingController {
 
   void setTheme(ThemeMode mode) {
     _update((s) => s.copyWith(themeMode: mode));
-    ref.read(themeNotifierProvider.notifier).setTheme(mode);
+    ref.read(themeProvider.notifier).setTheme(mode);
   }
 
   void nextStep() => _update((s) => s.copyWith(currentStep: s.currentStep + 1));

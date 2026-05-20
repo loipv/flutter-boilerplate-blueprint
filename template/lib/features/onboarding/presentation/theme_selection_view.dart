@@ -26,12 +26,12 @@ class _ThemeSelectionViewState extends ConsumerState<ThemeSelectionView> {
   @override
   void initState() {
     super.initState();
-    _selected = ref.read(themeNotifierProvider).value ?? ThemeMode.system;
+    _selected = ref.read(themeProvider).value ?? ThemeMode.system;
   }
 
   void _selectTheme(ThemeMode mode) {
     setState(() => _selected = mode);
-    ref.read(themeNotifierProvider.notifier).setTheme(mode);
+    ref.read(themeProvider.notifier).setTheme(mode);
   }
 
   void _confirm() {

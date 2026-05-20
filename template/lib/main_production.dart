@@ -66,7 +66,7 @@ Future<void> main() async {
   initLogging();
 
   // 3. Firebase
-  final firebaseOptions = ProductionFirebaseOptions.currentPlatform;
+  final firebaseOptions = DefaultFirebaseOptions.currentPlatform;
   await Firebase.initializeApp(
     options: _firebaseAuthDomain.isEmpty
         ? firebaseOptions

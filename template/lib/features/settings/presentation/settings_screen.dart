@@ -380,7 +380,7 @@ class _ThemeTile extends ConsumerWidget {
         onChanged: (mode) {
           if (mode != null) {
             ref.read(settingsControllerProvider.notifier).updateThemeMode(mode);
-            ref.read(themeNotifierProvider.notifier).setTheme(mode);
+            ref.read(themeProvider.notifier).setTheme(mode);
           }
         },
       ),

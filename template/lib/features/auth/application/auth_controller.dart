@@ -128,7 +128,7 @@ class AuthController extends _$AuthController {
       }
 
       await ref.read(onboardingControllerProvider.notifier).resetOnboarding();
-      await ref.read(themeNotifierProvider.notifier).resetToSystem();
+      await ref.read(themeProvider.notifier).resetToSystem();
       return null;
     } catch (e) {
       if (e is Failure) {
@@ -151,7 +151,7 @@ class AuthController extends _$AuthController {
 
   Future<void> signOut() async {
     await ref.read(onboardingControllerProvider.notifier).resetOnboarding();
-    await ref.read(themeNotifierProvider.notifier).resetToSystem();
+    await ref.read(themeProvider.notifier).resetToSystem();
     await ref.read(authRepositoryProvider).signOut();
   }
 }

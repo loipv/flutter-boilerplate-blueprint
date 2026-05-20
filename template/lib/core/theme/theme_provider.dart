@@ -9,7 +9,7 @@ part 'theme_provider.g.dart';
 /// Use this in widgets that need a `ThemeMode` value directly (e.g. DropdownButton).
 @riverpod
 ThemeMode themeMode(Ref ref) =>
-    ref.watch(themeNotifierProvider).value ?? ThemeMode.system;
+    ref.watch(themeProvider).value ?? ThemeMode.system;
 
 /// Persists theme mode to SharedPreferences.
 ///
