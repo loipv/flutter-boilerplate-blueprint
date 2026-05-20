@@ -37,7 +37,7 @@ This repo is designed for teams who want to scaffold a real app foundation quick
 
 ## 4. Quick start
 
-Latest stable blueprint version: `v0.8.0`
+Latest stable blueprint version: `v0.8.1`
 
 Review the script before running it. This scaffold requires `bash`; do not run it with `sh`. The `bash -c "$(curl ...)"` form downloads the whole script first, so nothing executes until the download finishes.
 
@@ -48,7 +48,7 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/loipv/flutter-boilerplat
 If you need to reproduce an older blueprint version exactly, use a tag instead:
 
 ```bash
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/loipv/flutter-boilerplate-blueprint/v0.8.0/scaffold.sh)"
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/loipv/flutter-boilerplate-blueprint/v0.8.1/scaffold.sh)"
 ```
 
 If you want to inspect the repo first:

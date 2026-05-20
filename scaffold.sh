@@ -23,7 +23,7 @@ fi
 set -euo pipefail
 
 TEMPLATE_REPO="https://github.com/loipv/flutter-boilerplate-blueprint.git"
-BLUEPRINT_VERSION="0.7.0"
+BLUEPRINT_VERSION="0.8.1"
 FLUTTER_VERSION="3.41.4"
 HAS_FVM=false
 HAS_FLUTTER=false
