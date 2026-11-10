@@ -1,0 +1,29 @@
+name: Blueprint
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  scaffold:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        flags:
+          - --yes --name blueprint_ci
+          - --yes --name blueprint_ci --no-notifications --no-posthog --no-sentry --no-functions --no-apple --no-google --no-anon
+          - --yes --name acme_notes --org io.acme --title "Acme Notes" --description "Notes for Acme"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.41.4
+          channel: stable
+          cache: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Scaffold and verify
+        run: tool/verify_init.sh ${{ matrix.flags }}

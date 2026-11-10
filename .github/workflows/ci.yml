@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.41.4
+          channel: stable
+          cache: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Create Firebase options stubs if missing
+        run: |
+          write_stub() {
+            [ -f "lib/firebase_options_$1.dart" ] && return 0
+            cat > "lib/firebase_options_$1.dart" <<EOT
+          // Stub Firebase options so the project compiles before Firebase is configured.
+          // Replace it by running:
+          //   flutterfire configure --project=<$2-project-id> --out=lib/firebase_options_$1.dart
+          import 'package:firebase_core/firebase_core.dart';
+
+          class DefaultFirebaseOptions {
+            static FirebaseOptions get currentPlatform => const FirebaseOptions(
+              apiKey: 'stub',
+              appId: 'stub',
+              messagingSenderId: 'stub',
+              projectId: 'stub',
+            );
+          }
+          EOT
+          }
+          write_stub staging staging
+          write_stub production production
+      - name: Setup
+        run: make setup
+      - name: Analyze
+        run: make analyze
+      - name: Test
+        run: make test

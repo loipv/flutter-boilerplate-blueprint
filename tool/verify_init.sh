@@ -30,10 +30,10 @@ cd "$dir"
 echo "Running: ${DART[*]} tool/init.dart $*"
 "${DART[@]}" tool/init.dart "$@" || fail "init exited with $?"
 
-for path in tool scaffold.sh CHANGELOG.md LICENSE docs/superpowers docs/repo-assets test/tool; do
+for path in tool scaffold.sh CHANGELOG.md LICENSE docs/superpowers docs/repo-assets test/tool .github/workflows/blueprint.yml; do
   [ ! -e "$path" ] || fail "$path still exists"
 done
-for path in .git .env.staging .env.production BLUEPRINT_VERSION.md; do
+for path in .git .env.staging .env.production BLUEPRINT_VERSION.md .github/workflows/ci.yml; do
   [ -e "$path" ] || fail "$path is missing"
 done
 
