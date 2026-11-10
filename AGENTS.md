@@ -8,7 +8,7 @@
 
 ### 1.1 Project Identity
 
-**App:** `flutter-boilerplate-blueprint` — a Flutter + Firebase starter template with feature-first architecture, Riverpod 3.x, auth, onboarding, and release tooling.
+**App:** `blueprint_app` — A Flutter + Firebase starter app
 **Stack:** Flutter + Firebase · Feature-First Clean Architecture · Riverpod 3.x code-gen
 
 ### 1.2 Architectural Vetos
@@ -31,20 +31,29 @@
 2. No assumptions about business logic or implementation details; search first
 3. If no results, state this explicitly and request clarification
 
+<!-- BEGIN_BLUEPRINT -->
 ### 2.1.1 Blueprint Release Context
 
-This repository has two separate versioning concerns:
+This repository is the blueprint: a runnable app that `tool/init.dart` renames into a new app. It has two separate versioning concerns:
 
-- The **blueprint version** for this template repo, defined by `BLUEPRINT_VERSION` in `scaffold.sh`
-- The **generated app version** in each scaffolded app's `pubspec.yaml`
+- The **blueprint version**, defined in `BLUEPRINT_VERSION.md`
+- The **app version** in `pubspec.yaml`
 
 For blueprint release work:
 
 1. Read `README.md` and `CHANGELOG.md` first
 2. Treat `main` as the default install path for the latest stable blueprint
 3. Treat Git tags as reproducible snapshots for older exact blueprint versions
-4. Update blueprint release docs and metadata together: `scaffold.sh`, `README.md`, `CHANGELOG.md`, and any generated version-stamp files
-5. Do not use generated-app Makefile release commands (`make bump-version`, `make tag-release`) as the source of truth for blueprint releases
+4. Update `BLUEPRINT_VERSION.md`, the "Latest stable blueprint version" line in `README.md`, and `CHANGELOG.md` together; then commit, tag, and push
+5. Do not use app Makefile release commands (`make bump-version`, `make tag-release`) as the source of truth for blueprint releases
+
+`lib/firebase_options_staging.dart` and `lib/firebase_options_production.dart` are committed as stubs so the repo analyzes and tests without Firebase projects. Before running `flutterfire configure` in this repo, run:
+
+```bash
+git update-index --skip-worktree lib/firebase_options_staging.dart lib/firebase_options_production.dart
+```
+
+<!-- END_BLUEPRINT -->
 
 ### 2.2 Architecture Enforcement
 
@@ -59,7 +68,7 @@ Every feature lives under `lib/features/<name>/` with up to four layers:
 
 Shared code lives in `lib/core/` (router, theme, domain models, services, error types).
 
-Platform setup and release wiring live outside `lib/` too. When a task touches auth, publishing, or platform configuration, also read the generated app's `docs/setup.md`, `docs/auth_setup.md`, and the `ios/` / `android/` flavor files before changing code.
+Platform setup and release wiring live outside `lib/` too. When a task touches auth, publishing, or platform configuration, also read `docs/setup.md`, `docs/auth_setup.md`, and the `ios/` / `android/` flavor files before changing code.
 
 #### Strictly Forbidden Patterns
 
@@ -100,8 +109,10 @@ class ExampleController extends _$ExampleController {
 After editing annotated classes, run:
 
 ```bash
-fvm flutter pub run build_runner build --delete-conflicting-outputs
+make codegen
 ```
+
+Commands: use the `make` target; where none exists, `fvm flutter`.
 
 ### 2.4 Backend Abstraction Pattern
 
@@ -184,7 +195,7 @@ lib/
     └── user_profile/           # Firestore user document CRUD
 ```
 
-Generated apps also include platform setup files such as:
+Platform setup files:
 
 ```text
 ios/config/Staging/GoogleService-Info.plist
@@ -205,7 +216,7 @@ Never change one without the others.
 
 ### 3.3 Advanced Environment Configuration
 
-Generated apps may optionally use environment-driven platform and analytics overrides:
+Optional environment-driven platform and analytics overrides:
 
 - `POSTHOG_HOST`: custom PostHog region or self-hosted domain
 - `FIREBASE_AUTH_DOMAIN`: custom Firebase Auth redirect domain
@@ -221,7 +232,7 @@ Do not hardcode these values in source. Keep them in env files and read them in 
 - **Rule**: Never make real network calls in unit tests
 
 ```dart
-class MockAuthRepository extends Mock implements AuthRepository {}
+class MockAuthRepository extends Mock implements FirebaseAuthRepository {}
 
 test(
   'Given anonymous user, When signInWithGoogle succeeds, Then user is updated',
@@ -256,5 +267,5 @@ Never expose admin or other users' data to the client.
 1. **Reference existing patterns**: use `lib/features/auth/` as the full 4-layer reference
 2. **No speculative abstractions**: build what the task requires, not what might be needed later
 3. **No layer-crossing**: presentation never imports from `data/`, domain never imports from `application/`
-4. **Run after every change**: `dart format .` then `fvm flutter analyze`
+4. **Run after every change**: `dart format .` then `make analyze`
 5. **Update `plans/master_plan.md`** when completing tasks (if present)

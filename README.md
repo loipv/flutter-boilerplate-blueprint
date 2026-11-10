@@ -45,23 +45,25 @@ Review the script before running it. This scaffold requires `bash`; do not run i
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/loipv/flutter-boilerplate-blueprint/main/scaffold.sh)"
 ```
 
-If you need to reproduce an older blueprint version exactly, use a tag instead:
+If you need to reproduce an older blueprint version exactly, pin a tag. `BLUEPRINT_REF` selects the ref that gets cloned, so set it to the same tag as the script URL:
 
 ```bash
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/loipv/flutter-boilerplate-blueprint/v0.8.1/scaffold.sh)"
+BLUEPRINT_REF=v1.0.0 bash -c "$(curl -fsSL https://raw.githubusercontent.com/loipv/flutter-boilerplate-blueprint/v1.0.0/scaffold.sh)"
 ```
 
-If you want to inspect the repo first:
+If you want to inspect the repo first, or skip the script, use "Use this template" on GitHub or clone it, then run the init tool:
 
 ```bash
-git clone https://github.com/loipv/flutter-boilerplate-blueprint
-cd flutter-boilerplate-blueprint
-bash scaffold.sh
+git clone https://github.com/loipv/flutter-boilerplate-blueprint my_app
+cd my_app
+dart tool/init.dart
 ```
 
-If you accidentally run it with `sh`, the script now exits immediately with a message telling you to re-run it with `bash`.
+You can also pass a target directory and init flags to the script: `bash scaffold.sh my_app --yes --org io.acme`.
 
-The script asks a short set of setup questions, then creates a new Flutter project with the template overlaid on top.
+If you accidentally run the script with `sh`, it exits immediately with a message telling you to re-run it with `bash`.
+
+The script clones the blueprint into the target directory, and `tool/init.dart` renames that clone in place into your app: package name, application id, display name, and the optional features you turn off. Then `tool/` deletes itself.
 Generated apps also include a `BLUEPRINT_VERSION.md` file so you can see which blueprint version they were scaffolded from later.
 
 ## 5. Why this exists
@@ -85,7 +87,7 @@ This template gives you the common plumbing without locking you into app-specifi
 - Optional Firebase Cloud Functions scaffold
 - Makefile commands for run, build, test, codegen, and deploy workflows
 - Project docs for setup, testing, release prep, and next steps
-- `AGENTS.md` plus AI bootloader files for code assistants
+- `AGENTS.md` plus a `CLAUDE.md` bootloader for code assistants
 
 ## 7. Why teams pick this over older starters
 
@@ -96,7 +98,7 @@ This blueprint is intentionally optimized for:
 - **Current architecture choices**: Riverpod 3.x, code generation, feature-first boundaries
 - **Real app setup**: flavors, env files, auth setup docs, signing notes, release guidance
 - **Migration-resistant structure**: Firebase stays in the data layer and entrypoints
-- **Repeatable scaffolding**: `scaffold.sh` overlays the template into a fresh app instead of asking users to mutate a sample app by hand
+- **Repeatable scaffolding**: `tool/init.dart` renames a clone in place instead of asking users to mutate a sample app by hand
 - **Versioned blueprint releases**: `main` tracks the latest stable blueprint and tags preserve exact historical snapshots
 
 ## 8. Comparison snapshot
@@ -110,27 +112,25 @@ This blueprint is intentionally optimized for:
 
 ## 9. What the scaffold asks
 
-| Question                      | Default                   |
-| ----------------------------- | ------------------------- |
-| App display name              | `My App`                  |
-| Package name (snake_case)     | derived from title        |
-| Organization (reverse domain) | `com.example`             |
-| Short description             | blank                     |
-| Output directory              | `<current-dir>/<package>` |
-| Anonymous sign-in             | yes                       |
-| Apple Sign-In                 | yes                       |
-| Google Sign-In                | yes                       |
-| Push notifications            | yes                       |
-| PostHog analytics             | yes                       |
-| Sentry error monitoring       | yes                       |
-| Cloud Functions (TypeScript)  | yes                       |
-| Use FVM                       | yes, if installed         |
-| FVM Flutter SDK               | blueprint-tested `3.41.4` |
-| AI coding assistant           | Claude Code               |
-| Bottom nav tabs               | 3 tabs                    |
-| Color preset                  | Sage Green, or custom hex |
+Each prompt has a flag. `--yes` accepts the default for anything you do not pass.
 
-If you enable FVM, the scaffold defaults to a blueprint-tested Flutter SDK (`3.41.4`) so generated apps are reproducible against the version this template was validated on. You can opt into the latest stable channel during scaffolding if you prefer newer SDK bits over strict reproducibility.
+| Prompt                       | Flag                 | Default                          |
+| ---------------------------- | -------------------- | -------------------------------- |
+| Package name (snake_case)    | `--name`             | target directory name            |
+| Organization (reverse domain) | `--org`              | `com.example`                    |
+| Display name                 | `--title`            | package name in Title Case       |
+| Short description            | `--description`      | `A new Flutter app`              |
+| Notifications                | `--no-notifications` | on                               |
+| PostHog analytics            | `--no-posthog`       | on                               |
+| Sentry error monitoring      | `--no-sentry`        | on                               |
+| Cloud Functions (TypeScript) | `--no-functions`     | on                               |
+| Apple Sign-In                | `--no-apple`         | on                               |
+| Google Sign-In               | `--no-google`        | on                               |
+| Anonymous sign-in            | `--no-anon`          | on                               |
+
+Invalid input re-prompts in interactive mode; with flags it exits non-zero with the reason, before any file is changed.
+
+Bottom nav tab count, brand colors, the AI tool file, and FVM are not asked. Edit them by hand after scaffolding; `docs/next_steps.md` in the generated app covers each one. The Flutter SDK is pinned to `3.41.4` in `.fvmrc`.
 
 ## 10. Architecture at a glance
 
@@ -185,6 +185,8 @@ Read it left to right: UI in `presentation` talks to controllers in `application
 │       ├── home/
 │       ├── settings/
 │       └── user_profile/
+├── test/
+├── .github/workflows/ci.yml
 ├── docs/
 │   ├── next_steps.md
 │   ├── setup.md
@@ -206,8 +208,9 @@ Read it left to right: UI in `presentation` talks to controllers in `application
 ├── .env.production
 ├── Makefile
 ├── firestore.rules
+├── BLUEPRINT_VERSION.md
 ├── AGENTS.md
-└── CLAUDE.md / CODEX.md / GEMINI.md
+└── CLAUDE.md
 ```
 
 ## 12. Included out of the box
@@ -272,33 +275,48 @@ The full contract lives in `AGENTS.md`. The short version:
 
 PRs are welcome. Keep the template focused on patterns that most apps actually need. If a feature is too specific to a single product, it probably does not belong in the base template.
 
-## 17. Releasing blueprint updates
+## 17. Working on the blueprint
 
-The generated app has its own app version in `pubspec.yaml`. The blueprint itself has a separate version, defined in [`scaffold.sh`](./scaffold.sh) as `BLUEPRINT_VERSION`.
+This repo is a runnable app. Clone it and work on it directly:
+
+```bash
+make setup            # pub get, code generation, functions deps
+make analyze          # static analysis
+make test             # unit tests, including tool/ tests
+tool/verify_init.sh   # run the init tool on a copy and check the result
+```
+
+`lib/firebase_options_staging.dart` and `lib/firebase_options_production.dart` are committed stubs. Before running `flutterfire configure` here, run `git update-index --skip-worktree` on both files so your generated config is not committed.
+
+`tool/verify_init.sh` copies the working tree, runs `tool/init.dart` non-interactively, then analyzes, tests, and checks for leftover tokens. Pass init flags to try a combination, for example `tool/verify_init.sh --yes --name acme_notes --org io.acme --no-sentry`. CI runs three combinations on every push (`.github/workflows/blueprint.yml`), and `.github/workflows/ci.yml` runs analyze and test, and stays in generated apps.
+
+Anything that only makes sense in the blueprint (this README, release notes) sits between `<!-- BEGIN_BLUEPRINT -->` and `<!-- END_BLUEPRINT -->` lines in Markdown, or is a blueprint-only file; init removes both.
+
+## 18. Releasing blueprint updates
+
+The generated app has its own app version in `pubspec.yaml`. The blueprint itself has a separate version, defined in [`BLUEPRINT_VERSION.md`](./BLUEPRINT_VERSION.md).
 
 When you cut a new blueprint version:
 
-1. Update `BLUEPRINT_VERSION` in [`scaffold.sh`](./scaffold.sh).
+1. Update [`BLUEPRINT_VERSION.md`](./BLUEPRINT_VERSION.md).
 2. Update the "Latest stable blueprint version" line in [`README.md`](./README.md).
-3. Update the older-version tagged example in [`README.md`](./README.md) to use the latest released tag.
-4. Add a new entry to [`CHANGELOG.md`](./CHANGELOG.md) describing what changed in that blueprint release.
-5. Review the generated metadata file [`template/BLUEPRINT_VERSION.md`](./template/BLUEPRINT_VERSION.md) and the note in [`template/docs/next_steps.md`](./template/docs/next_steps.md). They are tokenized from `BLUEPRINT_VERSION`, so no manual version edit should be needed there.
-6. Commit the blueprint changes.
-7. Create an annotated tag for the new version.
-8. Push the branch and the tag.
+3. Add a new entry to [`CHANGELOG.md`](./CHANGELOG.md) describing what changed in that blueprint release.
+4. Commit the blueprint changes.
+5. Create an annotated tag for the new version.
+6. Push the branch and the tag.
 
-Example for `v0.2.0`:
+Example for `v1.0.0`:
 
 ```bash
-git add CHANGELOG.md README.md scaffold.sh template/BLUEPRINT_VERSION.md template/docs/next_steps.md
-git commit -m "Release blueprint v0.2.0"
-git tag -a v0.2.0 -m "Blueprint 0.2.0"
+git add BLUEPRINT_VERSION.md CHANGELOG.md README.md
+git commit -m "Release blueprint v1.0.0"
+git tag -a v1.0.0 -m "Blueprint 1.0.0"
 git push origin main
-git push origin v0.2.0
+git push origin v1.0.0
 ```
 
 The default quick-start command should point at `main`, which stays aligned with the latest stable blueprint. Tags are for reproducible snapshots when someone needs an older exact version. Users can check [`CHANGELOG.md`](./CHANGELOG.md) to see what changed between blueprint versions.
 
-## 18. License
+## 19. License
 
 MIT

@@ -39,7 +39,7 @@ Never use `google_fonts` or hardcode font family strings directly.
 
 ## Colors
 
-Defined in `core/theme/app_colors.dart`. All values come from the scaffold questionnaire.
+Defined in `core/theme/app_colors.dart`. The defaults ship with the blueprint; edit them to rebrand.
 
 | Token                    | Usage                            |
 | ------------------------ | -------------------------------- |

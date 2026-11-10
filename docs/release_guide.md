@@ -88,7 +88,7 @@ dart format .
 make release-preflight
 ```
 
-`make release-preflight` runs `fvm flutter analyze && fvm flutter test`. Do not proceed if formatting would change files or if either command fails.
+`make release-preflight` runs `make analyze` and `make test`. Do not proceed if formatting would change files or if either command fails.
 
 ### Step 2: Bump Version
 

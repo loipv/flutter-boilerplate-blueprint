@@ -28,7 +28,7 @@ test/
 
 ```sh
 make test
-# equivalent to: fvm flutter test
+# runs the Flutter test runner via fvm when installed
 ```
 
 Run a single file:
@@ -40,18 +40,30 @@ fvm flutter test test/features/auth/application/auth_controller_test.dart
 ## Mocking with Mocktail
 
 ```dart
-// mocks.dart
+// test/helpers/mocks.dart
 import 'package:mocktail/mocktail.dart';
-import 'package:my_app/features/auth/domain/auth_repository.dart';
+import 'package:blueprint_app/features/auth/data/firebase_auth_repository.dart';
+import 'package:blueprint_app/features/user_profile/data/firebase_user_repository.dart';
 
-class MockAuthRepository extends Mock implements AuthRepository {}
+class MockAuthRepository extends Mock implements FirebaseAuthRepository {}
+
+class MockUserRepository extends Mock implements FirebaseUserRepository {}
 ```
+
+The mocks implement the concrete `Firebase*Repository` classes because the repository providers are typed to them; tests inject them with `authRepositoryProvider.overrideWithValue(...)` and `userRepositoryProvider.overrideWithValue(...)`.
+
+Two working examples ship with the repo:
+
+- `test/features/auth/application/auth_controller_test.dart`
+- `test/features/onboarding/application/onboarding_controller_test.dart`
+
+Copy their structure for new controller tests.
 
 Register fallback values for custom types:
 
 ```dart
 setUpAll(() {
-  registerFallbackValue(const Failure.unexpected(''));
+  registerFallbackValue(const Failure.unknown());
 });
 ```
 
@@ -60,23 +72,32 @@ setUpAll(() {
 Use `ProviderContainer` to test Riverpod controllers in isolation:
 
 ```dart
-test('signInAnonymously succeeds', () async {
-  final mockRepo = MockAuthRepository();
-  when(() => mockRepo.signInAnonymously()).thenAnswer((_) async {});
+test('signInAnonymously records the login and emits the user', () async {
+  final authRepo = MockAuthRepository();
+  final userRepo = MockUserRepository();
+  when(() => authRepo.authStateChanges())
+      .thenAnswer((_) => const Stream<UserEntity?>.empty());
+  when(() => authRepo.signInAnonymously(name: any(named: 'name')))
+      .thenAnswer((_) async => anon);
+  when(() => userRepo.recordLogin(any(), signInProvider: any(named: 'signInProvider')))
+      .thenAnswer((_) async {});
 
   final container = ProviderContainer(
     overrides: [
-      authRepositoryProvider.overrideWithValue(mockRepo),
+      authRepositoryProvider.overrideWithValue(authRepo),
+      userRepositoryProvider.overrideWithValue(userRepo),
     ],
   );
   addTearDown(container.dispose);
+  container.listen(authControllerProvider, (_, _) {});
 
-  final controller = container.read(authControllerProvider.notifier);
-  await controller.signInAnonymously();
+  await container.read(authControllerProvider.notifier).signInAnonymously();
 
-  verify(() => mockRepo.signInAnonymously()).called(1);
+  expect(container.read(authControllerProvider).value, anon);
 });
 ```
+
+See `test/features/auth/application/auth_controller_test.dart` for the full setup, including `anon` and the shared stubs.
 
 ## Repository Tests
 
@@ -142,9 +163,7 @@ test('maps FirebaseException to AuthFailure', () async {
   when(() => mockFirebaseAuth.signInAnonymously())
       .thenThrow(FirebaseAuthException(code: 'network-request-failed'));
 
-  final result = await repo.signInAnonymously();
-  // If using Either or catching in controller:
-  expect(result, isA<AuthFailure>());
+  expect(() => repo.signInAnonymously(), throwsA(isA<Failure>()));
 });
 ```
 

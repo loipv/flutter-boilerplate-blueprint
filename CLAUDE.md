@@ -5,18 +5,28 @@
 ## Required Reading (Before Every Task)
 
 1. **`AGENTS.md`**: Architecture rules, banned patterns, design system, testing standards
-2. **`template/docs/tech.md`**: Schema, packages, directory structure
-3. **`template/docs/ui_ux.md`**: Widget specs, haptics, typography
-4. **`template/docs/testing_guide.md`**: TDD patterns, Mocktail usage
+2. **`docs/tech.md`**: Schema, packages, directory structure
+3. **`docs/ui_ux.md`**: Widget specs, haptics, typography
+4. **`docs/testing_guide.md`**: TDD patterns, Mocktail usage
 
+<!-- BEGIN_BLUEPRINT -->
 For blueprint release or versioning tasks, also read:
 
 5. **`README.md`**: Blueprint install and release workflow
 6. **`CHANGELOG.md`**: Blueprint change history between tags
 
+<!-- END_BLUEPRINT -->
+## Also Read When Relevant
+
+- **`docs/setup.md`**: Firebase setup, env files, platform config
+- **`docs/auth_setup.md`**: Google Sign-In, Apple Sign-In, App Check, custom auth domains
+- **`docs/release_guide.md`**: iOS and Android publishing flow
+
+If a task touches analytics, auth redirects, or platform setup, check env-driven config first. The app may use `POSTHOG_HOST` or `FIREBASE_AUTH_DOMAIN` in the entrypoints.
+
 ## Project Identity
 
-**flutter-boilerplate-blueprint**: A Flutter + Firebase starter template with feature-first architecture, Riverpod 3.x, auth, onboarding, and release tooling.
+**Blueprint App**: A Flutter + Firebase starter app
 Flutter + Firebase · Feature-First Clean Architecture · Riverpod 3.x code-gen
 
 ## Key Commands
@@ -30,14 +40,18 @@ make codegen              # build_runner (freezed + riverpod)
 make deploy-staging       # Deploy Firestore rules to staging
 make deploy-prod          # Deploy Firestore rules to production
 make release-preflight    # analyze + test gate
+make bump-version VERSION=1.0.0 BUILD=1
 make build-prod-ipa       # IPA for App Store / TestFlight
 make build-prod-aab       # AAB for Play Store
+make tag-release VERSION=1.0.0
 ```
 
-Always use `fvm flutter`, never bare `flutter`.
+Use the `make` target; where none exists, `fvm flutter`. Never use bare `flutter`.
 
-`make bump-version` and `make tag-release` are generated-app commands, not blueprint release commands. For blueprint releases, follow the process in `README.md` and use `BLUEPRINT_VERSION` in `scaffold.sh` as the source of truth.
+<!-- BEGIN_BLUEPRINT -->
+`make bump-version` and `make tag-release` are app commands, not blueprint release commands. For blueprint releases, follow the process in `README.md` and use `BLUEPRINT_VERSION.md` as the source of truth.
 
+<!-- END_BLUEPRINT -->
 ## Critical Bans (Quick Reference)
 
 - **Architecture:** Feature-first only. No `lib/controllers/`

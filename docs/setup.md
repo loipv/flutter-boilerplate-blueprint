@@ -2,6 +2,21 @@
 
 Use this after scaffolding a new app. It covers the pieces required to get the app running locally, then points you to the deeper setup guides for auth and releases.
 
+<!-- BEGIN_BLUEPRINT -->
+## Scaffold a New App
+
+```sh
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/loipv/flutter-boilerplate-blueprint/main/scaffold.sh)"
+```
+
+The script clones the blueprint into the target directory and runs `dart tool/init.dart`, which renames it in place. It asks for:
+
+- package name, organization, display name, description
+- which optional features to keep: notifications, PostHog, Sentry, Cloud Functions, Apple, Google, anonymous sign-in
+
+Every question has a flag (see `README.md`). Bottom nav tabs, brand colors, the AI tool file, and FVM are edited by hand afterwards; see `docs/next_steps.md`.
+
+<!-- END_BLUEPRINT -->
 ## 1. Prerequisites
 
 | Tool              | Install                                                       |
@@ -13,23 +28,13 @@ Use this after scaffolding a new app. It covers the pieces required to get the a
 | Android Studio    | [developer.android.com](https://developer.android.com/studio) |
 | CocoaPods         | `sudo gem install cocoapods`                                  |
 
-## 2. Scaffold a New App
+## 2. Install Dependencies
 
 ```sh
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/loipv/flutter-boilerplate-blueprint/main/scaffold.sh)"
+make setup
 ```
 
-The questionnaire asks for:
-
-- app name, package name, organization, description
-- bottom nav layout
-- brand color preset
-- optional features such as notifications, analytics, Sentry, and Cloud Functions
-- whether FVM should use the blueprint-tested Flutter SDK or the latest stable channel
-
-The script creates a new Flutter project in the output directory you choose, then overlays the template on top.
-
-If you choose FVM, the default is the blueprint-tested Flutter SDK pinned by the template. That keeps scaffolds reproducible and aligned with the version the blueprint was last validated against. If you prefer to track the newest stable SDK, choose the stable-channel option during scaffolding.
+This runs `pub get`, code generation, and `npm install` in `functions/` when that directory exists. If you use FVM, the repo pins the Flutter SDK in `.fvmrc`; the `make` targets pick up `fvm` automatically.
 
 ## 3. Create Firebase Projects
 

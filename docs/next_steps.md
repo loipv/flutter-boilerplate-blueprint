@@ -14,7 +14,7 @@ Scaffolded from `flutter-boilerplate-blueprint`. See `BLUEPRINT_VERSION.md` in t
 - [ ] **Install the FlutterFire CLI** if you haven't already: `dart pub global activate flutterfire_cli`
 - [ ] **Run `flutterfire configure`** for each project to generate `lib/firebase_options_staging.dart` and `lib/firebase_options_production.dart`
 - [ ] **Place platform Firebase files** in `ios/config/Staging/`, `ios/config/Production/`, `android/app/src/staging/`, and `android/app/src/production/`
-- [ ] **Fill in `.env.staging` and `.env.production`** with the values needed for the features you selected during scaffolding
+- [ ] **Fill in `.env.staging` and `.env.production`** with the values needed for the features you kept during scaffolding
 - [ ] **Enable Firestore** (Native mode) in each Firebase project
 - [ ] **Enable Anonymous auth** in each project: Authentication > Sign-in method
 - [ ] **Deploy security rules**: `make deploy-staging && make deploy-prod`
@@ -57,7 +57,7 @@ Do Tier 1 only. You can point both flavors at a single Firebase project to start
 
 ### Solo side project
 
-Do Tiers 1 and 2. Signing can wait until your first TestFlight build. Pick a color preset during scaffolding; you can swap it later by editing `app_colors.dart`.
+Do Tiers 1 and 2. Signing can wait until your first TestFlight build. The default colors live in `app_colors.dart`; edit them there to rebrand.
 
 ### Production app with a team
 
@@ -108,7 +108,7 @@ Do not remove `authorizationCode` from the `OAuthProvider.credential()` call. It
 Check for a local network ad-blocker (Pi-hole, NextDNS, etc.) blocking analytics domains. Add PostHog and Sentry domains to your allowlist, or test on a different network.
 
 **I want to remove a bottom nav tab.**
-Delete the screen file, remove its `StatefulShellBranch` from `app_router.dart`, remove its `NavigationDestination` from `main_scaffold.dart`, then delete the feature directory.
+See "Add or remove a tab" below.
 
 **I want to remove PostHog or Sentry after scaffolding.**
 Remove the package from `pubspec.yaml`. For PostHog, replace `PostHogAnalyticsRepository` with a no-op stub that implements `AnalyticsRepository`, or delete the interface and all call sites. For Sentry, remove the `Sentry.captureException` block from `AppLogger` and the `SentryNavigatorObserver` from `app_router.dart`.
@@ -118,3 +118,12 @@ Delete `.dart_tool/` and re-run `make codegen`. If it still fails, look for synt
 
 **How do I add push notifications?**
 If you included notifications at scaffold time, the app already has local notification plumbing, a reminder preference in Settings, and timezone re-sync support. What is still left is app-specific payload routing and any remote push setup. For remote push, add `firebase_messaging`, configure APNs, and extend the generated notification service.
+
+## Add or remove a tab
+
+Edit two files:
+
+- `lib/core/router/app_router.dart`: the `StatefulShellBranch` list
+- `lib/core/presentation/main_scaffold.dart`: the `NavigationDestination` list
+
+The rule: one `StatefulShellBranch` per `NavigationDestination`, in the same order. To remove a tab, delete its branch and its destination, then delete the screen file or feature directory. To add one, add a branch with the new route and a destination at the matching position.
