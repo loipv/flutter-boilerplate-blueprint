@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 
 /// Brand color palette.
 ///
-/// Values are injected at scaffold time from your chosen color preset or
-/// custom hex inputs. To change colors after scaffolding, update the
-/// hex constants below and re-run `make run-staging`.
+/// These are the default brand colors. To rebrand, edit the hex constants
+/// below and re-run `make run-staging`.
 ///
 /// Usage in widgets: prefer `Theme.of(context).colorScheme.primary` over
 /// `AppColors.primary` directly; this ensures dark mode uses `primaryDark`

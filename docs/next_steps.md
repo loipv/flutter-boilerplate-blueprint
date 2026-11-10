@@ -30,14 +30,14 @@ Scaffolded from `flutter-boilerplate-blueprint`. See `BLUEPRINT_VERSION.md` in t
 - [ ] **Read `docs/auth_setup.md`** and verify both environments separately before testing sign-in
 - [ ] **If you included PostHog or Sentry**: fill in the matching env values, set `POSTHOG_HOST` if you use a custom domain or EU region, and confirm they report correctly in staging
 - [ ] **Android release signing**: generate an upload keystore and configure env vars (see `docs/android_signing.md`)
-- [ ] **Describe your app**: fill in the one-line description placeholder in `AGENTS.md` (and your AI bootloader file if present)
+- [ ] **Describe your app**: init wrote your `--description` into the one-line summary in `AGENTS.md` and `CLAUDE.md`; expand it so AI assistants know what the app does
 
 ### Tier 3: Before launch
 
 - [ ] **App icon**: replace `assets/icons/app_logo.png` (1024x1024 PNG), then run `make icons && make splash`
 - [ ] **Onboarding copy**: update headlines and body text in `features/onboarding/presentation/`
 - [ ] **Home screen**: replace the placeholder in `features/home/presentation/home_screen.dart`
-- [ ] **Explore / Library screens**: replace or remove tabs you don't need, then update the router and scaffold to match
+- [ ] **Explore screen**: replace it or remove the tab (see "Add or remove a tab" below)
 - [ ] **Profile screen**: add any app-specific fields
 - [ ] **User model**: add domain-specific fields to `UserEntity` and `UserPreferences`
 - [ ] **Firestore collection names**: define them in `core/constants/app_constants.dart`
@@ -93,7 +93,7 @@ Run `make release-preflight` first. Then:
 ## FAQ
 
 **The app crashes on launch.**
-The most likely cause is a missing Firebase config file. Check that `lib/firebase_options_staging.dart` exists and was generated with `flutterfire configure --project=<your-staging-id>`.
+The most likely cause is an unconfigured Firebase options file. Check that `lib/firebase_options_staging.dart` no longer contains the `'stub'` placeholder values; regenerate it with `flutterfire configure --project=<your-staging-id> --out=lib/firebase_options_staging.dart`.
 
 **`make run-staging` has empty `--dart-define` values at runtime.**
 Run `fvm flutter clean` first. `String.fromEnvironment` is a compile-time constant, so stale build cache can hold old (empty) values.
@@ -127,3 +127,11 @@ Edit two files:
 - `lib/core/presentation/main_scaffold.dart`: the `NavigationDestination` list
 
 The rule: one `StatefulShellBranch` per `NavigationDestination`, in the same order. To remove a tab, delete its branch and its destination, then delete the screen file or feature directory. To add one, add a branch with the new route and a destination at the matching position.
+
+## AI assistant file
+
+`CLAUDE.md` is a short bootloader that points Claude Code at `AGENTS.md` and the docs. For another tool, rename or copy it to the file that tool reads (for example `GEMINI.md` or `.github/copilot-instructions.md`). Codex reads `AGENTS.md` directly.
+
+## FVM
+
+`.fvmrc` pins Flutter `3.41.4`. The Makefile runs `fvm flutter` when FVM is installed, and plain `flutter` otherwise. To change the pin, run `fvm use <version>`.

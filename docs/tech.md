@@ -54,7 +54,6 @@ lib/
     ├── notifications/       # Notification scheduling wrapper (optional)
     ├── home/                # Home tab (replace with your content)
     ├── explore/             # Explore tab (optional; 3+ tab layouts)
-    ├── library/             # Library tab (optional; 4-tab layout)
     └── profile/             # Profile tab
 ```
 

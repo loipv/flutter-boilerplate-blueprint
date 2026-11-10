@@ -117,7 +117,7 @@ Bottom navigation uses Material 3 `NavigationBar` with:
 - Unselected label: `FontWeight.w500`, `onSurfaceVariant`
 - Tab switch: 120ms fade via `AnimationController`
 
-Tab icons are `LucideIcons`; see MainScaffold variants for 2/3/4 tab defaults.
+Tab icons are `LucideIcons`; the tabs are defined in `lib/core/presentation/main_scaffold.dart`. To change them, see "Add or remove a tab" in `docs/next_steps.md`.
 
 ## Widgets Conventions
 

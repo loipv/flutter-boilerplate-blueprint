@@ -99,7 +99,7 @@ build-prod-aab:
 	  --obfuscate --split-debug-info=build/app/outputs/symbols
 
 release-preflight:
-	dart format . && $(FLUTTER) analyze && $(FLUTTER) test
+	$(FLUTTER:flutter=dart) format . && $(FLUTTER) analyze && $(FLUTTER) test
 
 bump-version:
 	@if [ -z "$(VERSION)" ] || [ -z "$(BUILD)" ]; then \

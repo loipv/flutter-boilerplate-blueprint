@@ -227,7 +227,7 @@ Do not hardcode these values in source. Keep them in env files and read them in 
 ### 3.4 Testing Standards
 
 - **Coverage**: 100% for domain + data layers, 80% for application layer
-- **Mocking**: `mocktail` only; mock the **abstract interface**, never the Firebase class
+- **Mocking**: `mocktail` only; providers expose the concrete `Firebase*Repository` types, so mocks implement those classes (see `test/helpers/mocks.dart`); never mock Firebase SDK classes in controller tests
 - **Style**: Given-When-Then for all test descriptions
 - **Rule**: Never make real network calls in unit tests
 
