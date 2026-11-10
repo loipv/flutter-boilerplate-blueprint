@@ -34,7 +34,7 @@ make build-prod-ipa       # IPA for App Store / TestFlight
 make build-prod-aab       # AAB for Play Store
 ```
 
-Always use `__FLUTTER_CMD__`, never bare `flutter`.
+Always use `fvm flutter`, never bare `flutter`.
 
 `make bump-version` and `make tag-release` are generated-app commands, not blueprint release commands. For blueprint releases, follow the process in `README.md` and use `BLUEPRINT_VERSION` in `scaffold.sh` as the source of truth.
 
@@ -43,7 +43,7 @@ Always use `__FLUTTER_CMD__`, never bare `flutter`.
 - **Architecture:** Feature-first only. No `lib/controllers/`
 - **State:** `@riverpod` code-gen only. No GetX, Provider, Bloc
 - **Widgets:** `ConsumerWidget` / `ConsumerStatefulWidget`. No `StatefulWidget`
-- **Imports:** Absolute only: `package:__APP_PACKAGE__/…`
+- **Imports:** Absolute only: `package:blueprint_app/…`
 - **Spacing:** `Gap(AppSpacing.pX)`. No `SizedBox`
 - **Icons:** `lucide_icons_flutter`. No Material Icons
 - **Fonts:** Bundled Inter / JetBrainsMono. No `google_fonts`

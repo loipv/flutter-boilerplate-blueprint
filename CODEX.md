@@ -42,7 +42,7 @@ Always use `fvm flutter`, never bare `flutter`.
 - **Architecture:** Feature-first only. No `lib/controllers/`
 - **State:** `@riverpod` code-gen only. No GetX, Provider, Bloc
 - **Widgets:** `ConsumerWidget` / `ConsumerStatefulWidget`. No `StatefulWidget`
-- **Imports:** Absolute only: `package:__APP_PACKAGE__/…`
+- **Imports:** Absolute only: `package:blueprint_app/…`
 - **Spacing:** `Gap(AppSpacing.pX)`. No `SizedBox`
 - **Icons:** `lucide_icons_flutter`. No Material Icons
 - **Fonts:** Bundled Inter / JetBrainsMono. No `google_fonts`

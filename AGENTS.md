@@ -64,7 +64,7 @@ Platform setup and release wiring live outside `lib/` too. When a task touches a
 #### Strictly Forbidden Patterns
 
 - ❌ `StatefulWidget`: use `ConsumerWidget` / `ConsumerStatefulWidget`
-- ❌ Relative imports: use `package:__APP_PACKAGE__/…` everywhere
+- ❌ Relative imports: use `package:blueprint_app/…` everywhere
 - ❌ `SizedBox` for spacing: use `Gap(AppSpacing.pX)`
 - ❌ Manual JSON parsing: use `@freezed` with `json_serializable`
 - ❌ `print()` / `debugPrint()`: use `AppLogger`

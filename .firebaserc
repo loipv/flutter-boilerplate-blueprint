@@ -1,0 +1,6 @@
+{
+  "projects": {
+    "staging": "blueprint_app-staging",
+    "production": "blueprint_app-prod"
+  }
+}
