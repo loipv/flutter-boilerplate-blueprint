@@ -15,6 +15,10 @@ import 'rename.dart';
 const _kotlinRoot = 'android/app/src/main/kotlin';
 const _appReadme = 'tool/app_readme.md';
 const _envFiles = ['.env.staging', '.env.production'];
+const _firebaseOptions = [
+  'lib/firebase_options_staging.dart',
+  'lib/firebase_options_production.dart',
+];
 
 /// A check failed, before any change ([InitPlan.prepare]) or during them.
 class InitFailure implements Exception {
@@ -28,7 +32,13 @@ class InitFailure implements Exception {
 
 /// Every write, move and deletion init performs.
 class InitPlan {
-  InitPlan._(this.options, this.writes, this.readme, this.removals);
+  InitPlan._(
+    this.options,
+    this.writes,
+    this.readme,
+    this.removals, {
+    required this.hadGit,
+  });
 
   /// Reads the tree and computes all new file contents without writing.
   /// Throws [InitFailure] when the tree does not match the manifest.
@@ -101,7 +111,13 @@ class InitPlan {
       }
     }
 
-    return InitPlan._(options, writes, readme!, removals);
+    return InitPlan._(
+      options,
+      writes,
+      readme!,
+      removals,
+      hadGit: pathExists('.git'),
+    );
   }
 
   final InitOptions options;
@@ -114,6 +130,9 @@ class InitPlan {
 
   /// Feature paths, existing test mirrors and blueprint-only paths.
   final List<String> removals;
+
+  /// Whether `.git` existed before init (a clone or "Use this template").
+  final bool hadGit;
 
   /// Applies the plan in spec order, ending with the deletion of `tool/`.
   void apply() {
@@ -133,9 +152,11 @@ class InitPlan {
       if (!pathExists(env)) File('$env.example').copySync(env);
     }
 
-    if (!pathExists('.git')) _gitInit();
+    if (!hadGit) _gitInit();
 
     deletePath('tool');
+
+    if (hadGit) _untrackFirebaseOptions();
   }
 }
 
@@ -173,11 +194,39 @@ String _dropFunctions(String text) {
 
 void _gitInit() {
   try {
-    final result = Process.runSync('git', ['init', '--quiet']);
+    var result = Process.runSync('git', ['init', '--quiet', '-b', 'main']);
+    // `-b` needs git 2.28 or later.
+    if (result.exitCode != 0) {
+      result = Process.runSync('git', ['init', '--quiet']);
+    }
     if (result.exitCode != 0) {
       stderr.writeln('Warning: git init failed: ${result.stderr}'.trim());
     }
   } on ProcessException {
     stderr.writeln('Warning: git not found; run `git init` yourself.');
+  }
+}
+
+/// The blueprint tracks the Firebase options stubs, but they are gitignored
+/// in your app: `flutterfire configure` writes your Firebase config there.
+/// The files stay on disk.
+void _untrackFirebaseOptions() {
+  final args = ['rm', '--cached', '--quiet', '--ignore-unmatch'];
+  try {
+    final result = Process.runSync('git', [...args, ..._firebaseOptions]);
+    if (result.exitCode != 0) {
+      stderr.writeln('Warning: git rm failed: ${result.stderr}'.trim());
+      return;
+    }
+    stdout.writeln(
+      'Untracked lib/firebase_options_*.dart (kept on disk): they are '
+      'gitignored because flutterfire configure writes your Firebase config '
+      'into them.',
+    );
+  } on ProcessException {
+    stderr.writeln(
+      'Warning: git not found; run `git rm --cached '
+      '${_firebaseOptions.join(' ')}` yourself.',
+    );
   }
 }

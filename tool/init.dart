@@ -88,11 +88,11 @@ int _run(List<String> args) {
   try {
     plan.apply();
   } on Exception catch (e) {
-    throw InitFailure(
-      'init stopped partway: $e\n'
-      'Restore the tree (for example `git checkout . && git clean -fd`) '
-      'and run it again.',
-    );
+    final hint = plan.hadGit
+        ? 'Restore the tree (for example `git checkout . && git clean -fd`) '
+              'and run it again.'
+        : 'Delete this directory and start again.';
+    throw InitFailure('init stopped partway: $e\n$hint');
   }
 
   final leftovers = scanLeftovers(options);

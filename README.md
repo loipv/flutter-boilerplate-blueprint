@@ -51,11 +51,14 @@ If you need to reproduce an older blueprint version exactly, pin a tag. `BLUEPRI
 BLUEPRINT_REF=v1.0.0 bash -c "$(curl -fsSL https://raw.githubusercontent.com/loipv/flutter-boilerplate-blueprint/v1.0.0/scaffold.sh)"
 ```
 
+The `v0.x` one-liners (tags `v0.6.0` to `v0.9.0`) no longer work, because their script reads a `template/` directory that `main` no longer has. Use the `main` one-liner above or set `BLUEPRINT_REF`.
+
 If you want to inspect the repo first, or skip the script, use "Use this template" on GitHub or clone it, then run the init tool:
 
 ```bash
 git clone https://github.com/loipv/flutter-boilerplate-blueprint my_app
 cd my_app
+rm -rf .git  # start your own history; init runs git init
 dart tool/init.dart
 ```
 

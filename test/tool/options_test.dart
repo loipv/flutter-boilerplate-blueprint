@@ -34,7 +34,7 @@ void main() {
   });
 
   test('validateText rejects unsafe characters', () {
-    for (final c in ["'", '"', r'\', r'$', '<', '>', '&']) {
+    for (final c in ["'", '"', '`', r'\', r'$', '<', '>', '&']) {
       expect(validateText('My${c}App'), isNotNull, reason: c);
     }
     expect(validateText('   '), isNotNull);

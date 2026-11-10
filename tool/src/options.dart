@@ -121,8 +121,9 @@ String? validateOrg(String value) {
 /// Returns null when [value] is safe as a title or description.
 String? validateText(String value) {
   if (value.trim().isEmpty) return 'Must not be empty.';
-  if (value.contains(RegExp('[\'"\\\\\$<>&\n\r]'))) {
-    return 'Must not contain quotes, backslash, \$, <, >, & or line breaks.';
+  if (value.contains(RegExp('[\'"`\\\\\$<>&\n\r]'))) {
+    return 'Must not contain quotes, backticks, backslash, \$, <, >, & or '
+        'line breaks.';
   }
   return null;
 }

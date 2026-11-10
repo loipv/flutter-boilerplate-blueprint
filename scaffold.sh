@@ -29,8 +29,18 @@ if [ $# -gt 0 ] && [ "${1#--}" = "$1" ]; then target="$1"; shift; else
 fi
 [ -n "$target" ] || { echo "Target directory is required." >&2; exit 1; }
 [ ! -e "$target" ] || { echo "Directory already exists: $target" >&2; exit 1; }
+top=""; d="$(dirname "$target")"  # top: highest parent that mkdir -p creates
+while [ ! -e "$d" ]; do top="$d"; d="$(dirname "$d")"; done
 mkdir -p "$(dirname "$target")"
 target="$(cd "$(dirname "$target")" && pwd)/$(basename "$target")"
+[ -z "$top" ] || top="$(cd "$top" && pwd)"
+
+keep=0  # until init succeeds, a failure or Ctrl+C removes what this script created
+cleanup() {
+  [ "$keep" = 0 ] || return 0
+  cd /; rm -rf "$target" ${top:+"$top"}; echo "Removed $target; nothing was created." >&2
+}
+trap cleanup EXIT; trap 'exit 130' INT; trap 'exit 143' TERM
 
 here="$(cd "$(dirname "${BASH_SOURCE[0]:-}")" 2>/dev/null && pwd || true)"
 if [ -n "$here" ] && [ -f "$here/tool/init.dart" ]; then
@@ -43,8 +53,7 @@ rm -rf "$target/.git"
 cd "$target"
 
 command -v fvm >/dev/null && fvm install
-rc=0
-$DART tool/init.dart "$@" || rc=$?
-[ "$rc" -eq 0 ] || exit "$rc"
-make setup
+$DART tool/init.dart "$@"
+keep=1
+make setup || { echo "make setup failed; your app is in $target. Fix the error and run make setup there." >&2; exit 1; }
 echo "Done. Read docs/next_steps.md for the remaining setup steps."
