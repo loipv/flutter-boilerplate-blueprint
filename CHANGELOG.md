@@ -4,6 +4,31 @@ All notable changes to the `flutter-boilerplate-blueprint` template should be do
 
 The generated app's `pubspec.yaml` version is separate from the blueprint version. Use this changelog to track scaffold and template changes between blueprint tags.
 
+## v1.0.0 - 2026-11-11
+
+### Changed
+
+- The app now lives at the repo root (`lib/`, `ios/`, `android/`, `test/`, `functions/`, `Makefile`, docs) instead of under `template/`. The repo is a runnable Flutter + Firebase app with fixed placeholder values (package `blueprint_app`, application id `com.example.blueprint_app`).
+- `tool/init.dart` renames the boilerplate in place (app name, package, bundle id, colors, feature flags). `scaffold.sh` is now a thin script (~50 lines) that clones the blueprint and runs `tool/init.dart`.
+- Sentry now runs only when `SENTRY_DSN` is set; a missing DSN runs the app without Sentry.
+- `functions/package-lock.json` and `pubspec.lock` are now committed.
+- Blueprint and app docs are merged for the root layout.
+
+### Added
+
+- Complete `ios/` and `android/` platform folders.
+- Seed tests under `test/` and CI: `ci.yml` (analyze + test) and `blueprint.yml` (runs `tool/verify_init.sh` for three init combinations).
+
+### Removed
+
+- Scaffold options: tab count, color presets, AI tool choice, and FVM choice.
+- `CODEX.md` (Codex reads `AGENTS.md`).
+
+### Breaking / manual follow-up
+
+- The `scaffold.sh` shipped in tags `v0.6.0` to `v0.9.0` clones `main` and reads `template/`, so those `v0.x` one-liners no longer work. Use the `main` one-liner or set `BLUEPRINT_REF`.
+- Generated apps no longer get a `CODEX.md` / `GEMINI.md` choice; `CLAUDE.md` and `AGENTS.md` are the only AI instruction files.
+
 ## v0.9.0 - 2026-05-20
 
 ### Changed
