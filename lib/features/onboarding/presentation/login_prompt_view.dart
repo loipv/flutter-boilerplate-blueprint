@@ -8,6 +8,8 @@ import 'package:blueprint_app/core/theme/app_typography.dart';
 import 'package:blueprint_app/core/presentation/utils/app_snack_bar.dart';
 import 'package:blueprint_app/features/auth/application/auth_controller.dart';
 import 'package:blueprint_app/features/auth/presentation/auth_failure_message.dart';
+// Unused only when both Apple and Google sign-in are removed.
+// ignore: unused_import
 import 'package:blueprint_app/features/auth/presentation/widgets/auth_button.dart';
 import 'package:blueprint_app/features/onboarding/application/onboarding_controller.dart';
 
@@ -30,6 +32,8 @@ class _LoginPromptViewState extends ConsumerState<LoginPromptView> {
   bool _isLoadingGoogle = false;
   // END_GOOGLE
 
+  // Unused only when both Apple and Google sign-in are removed.
+  // ignore: unused_element
   Future<void> _signIn(
     Future<void> Function() method, {
     required void Function(bool) setLoading,
@@ -59,6 +63,7 @@ class _LoginPromptViewState extends ConsumerState<LoginPromptView> {
     }
   }
 
+  // BEGIN_ANON
   Future<void> _continueAsGuest() async {
     final confirmed = await showDialog<bool>(
       context: context,
@@ -82,6 +87,7 @@ class _LoginPromptViewState extends ConsumerState<LoginPromptView> {
     );
     if (confirmed == true) await _completeOnboarding();
   }
+  // END_ANON
 
   Future<void> _completeOnboarding() async {
     await ref.read(onboardingControllerProvider.notifier).completeOnboarding();

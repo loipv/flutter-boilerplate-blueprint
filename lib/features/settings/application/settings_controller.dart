@@ -49,6 +49,7 @@ class SettingsController extends _$SettingsController {
     });
   }
 
+  // BEGIN_NOTIFICATIONS
   Future<void> updateNotificationTime(String? time) async {
     final user = ref.read(currentUserProvider).value;
     if (user == null) return;
@@ -65,6 +66,7 @@ class SettingsController extends _$SettingsController {
       _log.info('Notification time updated to $time');
     });
   }
+  // END_NOTIFICATIONS
 
   Future<void> deleteAccount() async {
     state = const AsyncValue.loading();

@@ -4,15 +4,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 // BEGIN_NOTIFICATIONS
 import 'package:blueprint_app/core/providers/shared_preferences_provider.dart';
 import 'package:blueprint_app/core/services/notification_service.dart';
-import 'package:blueprint_app/core/router/app_router.dart';
-import 'package:blueprint_app/core/services/session_lifecycle_observer.dart';
 import 'package:blueprint_app/core/services/timezone_lifecycle_observer.dart';
 import 'package:blueprint_app/features/notifications/application/notification_scheduler.dart';
 // END_NOTIFICATIONS
+import 'package:blueprint_app/core/router/app_router.dart';
+import 'package:blueprint_app/core/services/session_lifecycle_observer.dart';
 import 'package:blueprint_app/core/theme/app_theme.dart';
 import 'package:blueprint_app/core/theme/theme_provider.dart';
 import 'package:blueprint_app/features/auth/application/auth_controller.dart';
+// BEGIN_ANON
 import 'package:blueprint_app/features/auth/data/firebase_auth_repository.dart';
+// END_ANON
 import 'package:blueprint_app/features/user_profile/data/firebase_user_repository.dart';
 
 class App extends ConsumerStatefulWidget {

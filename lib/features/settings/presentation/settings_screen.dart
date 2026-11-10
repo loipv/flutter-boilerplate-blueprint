@@ -11,6 +11,8 @@ import 'package:blueprint_app/core/errors/failure.dart';
 import 'package:blueprint_app/features/auth/application/auth_controller.dart';
 import 'package:blueprint_app/features/auth/domain/user_entity.dart';
 import 'package:blueprint_app/features/auth/presentation/auth_failure_message.dart';
+// Unused only when both Apple and Google sign-in are removed.
+// ignore: unused_import
 import 'package:blueprint_app/features/auth/presentation/widgets/auth_button.dart';
 import 'package:blueprint_app/features/settings/application/settings_controller.dart';
 import 'package:blueprint_app/features/user_profile/application/user_profile_providers.dart';
@@ -133,7 +135,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               AuthButton(
                 provider: AuthProvider.apple,
                 isLoading: _isLoadingApple,
-                onTap: () => _linkAccount(SignInMethod.apple),
+                onTap: () => _linkAccount(
+                  () => ref
+                      .read(authControllerProvider.notifier)
+                      .signInWithApple(),
+                  setLoading: (v) => setState(() => _isLoadingApple = v),
+                  method: SignInMethod.apple,
+                ),
               ),
               const Gap(AppSpacing.p3),
               // END_APPLE
@@ -141,7 +149,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               AuthButton(
                 provider: AuthProvider.google,
                 isLoading: _isLoadingGoogle,
-                onTap: () => _linkAccount(SignInMethod.google),
+                onTap: () => _linkAccount(
+                  () => ref
+                      .read(authControllerProvider.notifier)
+                      .signInWithGoogle(),
+                  setLoading: (v) => setState(() => _isLoadingGoogle = v),
+                  method: SignInMethod.google,
+                ),
               ),
               // END_GOOGLE
               const Gap(AppSpacing.p4),
@@ -181,25 +195,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
-  Future<void> _linkAccount(SignInMethod method) async {
-    void setLoading(bool value) {
-      if (!mounted) return;
-      setState(() {
-        if (method == SignInMethod.apple) {
-          _isLoadingApple = value;
-        } else {
-          _isLoadingGoogle = value;
-        }
-      });
+  // Unused only when both Apple and Google sign-in are removed.
+  // ignore: unused_element
+  Future<void> _linkAccount(
+    Future<void> Function() signIn, {
+    required void Function(bool) setLoading,
+    required SignInMethod method,
+  }) async {
+    void update(bool value) {
+      if (mounted) setLoading(value);
     }
 
-    setLoading(true);
+    update(true);
     try {
-      if (method == SignInMethod.apple) {
-        await ref.read(authControllerProvider.notifier).signInWithApple();
-      } else {
-        await ref.read(authControllerProvider.notifier).signInWithGoogle();
-      }
+      await signIn();
       if (mounted) {
         AppSnackBar.success(context, 'Account linked successfully.');
       }
@@ -220,7 +229,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         AppSnackBar.error(context, 'Sign-in failed. Please try again.');
       }
     } finally {
-      setLoading(false);
+      update(false);
     }
   }
 
