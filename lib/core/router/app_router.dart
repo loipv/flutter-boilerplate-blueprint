@@ -13,6 +13,7 @@ import 'package:blueprint_app/core/presentation/splash_screen.dart';
 import 'package:blueprint_app/core/utils/app_logger.dart';
 import 'package:blueprint_app/features/auth/application/auth_controller.dart';
 import 'package:blueprint_app/features/home/presentation/home_screen.dart';
+import 'package:blueprint_app/features/explore/presentation/explore_screen.dart';
 import 'package:blueprint_app/features/profile/presentation/profile_screen.dart';
 import 'package:blueprint_app/features/onboarding/application/onboarding_controller.dart';
 import 'package:blueprint_app/features/onboarding/presentation/intro_view.dart';
@@ -21,12 +22,15 @@ import 'package:blueprint_app/features/onboarding/presentation/onboarding_scaffo
 import 'package:blueprint_app/features/onboarding/presentation/theme_selection_view.dart';
 import 'package:blueprint_app/features/settings/presentation/settings_screen.dart';
 
-part 'app_router_2tabs.g.dart';
+part 'app_router.g.dart';
 
 class _RouterRefreshNotifier extends ChangeNotifier {
   void notify() => notifyListeners();
 }
 
+// keepAlive: true. The GoRouter instance must never be recreated on
+// auth/onboarding state changes. Recreation resets navigation to
+// initialLocation, losing the user's position in the app.
 @Riverpod(keepAlive: true)
 GoRouter router(Ref ref) {
   const log = AppLogger('AppRouter');
@@ -34,13 +38,15 @@ GoRouter router(Ref ref) {
   final notifier = _RouterRefreshNotifier();
   ref.onDispose(notifier.dispose);
 
+  // ref.listen (not ref.watch); state changes trigger a redirect re-evaluation
+  // without rebuilding the router provider itself.
   ref.listen(
     authControllerProvider.select((v) => v.whenData((u) => u != null)),
-    (_, __) => notifier.notify(),
+    (_, _) => notifier.notify(),
   );
   ref.listen(
     onboardingControllerProvider.select((v) => v.whenData((s) => s.isComplete)),
-    (_, __) => notifier.notify(),
+    (_, _) => notifier.notify(),
   );
 
   return GoRouter(
@@ -75,16 +81,22 @@ GoRouter router(Ref ref) {
       }
 
       final isSplash = state.uri.path == '/splash';
+
       if (!isLoggedIn && !isOnboarding) return '/onboarding/intro';
 
       if (isLoggedIn) {
         final isComplete = onboardingState.asData?.value ?? false;
-        if (!isComplete && !isOnboarding) return '/onboarding/intro';
+        if (!isComplete && !isOnboarding) {
+          log.info('Redirecting to onboarding');
+          return '/onboarding/intro';
+        }
         if (isComplete && (isOnboarding || isSplash)) return '/';
       }
+
       return null;
     },
     routes: [
+      // Shell route: 3-tab layout
       StatefulShellRoute.indexedStack(
         pageBuilder: (context, state, navigationShell) =>
             CustomTransitionPage<void>(
@@ -97,20 +109,26 @@ GoRouter router(Ref ref) {
             ),
         branches: [
           StatefulShellBranch(
+            routes: [GoRoute(path: '/', builder: (_, _) => const HomeScreen())],
+          ),
+          StatefulShellBranch(
             routes: [
-              GoRoute(path: '/', builder: (_, __) => const HomeScreen()),
+              GoRoute(
+                path: '/explore',
+                builder: (_, _) => const ExploreScreen(),
+              ),
             ],
           ),
           StatefulShellBranch(
             routes: [
               GoRoute(
                 path: '/profile',
-                builder: (_, __) => const ProfileScreen(),
+                builder: (_, _) => const ProfileScreen(),
                 routes: [
                   GoRoute(
                     path: 'settings',
                     parentNavigatorKey: rootNavigatorKey,
-                    builder: (_, __) => const SettingsScreen(),
+                    builder: (_, _) => const SettingsScreen(),
                   ),
                 ],
               ),
@@ -118,31 +136,37 @@ GoRouter router(Ref ref) {
           ),
         ],
       ),
+
+      // Onboarding flow
       GoRoute(
         path: '/onboarding',
-        builder: (_, __) => const OnboardingScaffold(child: IntroView()),
+        builder: (_, _) => const OnboardingScaffold(child: IntroView()),
         routes: [
           GoRoute(
             path: 'intro',
-            builder: (_, __) => const OnboardingScaffold(child: IntroView()),
+            builder: (_, _) => const OnboardingScaffold(child: IntroView()),
           ),
           GoRoute(
             path: 'theme',
-            builder: (_, __) =>
+            builder: (_, _) =>
                 const OnboardingScaffold(child: ThemeSelectionView()),
           ),
           GoRoute(
             path: 'login-prompt',
-            builder: (_, __) =>
+            builder: (_, _) =>
                 const OnboardingScaffold(child: LoginPromptView()),
           ),
         ],
       ),
+
+      // Settings (covers bottom nav)
       GoRoute(
         path: '/settings',
         parentNavigatorKey: rootNavigatorKey,
-        builder: (_, __) => const SettingsScreen(),
+        builder: (_, _) => const SettingsScreen(),
       ),
+
+      // Splash
       GoRoute(
         path: '/splash',
         parentNavigatorKey: rootNavigatorKey,

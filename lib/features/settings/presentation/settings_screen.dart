@@ -277,7 +277,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final message = await ref
         .read(authControllerProvider.notifier)
         .deleteAccount();
-    if (!mounted || message == null) return;
+    if (!context.mounted || message == null) return;
     AppSnackBar.error(context, message);
   }
 
@@ -296,7 +296,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final granted = await ref
         .read(notificationServiceProvider)
         .requestPermissions();
-    if (granted == false && mounted) {
+    if (!context.mounted) return;
+    if (granted == false) {
       AppSnackBar.error(
         context,
         'Notifications are disabled for this app. Enable them in system settings and try again.',

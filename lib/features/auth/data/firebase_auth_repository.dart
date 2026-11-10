@@ -243,8 +243,9 @@ class FirebaseAuthRepository implements AuthRepository {
           final uc = await _firebaseAuth.signInWithCredential(fallback);
           return uc.user!.toEntity();
         }
-        if (e.code == 'email-already-in-use')
+        if (e.code == 'email-already-in-use') {
           throw const Failure.auth('email-already-in-use');
+        }
         throw Failure.auth(e.code);
       }
     } else {

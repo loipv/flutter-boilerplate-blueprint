@@ -45,8 +45,12 @@ dependencies:
   shared_preferences: ^2.5.5
 
   # --- Analytics & Monitoring ---
+  # BEGIN_POSTHOG
   posthog_flutter: ^5.23.1
+  # END_POSTHOG
+  # BEGIN_SENTRY
   sentry_flutter: ^9.16.1
+  # END_SENTRY
   package_info_plus: ^10.0.0
 
   # --- Utilities ---
@@ -57,10 +61,12 @@ dependencies:
   permission_handler: ^12.0.1
 
   # --- Notifications ---
+  # BEGIN_NOTIFICATIONS
   flutter_local_notifications: ^21.0.0
   timezone: ^0.11.0
   flutter_timezone: ^5.0.2
   workmanager: ^0.9.0+3
+  # END_NOTIFICATIONS
 
   # --- Icons ---
   cupertino_icons: ^1.0.8
@@ -73,7 +79,9 @@ dev_dependencies:
   freezed: ^3.2.5
   json_serializable: ^6.13.0
   mocktail: ^1.0.5
+  # BEGIN_SENTRY
   sentry_dart_plugin: ^3.2.1
+  # END_SENTRY
   flutter_lints: ^6.0.0
   flutter_launcher_icons: ^0.14.4
 

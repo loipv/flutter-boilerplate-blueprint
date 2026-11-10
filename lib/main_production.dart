@@ -37,12 +37,6 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
 
-  // BEGIN_SENTRY
-  assert(
-    _sentryDsn.isNotEmpty,
-    'SENTRY_DSN missing: run fvm flutter clean then make run-prod',
-  );
-  // END_SENTRY
   // BEGIN_POSTHOG
   assert(
     _postHogKey.isNotEmpty,
@@ -126,16 +120,19 @@ Future<void> main() async {
   await TimezoneSyncService.registerPeriodicTask();
   // END_NOTIFICATIONS
 
+  void startApp() => runApp(const ProviderScope(child: App()));
+
   // BEGIN_SENTRY
   // 4. Sentry
-  await SentryFlutter.init((options) {
-    options.dsn = _sentryDsn;
-    options.environment = 'production';
-    options.tracesSampleRate = 0.2;
-    options.sendDefaultPii = false;
-  }, appRunner: () => runApp(const ProviderScope(child: App())));
+  if (_sentryDsn.isNotEmpty) {
+    await SentryFlutter.init((options) {
+      options.dsn = _sentryDsn;
+      options.environment = 'production';
+      options.tracesSampleRate = 0.2;
+      options.sendDefaultPii = false;
+    }, appRunner: startApp);
+    return;
+  }
   // END_SENTRY
-  // BEGIN_NO_SENTRY
-  runApp(const ProviderScope(child: App()));
-  // END_NO_SENTRY
+  startApp();
 }

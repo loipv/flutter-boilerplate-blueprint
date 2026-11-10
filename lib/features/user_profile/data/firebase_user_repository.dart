@@ -60,7 +60,7 @@ class FirebaseUserRepository implements UserRepository {
       await _userDoc(uid).set({
         'lastLoginAt': FieldValue.serverTimestamp(),
         'totalSessionCount': FieldValue.increment(1),
-        if (signInProvider != null) 'signInProvider': signInProvider,
+        'signInProvider': ?signInProvider,
       }, SetOptions(merge: true));
     } catch (e, st) {
       _log.error('recordLogin failed', error: e, stackTrace: st);

@@ -8,7 +8,6 @@ import 'package:blueprint_app/core/theme/app_typography.dart';
 import 'package:blueprint_app/core/presentation/utils/app_snack_bar.dart';
 import 'package:blueprint_app/features/auth/application/auth_controller.dart';
 import 'package:blueprint_app/features/auth/presentation/auth_failure_message.dart';
-import 'package:blueprint_app/features/auth/domain/user_entity.dart';
 import 'package:blueprint_app/features/auth/presentation/widgets/auth_button.dart';
 import 'package:blueprint_app/features/onboarding/application/onboarding_controller.dart';
 
