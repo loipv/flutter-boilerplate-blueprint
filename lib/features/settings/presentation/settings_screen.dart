@@ -16,6 +16,9 @@ import 'package:blueprint_app/features/auth/presentation/auth_failure_message.da
 import 'package:blueprint_app/features/auth/presentation/widgets/auth_button.dart';
 import 'package:blueprint_app/features/settings/application/settings_controller.dart';
 import 'package:blueprint_app/features/user_profile/application/user_profile_providers.dart';
+// BEGIN_ADS
+import 'package:blueprint_app/features/ads/presentation/ad_privacy_options_tile.dart';
+// END_ADS
 // BEGIN_NOTIFICATIONS_IMPORTS
 import 'package:blueprint_app/core/services/notification_service.dart';
 // END_NOTIFICATIONS_IMPORTS
@@ -116,6 +119,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               ),
             ],
             // END_NOTIFICATIONS_SECTION
+            // BEGIN_ADS
+            const Gap(AppSpacing.p4),
+            AdPrivacyOptionsTile(header: _SectionHeader('Privacy')),
+            // END_ADS
             const Gap(AppSpacing.p8),
             _SectionHeader('Account'),
             const Gap(AppSpacing.p2),

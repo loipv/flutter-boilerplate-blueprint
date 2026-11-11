@@ -128,14 +128,16 @@ class AdsController {
 @Riverpod(keepAlive: true)
 AdsController adsController(Ref ref) {
   final settings = ref.read(adsSettingsProvider);
-  final config = ref.read(remoteConfigRepositoryProvider);
   final controller = AdsController(
     repository: ref.read(adsRepositoryProvider),
     isEnabled: (format) => ref.read(adsEnabledProvider(format)),
     unitId: settings.unitId,
     cap: AdFrequencyCap(
+      // Read lazily: Remote Config is only touched once an ad may be shown.
       minInterval: () => Duration(
-        seconds: config.get(ConfigKeys.adsFullScreenMinIntervalSeconds),
+        seconds: ref
+            .read(remoteConfigRepositoryProvider)
+            .get(ConfigKeys.adsFullScreenMinIntervalSeconds),
       ),
     ),
   );

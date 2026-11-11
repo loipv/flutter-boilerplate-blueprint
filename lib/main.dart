@@ -27,6 +27,10 @@ import 'package:workmanager/workmanager.dart';
 import 'package:blueprint_app/core/data/firebase_remote_config_repository.dart';
 // END_REMOTE_CONFIG
 import 'package:blueprint_app/core/utils/app_logger.dart';
+// BEGIN_ADS
+import 'package:blueprint_app/features/ads/application/ads_settings.dart';
+import 'package:blueprint_app/features/ads/domain/ad_unit_ids.dart';
+// END_ADS
 
 // TODO: Generate one file per Firebase project with:
 //   flutterfire configure --project=<staging-project-id> --out=lib/firebase_options_staging.dart
@@ -49,6 +53,10 @@ const _sentryDsn = String.fromEnvironment('SENTRY_DSN');
 // BEGIN_REMOTE_CONFIG
 const _remoteConfigEnv = String.fromEnvironment('REMOTE_CONFIG_ENV');
 // END_REMOTE_CONFIG
+// BEGIN_ADS
+const _adsEnabled = bool.fromEnvironment('ADS_ENABLED');
+const _adsDebugGeography = String.fromEnvironment('ADS_DEBUG_GEOGRAPHY');
+// END_ADS
 const _firebaseAuthDomain = String.fromEnvironment('FIREBASE_AUTH_DOMAIN');
 
 Future<void> main() async {
@@ -170,6 +178,19 @@ Future<void> main() async {
     // BEGIN_REMOTE_CONFIG
     remoteConfigRepositoryProvider.overrideWithValue(remoteConfig),
     // END_REMOTE_CONFIG
+    // BEGIN_ADS
+    adsSettingsProvider.overrideWithValue(
+      AdsSettings(
+        enabled: _adsEnabled,
+        useLiveIds: env == AppEnv.production && kReleaseMode,
+        platform: defaultTargetPlatform == TargetPlatform.iOS
+            ? AdPlatform.ios
+            : AdPlatform.android,
+        requestEeaDebugGeography: _adsDebugGeography == 'eea',
+        unitIds: AdUnitIds.fromEnvironment,
+      ),
+    ),
+    // END_ADS
   ];
 
   void startApp() =>

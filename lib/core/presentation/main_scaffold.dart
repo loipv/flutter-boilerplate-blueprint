@@ -3,6 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:blueprint_app/core/utils/app_haptics.dart';
+// BEGIN_ADS
+import 'package:blueprint_app/features/ads/application/ads_controller.dart';
+import 'package:blueprint_app/features/ads/application/app_open_ad_observer.dart';
+// END_ADS
 
 class MainScaffold extends ConsumerStatefulWidget {
   const MainScaffold({super.key, required this.navigationShell});
@@ -15,6 +19,9 @@ class MainScaffold extends ConsumerStatefulWidget {
 class _MainScaffoldState extends ConsumerState<MainScaffold>
     with SingleTickerProviderStateMixin {
   late final AnimationController _fadeController;
+  // BEGIN_ADS
+  late final AppOpenAdObserver _appOpenObserver;
+  // END_ADS
 
   @override
   void initState() {
@@ -24,10 +31,23 @@ class _MainScaffoldState extends ConsumerState<MainScaffold>
       duration: const Duration(milliseconds: 120),
       value: 1.0,
     );
+    // BEGIN_ADS
+    _appOpenObserver = AppOpenAdObserver(
+      onResumed: () => ref.read(adsControllerProvider).maybeShowAppOpen(),
+    );
+    WidgetsBinding.instance.addObserver(_appOpenObserver);
+    // Reading the controller starts consent and ad preloading.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) ref.read(adsControllerProvider);
+    });
+    // END_ADS
   }
 
   @override
   void dispose() {
+    // BEGIN_ADS
+    WidgetsBinding.instance.removeObserver(_appOpenObserver);
+    // END_ADS
     _fadeController.dispose();
     super.dispose();
   }

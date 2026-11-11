@@ -3,6 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:blueprint_app/core/theme/app_spacing.dart';
 import 'package:blueprint_app/core/theme/app_typography.dart';
+// BEGIN_ADS
+import 'package:blueprint_app/features/ads/presentation/ad_banner.dart';
+// END_ADS
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -14,10 +17,19 @@ class HomeScreen extends ConsumerWidget {
         title: Text('Home', style: AppTypography.titleLarge),
         centerTitle: false,
       ),
-      body: const SafeArea(
-        child: Padding(
-          padding: EdgeInsets.all(AppSpacing.p4),
-          child: _HomeBody(),
+      body: SafeArea(
+        child: Column(
+          children: [
+            const Expanded(
+              child: Padding(
+                padding: EdgeInsets.all(AppSpacing.p4),
+                child: _HomeBody(),
+              ),
+            ),
+            // BEGIN_ADS
+            const AdBanner(),
+            // END_ADS
+          ],
         ),
       ),
     );
