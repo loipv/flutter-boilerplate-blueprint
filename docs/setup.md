@@ -137,6 +137,8 @@ Optional values:
 ```text
 POSTHOG_HOST=
 FIREBASE_AUTH_DOMAIN=
+API_BASE_URL=
+REMOTE_CONFIG_ENV=
 APP_CHECK_DEBUG_TOKEN_IOS=
 APP_CHECK_DEBUG_TOKEN_ANDROID=
 UPLOAD_KEYSTORE_PATH=
@@ -148,6 +150,12 @@ UPLOAD_KEY_PASSWORD=
 `POSTHOG_HOST` is optional. Leave it blank for the SDK default, or set it if you use PostHog EU cloud or a custom/self-hosted domain.
 
 `FIREBASE_AUTH_DOMAIN` is optional. Set it only if you use a custom Firebase Auth redirect domain. Most apps can leave it blank.
+
+`API_BASE_URL` is the base URL of your HTTP API. It is the default for `ConfigKeys.apiBaseUrl` until Remote Config returns a value (first install, offline).
+
+<!-- BEGIN_REMOTE_CONFIG -->
+`REMOTE_CONFIG_ENV` is optional. It is the value of the Remote Config custom signal `environment`. Leave it blank to use the flavor name (`staging` / `production`).
+<!-- END_REMOTE_CONFIG -->
 
 `APP_CHECK_DEBUG_TOKEN_*` is useful for local device runs. The production flavor uses the same debug-token path only in debug mode, so you can test production builds locally without weakening release builds.
 
@@ -167,6 +175,32 @@ Deploy the bundled Firestore rules:
 make deploy-staging
 make deploy-prod
 ```
+
+<!-- BEGIN_REMOTE_CONFIG -->
+### Remote Config
+
+Remote Config is optional (init flag `--no-remote-config`). Enable it in each Firebase project (Console, Remote Config).
+
+**Per-environment values.** The app sets a custom signal `environment` on the client before each fetch. Its value is `REMOTE_CONFIG_ENV`, or the flavor name when blank. In the Console, add a condition on the custom signal `environment` that exactly matches `staging`, and one for `production`, then set per-condition values on a parameter. This also works when both flavors share one Firebase project (`--shared-app-id`). Sharing a project means Auth, Firestore and App Check are shared too.
+
+**Adding a key.** Add one line to `lib/core/domain/config_keys.dart` and list it in `ConfigKeys.all`:
+
+```dart
+static const newHomeEnabled = ConfigKey<bool>('new_home_enabled', false);
+```
+
+Then create a parameter with the same name in the Console. Supported types: `String`, `bool`, `int`, `double`. `get()` never throws: it returns the key's default when the key has no remote or default value, when a bool value is not exactly `true` / `false` (case-sensitive), or when an int / double value cannot be parsed.
+
+**Loading strategy.** At startup the app activates the values cached from a previous launch (defaults from code / `.env` until something was fetched), then runs one background `fetchAndActivate()` per launch. If it activates new values, they apply in the same session. There are no real-time updates and no periodic refetch. `minimumFetchInterval` throttles fetches across launches: 5 minutes for staging, 1 hour for production (`AppEnv.remoteConfigMinFetchInterval`).
+
+**Reading values.**
+
+- `ref.watchConfig(ConfigKeys.x)` (on `Ref` and `WidgetRef`) returns the value and rebuilds the caller when new values are activated.
+- `ref.read(remoteConfigRepositoryProvider).get(ConfigKeys.x)` does not rebuild; it sees new values on its next read.
+- `apiBaseUrl` can change once, a few seconds after startup. Read it per request, or `watchConfig` it so the HTTP client is rebuilt. A client that caches the URL at creation keeps the old one until the next launch.
+
+The Firebase Emulator does not support Remote Config; the app falls back to the defaults there.
+<!-- END_REMOTE_CONFIG -->
 
 ## 7. Platform Setup
 

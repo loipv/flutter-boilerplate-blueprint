@@ -17,6 +17,9 @@
 - **STRICTLY FORBID** `GetX`, `Provider`, or `Bloc`
 - **STRICTLY FORBID Firebase SDK imports** outside of `data/` layers and entrypoints (`main.dart`, `firebase_options_*.dart`). Domain, application, and presentation layers must remain backend-agnostic.
 - **STRICTLY FORBID `posthog_flutter` and `sentry_flutter` imports** outside of `core/data/` (SDK implementations), `core/router/` (observer injection), and entrypoints.
+<!-- BEGIN_REMOTE_CONFIG -->
+- **STRICTLY FORBID `firebase_remote_config` imports** outside of `core/data/` and entrypoints. Read Remote Config only through `RemoteConfigRepository` / `ConfigKeys` (`ref.watchConfig(key)` or `ref.read(remoteConfigRepositoryProvider).get(key)`); declare new keys in `ConfigKeys`.
+<!-- END_REMOTE_CONFIG -->
 - **STRICTLY FORBID leaking raw backend exceptions** (`FirebaseException`, etc.) past the data layer. All exceptions must be mapped to the `Failure` union type.
 
 ---
@@ -107,6 +110,10 @@ class ExampleController extends _$ExampleController {
 ```
 
 **keepAlive providers:** `AuthController`, `FirebaseAuthRepository` (as `AuthRepository`), `FirebaseUserRepository` (as `UserRepository`), `PostHogAnalyticsRepository` (as `AnalyticsRepository`), `ThemeNotifier`, `OnboardingController`.
+
+<!-- BEGIN_REMOTE_CONFIG -->
+Remote Config adds `FirebaseRemoteConfigRepository` (as `RemoteConfigRepository`) and `RemoteConfigRevision` to the keepAlive list.
+<!-- END_REMOTE_CONFIG -->
 
 After editing annotated classes, run:
 

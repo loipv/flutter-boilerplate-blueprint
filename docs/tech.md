@@ -23,11 +23,11 @@ lib/
 ├── core/
 │   ├── config/              # AppEnv: per-flavor runtime config
 │   ├── constants/           # App-wide constants
-│   ├── data/                # Core data impl (analytics)
-│   ├── domain/              # Core interfaces (AnalyticsRepository)
+│   ├── data/                # Core data impl (analytics, Remote Config)
+│   ├── domain/              # Core interfaces (AnalyticsRepository, RemoteConfigRepository, ConfigKeys)
 │   ├── errors/              # Failure union type
 │   ├── presentation/        # MainScaffold, SplashScreen, shared widgets
-│   ├── providers/           # SharedPreferences, haptics providers
+│   ├── providers/           # SharedPreferences, haptics, Remote Config revision providers
 │   ├── router/              # GoRouter (app_router.dart)
 │   ├── services/            # SessionLifecycleObserver, notifications, timezone sync
 │   ├── theme/               # AppColors, AppTypography, AppSpacing, AppTheme
@@ -73,6 +73,10 @@ presentation/→ Widgets only; reads providers, dispatches actions
 **No cross-layer imports going upward.** Data never imports from presentation. Domain never imports from data.
 
 **Firebase SDK imports are confined to `data/` layers only.** The only exception is `main_*.dart` (initialization) and `core/router/` (Sentry/PostHog observers).
+
+<!-- BEGIN_REMOTE_CONFIG -->
+`firebase_remote_config` is confined to `core/data/` and `main.dart`.
+<!-- END_REMOTE_CONFIG -->
 
 ### Riverpod Code-Gen
 
@@ -136,6 +140,9 @@ The router lives in a `@Riverpod(keepAlive: true)` provider. Auth and onboarding
 | `gap`                                                      | Spacing (use `Gap(AppSpacing.pN)`: never `SizedBox`) |
 | `posthog_flutter`                                          | Analytics                                            |
 | `sentry_flutter`                                           | Error tracking                                       |
+<!-- BEGIN_REMOTE_CONFIG -->
+| `firebase_remote_config`                                   | Remote Config (feature flags, per-env values)        |
+<!-- END_REMOTE_CONFIG -->
 
 ## Flavors
 

@@ -4,6 +4,15 @@ All notable changes to the `flutter-boilerplate-blueprint` template should be do
 
 The generated app's `pubspec.yaml` version is separate from the blueprint version. Use this changelog to track scaffold and template changes between blueprint tags.
 
+## Unreleased
+
+### Added
+
+- Optional Firebase Remote Config feature (marker `REMOTE_CONFIG`, init flag `--no-remote-config` removes it): `RemoteConfigRepository`, `ConfigKey<T>` / `ConfigKeys` (typed `String`, `bool`, `int`, `double` keys), `FirebaseRemoteConfigRepository`, and `ref.watchConfig(key)` backed by `RemoteConfigRevision`. Startup activates cached values and runs one background fetch per launch; new values apply in the same session. `AppEnv.remoteConfigMinFetchInterval` is 5 minutes for staging and 1 hour for production.
+- Per-environment values through the custom signal `environment` (`REMOTE_CONFIG_ENV` in `.env`, or the flavor name), so conditions work with one shared Firebase project.
+- `API_BASE_URL` env var feeding the `ConfigKeys.apiBaseUrl` default. It stays when Remote Config is removed.
+- `docs/setup.md` Remote Config section.
+
 ## v1.1.0 - 2026-11-11
 
 ### Added
