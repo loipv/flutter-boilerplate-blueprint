@@ -4,6 +4,45 @@ All notable changes to the `flutter-boilerplate-blueprint` template should be do
 
 The generated app's `pubspec.yaml` version is separate from the blueprint version. Use this changelog to track scaffold and template changes between blueprint tags.
 
+## v1.1.0 - 2026-11-11
+
+### Added
+
+- Test suite: one test file per `lib/` source file (`lib/a/b/foo.dart` ↔ `test/a/b/foo_test.dart`), with repository tests on `fake_cloud_firestore` / `firebase_auth_mocks` / `mock_exceptions`, router, widget and app flow tests, and shared helpers in `test/helpers/` (`fakes.dart`, `mocks.dart`, `pump_app.dart`).
+- `make check-test-layout` (`scripts/check_test_layout.dart`): fails on a test file whose source file does not exist.
+- `make coverage` (`scripts/coverage_gate.dart`): runs the tests with coverage and fails below domain 100%, data 90%, application 80%, or on a gated file no test loads. `ci.yml` and `tool/verify_init.sh` run both.
+- `make test-firebase`: runs the Firestore and Storage rules tests (`firebase_tests/`) and the Cloud Functions tests (`functions/test/`, calling each v2 function's `.run()`) with `vitest` on the Firebase Emulator under the `demo-test` project. Needs the Firebase CLI and Java 21+, not Flutter. After `--no-functions` only the rules tests run. `ci.yml` runs it in a `firebase` job in parallel with `test`.
+- `make test-integration DEVICE=<id>`: runs `integration_test/` (returning-user settings, sign-out and guest onboarding flows) on an iOS simulator or Android emulator against the Firebase Auth and Firestore emulators under `demo-test`. It writes gitignored placeholder staging Firebase configs only where none exist (`scripts/integration_stubs.sh`). The debug Android manifest allows cleartext traffic so the emulator can reach `http://10.0.2.2`; release builds are unchanged.
+- `integration.yml`: a manual (`workflow_dispatch`) workflow that runs `make test-integration` on an API 34 Android emulator. It ships in generated apps. Setup, troubleshooting and what stays manual (Google and Apple Sign-In) are in `docs/testing_guide.md`.
+
+### Changed
+
+- `ci.yml`'s `test` job runs the test layout check and the coverage gate (`make check-test-layout coverage`) instead of plain `make test`. `tool/verify_init.sh` runs both too.
+- `make release-preflight` runs format, analyze, the test layout check and the coverage gate. Format covers only the source folders (`lib`, `test`, `scripts`, `tool`, `integration_test`), so ignored build caches no longer break it.
+- `make setup` also installs the `firebase_tests/` dependencies.
+- `FirebaseAuthRepository` takes `GoogleSignIn` and an Apple credential function through its constructor, and `PostHogAnalyticsRepository` takes a `Posthog` instance, so tests can inject them. The providers pass the real instances; behavior is unchanged.
+- `firebase.json` has an `emulators` block (project `demo-test` in tests), and its functions `ignore` list excludes `test` and `vitest.config.mts`. init with `--no-functions` also removes `emulators.functions`.
+- Cloud Functions initialize the default Admin app only once.
+
+### Fixed
+
+- Google sign-in rethrows a `Failure` from the repository as is, instead of wrapping it as an unknown failure.
+- `savePreferences` writes a nested `preferences` map. It used dotted keys in `set()`, which real Firestore stored as literal top-level field names.
+- `SettingsController` stays alive across async preference writes, so a write no longer throws `UnmountedRefException`.
+- `OnboardingScaffold` no longer reads `GoRouterState` during redirects.
+- User documents with Firestore `Timestamp` fields now parse. Before, the profile was `null` for real users, so their preferences never loaded.
+- The haptics preference is respected when nothing else listens to the profile (for example in apps built with `--no-notifications`). `hapticsEnabled` is now kept alive and `App` listens to it, so `AppHaptics` reads see the stored setting instead of the default `true`.
+- `UserEntity.toJson()` serializes `preferences` as a nested map, so `fromJson(toJson())` round-trips.
+
+### Removed
+
+- `SettingsController.deleteAccount`, which nothing called. The Settings screen calls `AuthController.deleteAccount` and shows its error.
+
+### Breaking / manual follow-up
+
+- Apps generated from `v1.0.0` or earlier keep the bugs listed under Fixed until they port the fixes. The `savePreferences` and `Timestamp` bugs also exist in `v0.9.0`.
+- Documents written by apps generated from older blueprint versions may carry literal top-level `preferences.<field>` keys from the old `savePreferences`. They are no longer written; apps can migrate them into the nested `preferences` map or ignore them.
+
 ## v1.0.0 - 2026-11-11
 
 ### Changed
@@ -22,23 +61,11 @@ The generated app's `pubspec.yaml` version is separate from the blueprint versio
 - `make build-staging-ipa` and `make build-staging-aab`.
 - init refuses to turn off all three sign-in methods (Apple, Google, anonymous), and fails before any write on a marker name it does not know (for example a typo like `BEGIN_POSTHOGG`). A test checks that every marker in the repo has a known name.
 - Complete `ios/` and `android/` platform folders.
-- Seed tests under `test/` and CI: `ci.yml` (analyze, test layout check, coverage gate) and `blueprint.yml` (runs `tool/verify_init.sh` for three init combinations).
-- Test suite: one test file per `lib/` source file (`lib/a/b/foo.dart` ↔ `test/a/b/foo_test.dart`), with repository tests on `fake_cloud_firestore` / `firebase_auth_mocks` / `mock_exceptions`, router, widget and app flow tests, and shared helpers in `test/helpers/` (`fakes.dart`, `mocks.dart`, `pump_app.dart`).
-- `make check-test-layout` (`scripts/check_test_layout.dart`): fails on a test file whose source file does not exist.
-- `make coverage` (`scripts/coverage_gate.dart`): runs the tests with coverage and fails below domain 100%, data 90%, application 80%, or on a gated file no test loads. `ci.yml` and `tool/verify_init.sh` run both.
-- `make test-firebase`: runs the Firestore and Storage rules tests (`firebase_tests/`) and the Cloud Functions tests (`functions/test/`, calling each v2 function's `.run()`) with `vitest` on the Firebase Emulator under the `demo-test` project. Needs the Firebase CLI and Java 21+, not Flutter. After `--no-functions` only the rules tests run. `ci.yml` runs it in a `firebase` job in parallel with `test`.
-- `make test-integration DEVICE=<id>`: runs `integration_test/` (returning-user settings, sign-out and guest onboarding flows) on an iOS simulator or Android emulator against the Firebase Auth and Firestore emulators under `demo-test`. It writes gitignored placeholder staging Firebase configs only where none exist (`scripts/integration_stubs.sh`). The debug Android manifest allows cleartext traffic so the emulator can reach `http://10.0.2.2`; release builds are unchanged.
-- `integration.yml`: a manual (`workflow_dispatch`) workflow that runs `make test-integration` on an API 34 Android emulator. It ships in generated apps. Setup, troubleshooting and what stays manual (Google and Apple Sign-In) are in `docs/testing_guide.md`.
+- Seed tests under `test/` and CI: `ci.yml` (analyze + test) and `blueprint.yml` (runs `tool/verify_init.sh` for three init combinations).
 
 ### Fixed
 
 - `scaffold.sh` honors `BLUEPRINT_REF` when run from a local clone, prints the ref it uses, and explains how to scaffold a pre-v1.0.0 tag instead of failing in init. The `curl` one-liner no longer mistakes the current directory for a local blueprint clone.
-- Google sign-in rethrows a `Failure` from the repository as is, instead of wrapping it as an unknown failure.
-- `savePreferences` writes a nested `preferences` map. It used dotted keys in `set()`, which real Firestore stored as literal top-level field names.
-- `SettingsController` stays alive across async preference writes, so a write no longer throws `UnmountedRefException`.
-- `OnboardingScaffold` no longer reads `GoRouterState` during redirects.
-- User documents with Firestore `Timestamp` fields now parse. Before, the profile was `null` for real users, so their preferences never loaded.
-- The haptics preference is respected when nothing else listens to the profile (for example in apps built with `--no-notifications`). `hapticsEnabled` is now kept alive and `App` listens to it, so `AppHaptics` reads see the stored setting instead of the default `true`.
 
 ### Removed
 
@@ -49,7 +76,6 @@ The generated app's `pubspec.yaml` version is separate from the blueprint versio
 
 - The `scaffold.sh` shipped in tags `v0.6.0` to `v0.9.0` clones `main` and reads `template/`, so those `v0.x` one-liners no longer work. Use the `main` one-liner or set `BLUEPRINT_REF`.
 - Generated apps no longer get a `CODEX.md` / `GEMINI.md` choice; `CLAUDE.md` and `AGENTS.md` are the only AI instruction files.
-- Documents written by apps generated from older blueprint versions may carry literal top-level `preferences.<field>` keys from the old `savePreferences`. They are no longer written; apps can migrate them into the nested `preferences` map or ignore them.
 
 ## v0.9.0 - 2026-05-20
 
