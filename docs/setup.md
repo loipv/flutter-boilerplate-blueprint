@@ -153,7 +153,7 @@ UPLOAD_KEY_PASSWORD=
 
 `FIREBASE_AUTH_DOMAIN` is optional. Set it only if you use a custom Firebase Auth redirect domain. Most apps can leave it blank.
 
-`API_BASE_URL` is the base URL of your HTTP API. It is the default for `ConfigKeys.apiBaseUrl` until Remote Config returns a value (first install, offline).
+`API_BASE_URL` is the base URL of your HTTP API. It is the default for `ConfigKeys.apiBaseUrl`. Remote Config overrides it when enabled.
 
 <!-- BEGIN_REMOTE_CONFIG -->
 `REMOTE_CONFIG_ENV` is optional. It is the value of the Remote Config custom signal `environment`. Leave it blank to use the flavor name (`staging` / `production`).
@@ -183,7 +183,7 @@ make deploy-prod
 
 Remote Config is optional (init flag `--no-remote-config`). Enable it in each Firebase project (Console, Remote Config).
 
-**Per-environment values.** The app sets a custom signal `environment` on the client before each fetch. Its value is `REMOTE_CONFIG_ENV`, or the flavor name when blank. In the Console, add a condition on the custom signal `environment` that exactly matches `staging`, and one for `production`, then set per-condition values on a parameter. If a team points both flavors at one Firebase project, this signal keeps their values separate; Auth, Firestore and App Check are then shared too. The signal also works with `--shared-app-id`, where a condition on App ID could not tell staging from production.
+**Per-environment values.** The app sets a custom signal `environment` on the client before each fetch. Its value is `REMOTE_CONFIG_ENV`, or the flavor name when blank. In the Console, add a condition on the custom signal `environment` that exactly matches `staging`, and one for `production`, then set per-condition values on a parameter. If a team points both flavors at one Firebase project, this signal keeps their values separate; Auth, Firestore and App Check are then shared too. The signal also works with `--shared-app-id`, where a condition on App ID could not tell staging from production. With one shared Firebase project and `--shared-app-id`, both builds also share Remote Config's on-device cache, so after switching builds on one device the app can show the other environment's values until a fetch succeeds (up to `minimumFetchInterval`: 5 min staging / 1 h production). Keep separate bundle ids (the default) when sharing one Firebase project, or reinstall the app when switching builds on a test device.
 
 **Adding a key.** Add one line to `lib/core/domain/config_keys.dart` and list it in `ConfigKeys.all`:
 
@@ -201,7 +201,7 @@ Then create a parameter with the same name in the Console. Supported types: `Str
 - `ref.read(remoteConfigRepositoryProvider).get(ConfigKeys.x)` does not rebuild; it sees new values on its next read.
 - `apiBaseUrl` can change once, a few seconds after startup. Read it per request, or `watchConfig` it so the HTTP client is rebuilt. A client that caches the URL at creation keeps the old one until the next launch.
 
-The Firebase Emulator does not support Remote Config; the app falls back to the defaults there.
+The Firebase Emulator has no Remote Config; the integration tests do not initialize it, so `get()` returns the defaults there.
 <!-- END_REMOTE_CONFIG -->
 
 ## 7. Platform Setup

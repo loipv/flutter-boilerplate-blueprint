@@ -29,7 +29,7 @@ test/
 │       └── presentation/     # Widget tests
 ├── scripts/                  # Tests for scripts/ (layout check, coverage gate)
 └── helpers/
-    ├── fakes.dart            # In-memory FakeAuthRepository, FakeUserRepository
+    ├── fakes.dart            # In-memory FakeAuthRepository, FakeUserRepository, FakeRemoteConfigRepository
     ├── mocks.dart            # Mocktail mocks
     └── pump_app.dart         # pumpApp() for widget tests
 ```
@@ -41,6 +41,12 @@ In the blueprint, `tool/src/<name>.dart` ↔ `test/tool/<name>_test.dart`. init 
 <!-- END_BLUEPRINT -->
 
 Optional features keep their tests inside the same marker blocks as their `lib/` code: a test, import or helper that only exists for Apple sign-in sits between the `BEGIN_APPLE` / `END_APPLE` lines, exactly like the code it tests. Every test file must still compile and keep at least one test after any combination of features is stripped; a file with zero tests makes `flutter test` exit with code 79.
+
+Widget tests that render anything using `watchConfig` must override the Remote Config provider, because the real one calls `FirebaseRemoteConfig.instance`, which throws without a Firebase app:
+
+```dart
+remoteConfigRepositoryProvider.overrideWithValue(FakeRemoteConfigRepository()),
+```
 
 Test descriptions use Given-When-Then: `'Given <state>, When <action>, Then <outcome>'`. `group()` names are the method or route under test.
 
