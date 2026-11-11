@@ -17,6 +17,48 @@ abstract final class ConfigKeys {
     String.fromEnvironment('API_BASE_URL'),
   );
 
+  // BEGIN_ADS
+  /// Master switch for all ads.
+  static const adsEnabled = ConfigKey<bool>('ads_enabled', true);
+
+  /// Switch for banner ads.
+  static const adsBannerEnabled = ConfigKey<bool>('ads_banner_enabled', true);
+
+  /// Switch for interstitial ads.
+  static const adsInterstitialEnabled = ConfigKey<bool>(
+    'ads_interstitial_enabled',
+    true,
+  );
+
+  /// Switch for rewarded ads.
+  static const adsRewardedEnabled = ConfigKey<bool>(
+    'ads_rewarded_enabled',
+    true,
+  );
+
+  /// Switch for app open ads.
+  static const adsAppOpenEnabled = ConfigKey<bool>(
+    'ads_app_open_enabled',
+    true,
+  );
+
+  /// Minimum seconds between two full-screen ads.
+  static const adsFullScreenMinIntervalSeconds = ConfigKey<int>(
+    'ads_full_screen_min_interval_seconds',
+    90,
+  );
+  // END_ADS
+
   /// Every key. Add new keys here too; it feeds the SDK defaults.
-  static const List<ConfigKey<Object>> all = [apiBaseUrl];
+  static const List<ConfigKey<Object>> all = [
+    apiBaseUrl,
+    // BEGIN_ADS
+    adsEnabled,
+    adsBannerEnabled,
+    adsInterstitialEnabled,
+    adsRewardedEnabled,
+    adsAppOpenEnabled,
+    adsFullScreenMinIntervalSeconds,
+    // END_ADS
+  ];
 }

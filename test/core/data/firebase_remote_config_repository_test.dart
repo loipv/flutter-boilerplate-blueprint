@@ -143,6 +143,14 @@ void main() {
         expect(settings.minimumFetchInterval, const Duration(minutes: 5));
         expect(calls[1].captured.single, {
           'api_base_url': ConfigKeys.apiBaseUrl.defaultValue,
+          // BEGIN_ADS
+          'ads_enabled': true,
+          'ads_banner_enabled': true,
+          'ads_interstitial_enabled': true,
+          'ads_rewarded_enabled': true,
+          'ads_app_open_enabled': true,
+          'ads_full_screen_min_interval_seconds': 90,
+          // END_ADS
         });
         expect(calls[2].captured.single, {'environment': 'staging'});
       },
