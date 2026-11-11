@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gap/gap.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:blueprint_app/core/data/firebase_remote_config_repository.dart';
 import 'package:blueprint_app/features/ads/application/ads_settings.dart';
 import 'package:blueprint_app/features/ads/data/google_mobile_ads_repository.dart';
 import 'package:blueprint_app/features/ads/domain/ad_unit_ids.dart';
 import 'package:blueprint_app/features/ads/domain/ads_repository.dart';
 import 'package:blueprint_app/features/ads/presentation/ad_privacy_options_tile.dart';
 
+import '../../../helpers/fakes.dart';
 import '../../../helpers/mocks.dart';
 import '../../../helpers/pump_app.dart';
 
@@ -21,9 +23,12 @@ const _settings = AdsSettings(
 
 void main() {
   late MockAdsRepository repository;
+  late FakeRemoteConfigRepository config;
 
   setUp(() {
     repository = MockAdsRepository();
+    config = FakeRemoteConfigRepository();
+    addTearDown(config.dispose);
   });
 
   Future<void> pump(WidgetTester tester, AdsConsent consent) {
@@ -41,6 +46,7 @@ void main() {
       overrides: [
         adsSettingsProvider.overrideWithValue(_settings),
         adsRepositoryProvider.overrideWithValue(repository),
+        remoteConfigRepositoryProvider.overrideWithValue(config),
       ],
     );
   }
