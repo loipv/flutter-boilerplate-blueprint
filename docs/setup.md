@@ -138,7 +138,9 @@ Optional values:
 POSTHOG_HOST=
 FIREBASE_AUTH_DOMAIN=
 API_BASE_URL=
+# BEGIN_REMOTE_CONFIG
 REMOTE_CONFIG_ENV=
+# END_REMOTE_CONFIG
 APP_CHECK_DEBUG_TOKEN_IOS=
 APP_CHECK_DEBUG_TOKEN_ANDROID=
 UPLOAD_KEYSTORE_PATH=
@@ -181,7 +183,7 @@ make deploy-prod
 
 Remote Config is optional (init flag `--no-remote-config`). Enable it in each Firebase project (Console, Remote Config).
 
-**Per-environment values.** The app sets a custom signal `environment` on the client before each fetch. Its value is `REMOTE_CONFIG_ENV`, or the flavor name when blank. In the Console, add a condition on the custom signal `environment` that exactly matches `staging`, and one for `production`, then set per-condition values on a parameter. This also works when both flavors share one Firebase project (`--shared-app-id`). Sharing a project means Auth, Firestore and App Check are shared too.
+**Per-environment values.** The app sets a custom signal `environment` on the client before each fetch. Its value is `REMOTE_CONFIG_ENV`, or the flavor name when blank. In the Console, add a condition on the custom signal `environment` that exactly matches `staging`, and one for `production`, then set per-condition values on a parameter. If a team points both flavors at one Firebase project, this signal keeps their values separate; Auth, Firestore and App Check are then shared too. The signal also works with `--shared-app-id`, where a condition on App ID could not tell staging from production.
 
 **Adding a key.** Add one line to `lib/core/domain/config_keys.dart` and list it in `ConfigKeys.all`:
 
