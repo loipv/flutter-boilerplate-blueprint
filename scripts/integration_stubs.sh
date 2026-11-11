@@ -13,7 +13,7 @@ android_json=android/app/src/staging/google-services.json
 ios_plist=ios/config/Staging/GoogleService-Info.plist
 
 # Android package: applicationId, plus ".staging" when the staging flavor
-# declares that suffix (init --shared-app-id removes it).
+# declares that suffix (it is absent when staging shares the production app id).
 gradle=android/app/build.gradle.kts
 package_name=$(sed -nE 's/^[[:space:]]*applicationId[[:space:]]*=[[:space:]]*"([^"]+)".*/\1/p' "$gradle" | head -n 1)
 [ -n "$package_name" ] || { echo "No applicationId in $gradle" >&2; exit 1; }

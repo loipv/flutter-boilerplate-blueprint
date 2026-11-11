@@ -17,12 +17,14 @@ void main() {
       expect(expectedSourceFor('test/app_test.dart'), 'lib/app.dart');
     });
 
+    // BEGIN_BLUEPRINT
     test('Given a tool test, When mapped, Then it points into tool/src', () {
       expect(
         expectedSourceFor('test/tool/markers_test.dart'),
         'tool/src/markers.dart',
       );
     });
+    // END_BLUEPRINT
 
     test('Given a scripts test, When mapped, Then it points into scripts', () {
       expect(

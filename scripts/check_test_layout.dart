@@ -12,9 +12,11 @@ String? expectedSourceFor(String testPath) {
   if (testPath.startsWith('test/helpers/')) return null;
   final rest = testPath.substring('test/'.length);
   final base = rest.substring(0, rest.length - suffix.length);
+  // BEGIN_BLUEPRINT
   if (base.startsWith('tool/')) {
     return 'tool/src/${base.substring('tool/'.length)}.dart';
   }
+  // END_BLUEPRINT
   if (base.startsWith('scripts/')) return '$base.dart';
   return 'lib/$base.dart';
 }
