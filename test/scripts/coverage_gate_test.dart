@@ -79,7 +79,34 @@ void main() {
     );
   });
 
+  group('parseLcov malformed records', () {
+    test('Given a record without LF, When parsed, Then it is absent', () {
+      expect(parseLcov('SF:lib/a/data/b.dart\nLH:3\nend_of_record\n'), isEmpty);
+    });
+
+    test('Given LF without LH, When parsed, Then hit is 0', () {
+      expect(parseLcov('SF:lib/a/data/b.dart\nLF:5\nend_of_record\n'), {
+        'lib/a/data/b.dart': (found: 5, hit: 0),
+      });
+    });
+  });
+
   group('hasExecutableCode', () {
+    test('Given a block getter, When checked, Then true', () {
+      expect(hasExecutableCode('int get x { return 1; }'), true);
+    });
+
+    test('Given an initializer-list constructor, When checked, Then true', () {
+      expect(
+        hasExecutableCode('class A { final int x; A() : x = 1 { } }'),
+        true,
+      );
+    });
+
+    test('Given an abstract getter, When checked, Then false', () {
+      expect(hasExecutableCode('abstract class A { int get x; }'), false);
+    });
+
     test('Given an abstract interface, When checked, Then false', () {
       expect(
         hasExecutableCode('abstract class A { Future<void> f(); }'),

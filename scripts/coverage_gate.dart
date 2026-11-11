@@ -35,20 +35,20 @@ Layer? layerOf(String libPath) {
 Map<String, Counts> parseLcov(String lcov) {
   final result = <String, Counts>{};
   String? file;
-  var found = 0;
+  int? found;
   var hit = 0;
   for (final raw in lcov.split('\n')) {
     final line = raw.trim();
     if (line.startsWith('SF:')) {
       file = _normalize(line.substring(3));
-      found = 0;
+      found = null;
       hit = 0;
     } else if (line.startsWith('LF:')) {
-      found = int.tryParse(line.substring(3)) ?? 0;
+      found = int.tryParse(line.substring(3));
     } else if (line.startsWith('LH:')) {
       hit = int.tryParse(line.substring(3)) ?? 0;
     } else if (line == 'end_of_record' && file != null) {
-      result[file] = (found: found, hit: hit);
+      if (found != null) result[file] = (found: found, hit: hit);
       file = null;
     }
   }
@@ -64,11 +64,20 @@ String _normalize(String path) {
 
 final _lineComment = RegExp(r'//.*');
 final _body = RegExp(r'\)\s*(async\*|sync\*|async)?\s*\{');
+final _getterBody = RegExp(r'\bget\s+\w+\s*\{');
+final _initializerBody = RegExp(r'\)\s*:[^;{]*\{');
 
 /// Whether the source has any function body (so it would appear in lcov).
+///
+/// Strips `//` line comments, then is true when the source contains `=>`,
+/// a `) [async|async*|sync*] {` body, a block-bodied getter
+/// (`get x {`), or a constructor with an initializer list (`) : x = 1 {`).
 bool hasExecutableCode(String dartSource) {
   final code = dartSource.replaceAll(_lineComment, '');
-  return code.contains('=>') || _body.hasMatch(code);
+  return code.contains('=>') ||
+      _body.hasMatch(code) ||
+      _getterBody.hasMatch(code) ||
+      _initializerBody.hasMatch(code);
 }
 
 class GateResult {
