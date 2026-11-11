@@ -7,6 +7,7 @@ import 'package:blueprint_app/core/data/firebase_remote_config_repository.dart';
 import 'package:blueprint_app/core/domain/config_keys.dart';
 import 'package:blueprint_app/features/ads/application/ad_frequency_cap.dart';
 import 'package:blueprint_app/features/ads/application/ad_free_provider.dart';
+import 'package:blueprint_app/features/ads/application/ads_consent_controller.dart';
 import 'package:blueprint_app/features/ads/application/ads_controller.dart';
 import 'package:blueprint_app/features/ads/application/ads_settings.dart';
 import 'package:blueprint_app/features/ads/data/google_mobile_ads_repository.dart';
@@ -225,6 +226,52 @@ void main() {
     );
   });
 
+  test('Given banner enabled, When loadBanner, Then the repository gets the '
+      'banner unit ID and width, and the handle is returned', () async {
+    final handle = FakeAdBannerHandle();
+    when(
+      () => repository.loadBanner(
+        adUnitId: any(named: 'adUnitId'),
+        width: any(named: 'width'),
+      ),
+    ).thenAnswer((_) async => handle);
+
+    expect(await controller.loadBanner(width: 320), same(handle));
+
+    verify(
+      () => repository.loadBanner(adUnitId: 'unit-banner', width: 320),
+    ).called(1);
+  });
+
+  test('Given banner disabled, When loadBanner, Then null and the '
+      'repository is not called', () async {
+    enabled.remove(AdFormat.banner);
+
+    expect(await controller.loadBanner(width: 320), isNull);
+
+    verifyZeroInteractions(repository);
+  });
+
+  test('Given no banner unit ID, When loadBanner, Then null and the '
+      'repository is not called', () async {
+    withUnitId.remove(AdFormat.banner);
+
+    expect(await controller.loadBanner(width: 320), isNull);
+
+    verifyZeroInteractions(repository);
+  });
+
+  test('Given the repository throws, When loadBanner, Then null', () async {
+    when(
+      () => repository.loadBanner(
+        adUnitId: any(named: 'adUnitId'),
+        width: any(named: 'width'),
+      ),
+    ).thenThrow(StateError('load failed'));
+
+    expect(await controller.loadBanner(width: 320), isNull);
+  });
+
   group('adsControllerProvider', () {
     const settings = AdsSettings(
       enabled: true,
@@ -280,52 +327,48 @@ void main() {
       }
     });
 
-    test('Given the master key off, When the controller is read, Then '
-        'initialize is never called, and flipping it on initializes once',
-        () async {
+    test('Given the master key off at launch, When it flips on mid-session, '
+        'Then initialize and preload are never called', () async {
       final config = FakeRemoteConfigRepository(
         values: {ConfigKeys.adsEnabled.key: false},
       );
       addTearDown(config.dispose);
-      final container = makeContainer(config, (
+      makeContainer(config, (
         canRequestAds: true,
         privacyOptionsRequired: false,
-      ));
-
-      container.listen(adsControllerProvider, (_, _) {});
+      )).listen(adsControllerProvider, (_, _) {});
       await pumpEventQueue();
+
+      config.update({ConfigKeys.adsEnabled.key: true});
+      await pumpEventQueue();
+
       verifyNever(
         () => repository.initialize(
           debugGeographyEea: any(named: 'debugGeographyEea'),
         ),
       );
-
-      config.update({ConfigKeys.adsEnabled.key: true});
-      await pumpEventQueue();
-      verify(
-        () => repository.initialize(
-          debugGeographyEea: any(named: 'debugGeographyEea'),
-        ),
-      ).called(1);
+      verifyNever(
+        () => repository.preload(any(), adUnitId: any(named: 'adUnitId')),
+      );
     });
 
-    test('Given consent first denied, When it becomes granted, Then each '
-        'enabled format is preloaded exactly once', () async {
-      final config = FakeRemoteConfigRepository(
-        values: {ConfigKeys.adsEnabled.key: false},
-      );
+    test('Given consent first denied, When privacy options grant it, Then '
+        'each enabled format is preloaded exactly once', () async {
+      final config = FakeRemoteConfigRepository();
       addTearDown(config.dispose);
-      final container = makeContainer(config, (
-        canRequestAds: true,
-        privacyOptionsRequired: false,
-      ));
+      final container = makeContainer(config, noAdsConsent);
+      when(() => repository.showPrivacyOptions()).thenAnswer(
+        (_) async => (canRequestAds: true, privacyOptionsRequired: true),
+      );
       container.listen(adsControllerProvider, (_, _) {});
       await pumpEventQueue();
       verifyNever(
         () => repository.preload(any(), adUnitId: any(named: 'adUnitId')),
       );
 
-      config.update({ConfigKeys.adsEnabled.key: true});
+      await container
+          .read(adsConsentControllerProvider.notifier)
+          .showPrivacyOptions();
       await pumpEventQueue();
 
       for (final format in [

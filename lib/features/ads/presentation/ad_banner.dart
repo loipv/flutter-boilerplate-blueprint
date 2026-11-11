@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:blueprint_app/features/ads/application/ads_controller.dart';
 import 'package:blueprint_app/features/ads/application/ads_enabled_provider.dart';
-import 'package:blueprint_app/features/ads/application/ads_settings.dart';
-import 'package:blueprint_app/features/ads/data/google_mobile_ads_repository.dart';
 import 'package:blueprint_app/features/ads/domain/ad_banner_handle.dart';
 import 'package:blueprint_app/features/ads/domain/ad_format.dart';
 
@@ -39,15 +38,14 @@ class _AdBannerState extends ConsumerState<AdBanner> {
   }
 
   Future<void> _load(double width) async {
-    final unitId = ref.read(adsSettingsProvider).unitId(AdFormat.banner);
-    if (unitId == null || !_isEnabled) return;
+    if (!_isEnabled) return;
     _loading = true;
     final generation = _generation;
     var handled = false;
     try {
       final handle = await ref
-          .read(adsRepositoryProvider)
-          .loadBanner(adUnitId: unitId, width: width);
+          .read(adsControllerProvider)
+          .loadBanner(width: width);
       if (handle == null) return;
       if (!mounted || generation != _generation || !_isEnabled) {
         handle.dispose();

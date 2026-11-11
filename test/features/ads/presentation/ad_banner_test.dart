@@ -3,12 +3,14 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
+import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:blueprint_app/core/theme/app_theme.dart';
+import 'package:blueprint_app/features/ads/application/ad_frequency_cap.dart';
+import 'package:blueprint_app/features/ads/application/ads_controller.dart';
 import 'package:blueprint_app/features/ads/application/ads_enabled_provider.dart';
 import 'package:blueprint_app/features/ads/application/ads_settings.dart';
-import 'package:blueprint_app/features/ads/data/google_mobile_ads_repository.dart';
 import 'package:blueprint_app/features/ads/domain/ad_banner_handle.dart';
 import 'package:blueprint_app/features/ads/domain/ad_format.dart';
 import 'package:blueprint_app/features/ads/domain/ad_unit_ids.dart';
@@ -34,12 +36,22 @@ void main() {
     repository = MockAdsRepository();
   });
 
+  /// A real controller over the mock repository, reading the overridden
+  /// adsEnabledProvider at call time.
+  Override controllerOverride() => adsControllerProvider.overrideWith(
+    (ref) => AdsController(
+      repository: repository,
+      isEnabled: (format) => ref.read(adsEnabledProvider(format)),
+      unitId: _settings.unitId,
+      cap: AdFrequencyCap(minInterval: () => Duration.zero),
+    ),
+  );
+
   Widget app({required bool enabled, Widget? child}) {
     return ProviderScope(
       overrides: [
-        adsRepositoryProvider.overrideWithValue(repository),
-        adsSettingsProvider.overrideWithValue(_settings),
         adsEnabledProvider(AdFormat.banner).overrideWithValue(enabled),
+        controllerOverride(),
       ],
       child: MaterialApp(
         theme: AppTheme.lightTheme,
@@ -208,8 +220,7 @@ void main() {
     final flag = StateProvider<bool>((ref) => true);
     final container = ProviderContainer(
       overrides: [
-        adsRepositoryProvider.overrideWithValue(repository),
-        adsSettingsProvider.overrideWithValue(_settings),
+        controllerOverride(),
         adsEnabledProvider(
           AdFormat.banner,
         ).overrideWith((ref) => ref.watch(flag)),

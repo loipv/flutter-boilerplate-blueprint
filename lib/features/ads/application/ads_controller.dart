@@ -7,13 +7,15 @@ import 'package:blueprint_app/features/ads/application/ads_consent_controller.da
 import 'package:blueprint_app/features/ads/application/ads_enabled_provider.dart';
 import 'package:blueprint_app/features/ads/application/ads_settings.dart';
 import 'package:blueprint_app/features/ads/data/google_mobile_ads_repository.dart';
+import 'package:blueprint_app/features/ads/domain/ad_banner_handle.dart';
 import 'package:blueprint_app/features/ads/domain/ad_format.dart';
 import 'package:blueprint_app/features/ads/domain/ads_repository.dart';
 import 'package:blueprint_app/features/ads/domain/rewarded_outcome.dart';
 
 part 'ads_controller.g.dart';
 
-/// The single entry point app code uses to preload and show full-screen ads.
+/// The single entry point app code uses to load banners and to preload and
+/// show full-screen ads.
 ///
 /// Never throws: repository failures are logged and reported as "no ad".
 class AdsController {
@@ -44,6 +46,20 @@ class AdsController {
       AdFormat.appOpen,
     ]) {
       _preload(format);
+    }
+  }
+
+  /// Loads an adaptive banner [width] wide. Returns null when banners are off,
+  /// no unit ID is set, there is no fill, or the load fails.
+  Future<AdBannerHandle?> loadBanner({required double width}) async {
+    if (!_isEnabled(AdFormat.banner)) return null;
+    final id = _unitId(AdFormat.banner);
+    if (id == null) return null;
+    try {
+      return await _repository.loadBanner(adUnitId: id, width: width);
+    } on Object catch (e, st) {
+      _log.warning('load banner failed', error: e, stackTrace: st);
+      return null;
     }
   }
 
