@@ -158,7 +158,7 @@ flowchart LR
     DATA --> FIREBASE["Firebase<br/>Auth, Firestore, Functions"]
     DATA -.-> FAILURE["Failure<br/>mapped backend errors"]
     CORE["lib/core<br/>router, theme, logger, shared services"] -.-> FEATURE
-    ENTRY["Entrypoints<br/>main_staging.dart / main_production.dart"] --> FIREBASE
+    ENTRY["Entrypoint<br/>main.dart (staging / production by flavor)"] --> FIREBASE
 ```
 
 Read it left to right: UI in `presentation` talks to controllers in `application`, business rules live in `domain`, and Firebase work happens in `data`. `lib/core` supports all features, and backend errors are mapped to `Failure` before they reach higher layers.
@@ -169,9 +169,9 @@ Read it left to right: UI in `presentation` talks to controllers in `application
 <your-app>/
 ├── lib/
 │   ├── app.dart
-│   ├── main_staging.dart
-│   ├── main_production.dart
+│   ├── main.dart
 │   ├── core/
+│   │   ├── config/
 │   │   ├── constants/
 │   │   ├── data/
 │   │   ├── domain/

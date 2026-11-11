@@ -11,6 +11,7 @@ The generated app's `pubspec.yaml` version is separate from the blueprint versio
 - The app now lives at the repo root (`lib/`, `ios/`, `android/`, `test/`, `functions/`, `Makefile`, docs) instead of under `template/`. The repo is a runnable Flutter + Firebase app with fixed placeholder values (package `blueprint_app`, application id `com.example.blueprint_app`).
 - `tool/init.dart` renames the boilerplate in place (package name, organization for the bundle/application id, display name, description, and seven feature toggles). `scaffold.sh` is now a thin script that clones the blueprint and runs `tool/init.dart`.
 - Sentry now runs only when `SENTRY_DSN` is set; a missing DSN runs the app without Sentry.
+- `lib/main_staging.dart` and `lib/main_production.dart` are merged into one `lib/main.dart`. The environment comes from the build flavor (`appFlavor`) through `AppEnv` in `lib/core/config/app_env.dart`; starting without `--flavor` fails fast. The Makefile no longer passes `-t` or `--dart-define=APP_ENV`.
 - `functions/package-lock.json` and `pubspec.lock` are now committed.
 - Blueprint and app docs are merged for the root layout.
 

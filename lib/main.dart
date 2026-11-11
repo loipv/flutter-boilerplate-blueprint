@@ -14,16 +14,24 @@ import 'package:posthog_flutter/posthog_flutter.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 // END_SENTRY
 import 'package:blueprint_app/app.dart';
+import 'package:blueprint_app/core/config/app_env.dart';
 // BEGIN_NOTIFICATIONS
 import 'package:blueprint_app/core/services/timezone_sync_service.dart';
 import 'package:workmanager/workmanager.dart';
 // END_NOTIFICATIONS
 import 'package:blueprint_app/core/utils/app_logger.dart';
 
-// TODO: Generate with:
+// TODO: Generate one file per Firebase project with:
+//   flutterfire configure --project=<staging-project-id> --out=lib/firebase_options_staging.dart
 //   flutterfire configure --project=<production-project-id> --out=lib/firebase_options_production.dart
-import 'firebase_options_production.dart';
+import 'package:blueprint_app/firebase_options_production.dart'
+    as production_firebase;
+import 'package:blueprint_app/firebase_options_staging.dart'
+    as staging_firebase;
 
+// Keys injected via --dart-define at build time from .env.<flavor>.
+// Use `make run-staging` / `make run-prod`. If these are empty at runtime,
+// run `fvm flutter clean` first.
 // BEGIN_POSTHOG
 const _postHogKey = String.fromEnvironment('POSTHOG_API_KEY');
 const _postHogHost = String.fromEnvironment('POSTHOG_HOST');
@@ -35,32 +43,44 @@ const _firebaseAuthDomain = String.fromEnvironment('FIREBASE_AUTH_DOMAIN');
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // The flavor picks the environment, so bundle id and config cannot diverge.
+  final env = AppEnv.fromFlavor(appFlavor);
+  // Debug-build diagnostics (SDK logs, PostHog opt-out) for this environment.
+  // Unused only when both PostHog and Sentry are removed.
+  // ignore: unused_local_variable
+  final verboseSdks = kDebugMode && env.verboseSdksInDebug;
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
 
   // BEGIN_POSTHOG
   assert(
     _postHogKey.isNotEmpty,
-    'POSTHOG_API_KEY missing: run fvm flutter clean then make run-prod',
+    'POSTHOG_API_KEY missing: run fvm flutter clean then make run-staging '
+    'or make run-prod',
   );
 
-  // 1. PostHog
+  // 1. PostHog: fully anonymous, no person profiles
   final postHogConfig = PostHogConfig(_postHogKey)
-    ..debug = false
-    ..optOut = false
+    ..debug = verboseSdks
+    ..optOut =
+        verboseSdks // silence events in staging debug/simulator runs
     ..captureApplicationLifecycleEvents = true
     ..personProfiles = PostHogPersonProfiles.never;
   if (_postHogHost.isNotEmpty) {
     postHogConfig.host = _postHogHost;
   }
   await Posthog().setup(postHogConfig);
-  await Posthog().register('environment', 'production');
+  await Posthog().register('environment', env.name);
   // END_POSTHOG
 
-  // 2. Logging
+  // 2. Logging (must be before Firebase/Sentry init)
   initLogging();
 
   // 3. Firebase
-  final firebaseOptions = DefaultFirebaseOptions.currentPlatform;
+  final firebaseOptions = switch (env) {
+    AppEnv.staging => staging_firebase.DefaultFirebaseOptions.currentPlatform,
+    AppEnv.production =>
+      production_firebase.DefaultFirebaseOptions.currentPlatform,
+  };
   await Firebase.initializeApp(
     options: _firebaseAuthDomain.isEmpty
         ? firebaseOptions
@@ -93,24 +113,28 @@ Future<void> main() async {
   );
   // END_GOOGLE
 
+  // App Check: debug providers outside production release builds.
+  // Staging always uses them, so never submit a staging build to the stores.
   const appCheckTokenIos = String.fromEnvironment('APP_CHECK_DEBUG_TOKEN_IOS');
   const appCheckTokenAndroid = String.fromEnvironment(
     'APP_CHECK_DEBUG_TOKEN_ANDROID',
   );
+  final useDebugAppCheck = env.alwaysUseDebugAppCheck || !kReleaseMode;
   await FirebaseAppCheck.instance.activate(
-    providerAndroid: kReleaseMode
-        ? const AndroidPlayIntegrityProvider()
-        : AndroidDebugProvider(
+    providerAndroid: useDebugAppCheck
+        ? AndroidDebugProvider(
             debugToken: appCheckTokenAndroid.isNotEmpty
                 ? appCheckTokenAndroid
                 : null,
-          ),
-    providerApple: kReleaseMode
-        ? const AppleDeviceCheckProvider()
-        : AppleDebugProvider(
+          )
+        : const AndroidPlayIntegrityProvider(),
+    providerApple: useDebugAppCheck
+        ? AppleDebugProvider(
             debugToken: appCheckTokenIos.isNotEmpty ? appCheckTokenIos : null,
-          ),
+          )
+        : const AppleDeviceCheckProvider(),
   );
+  // Pre-warm token so the first Firestore request is not denied
   try {
     await FirebaseAppCheck.instance.getToken(true);
   } catch (_) {}
@@ -123,13 +147,14 @@ Future<void> main() async {
   void startApp() => runApp(const ProviderScope(child: App()));
 
   // BEGIN_SENTRY
-  // 4. Sentry
+  // 4. Sentry wraps runApp; captures Flutter framework errors automatically
   if (_sentryDsn.isNotEmpty) {
     await SentryFlutter.init((options) {
       options.dsn = _sentryDsn;
-      options.environment = 'production';
-      options.tracesSampleRate = 0.2;
+      options.environment = env.name;
+      options.tracesSampleRate = env.sentryTracesSampleRate;
       options.sendDefaultPii = false;
+      options.debug = verboseSdks;
     }, appRunner: startApp);
     return;
   }

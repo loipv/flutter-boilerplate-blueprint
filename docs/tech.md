@@ -17,11 +17,11 @@
 
 ```
 lib/
-├── main_staging.dart        # Staging entry point
-├── main_production.dart     # Production entry point
+├── main.dart                # Entry point for both flavors
 ├── app.dart                 # ProviderScope + MaterialApp.router
 │
 ├── core/
+│   ├── config/              # AppEnv: per-flavor runtime config
 │   ├── constants/           # App-wide constants
 │   ├── data/                # Core data impl (analytics)
 │   ├── domain/              # Core interfaces (AnalyticsRepository)
@@ -139,14 +139,15 @@ The router lives in a `@Riverpod(keepAlive: true)` provider. Auth and onboarding
 
 ## Flavors
 
-Two flavors: `staging` and `production`. Selected at build time via `--dart-define=APP_ENV=staging`.
+Two flavors: `staging` and `production`, selected at build time with `--flavor`. Each flavor has its own bundle/application id (`.staging` suffix), display name and Firebase project.
 
-Entry points:
+One entry point, `lib/main.dart`, serves both flavors:
 
-- `lib/main_staging.dart` : initializes Firebase with staging config
-- `lib/main_production.dart` : initializes Firebase with production config
+- `AppEnv.fromFlavor(appFlavor)` (`lib/core/config/app_env.dart`) maps the flavor to an environment and throws if the app was started without `--flavor`.
+- `AppEnv` holds the per-environment differences (Sentry trace rate, debug SDK logging, App Check debug providers).
+- `main.dart` initializes Firebase with `lib/firebase_options_staging.dart` or `lib/firebase_options_production.dart` to match.
 
-The Makefile injects `APP_ENV` automatically for all `make run-*` and `make build-*` commands.
+Secrets come from `.env.staging` / `.env.production` as `--dart-define` values. The `make run-*` and `make build-*` commands pass the flavor and the matching env file.
 
 ## Code Generation
 

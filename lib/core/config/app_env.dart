@@ -1,0 +1,43 @@
+/// Runtime environment, selected by the build flavor (`--flavor staging` or
+/// `--flavor production`). Holds the per-environment differences so a single
+/// `lib/main.dart` serves both flavors. Secrets stay in `.env.<flavor>` and
+/// reach the app through `--dart-define`.
+enum AppEnv {
+  staging(
+    sentryTracesSampleRate: 0.5,
+    verboseSdksInDebug: true,
+    alwaysUseDebugAppCheck: true,
+  ),
+  production(
+    sentryTracesSampleRate: 0.2,
+    verboseSdksInDebug: false,
+    alwaysUseDebugAppCheck: false,
+  );
+
+  const AppEnv({
+    required this.sentryTracesSampleRate,
+    required this.verboseSdksInDebug,
+    required this.alwaysUseDebugAppCheck,
+  });
+
+  /// Fraction of transactions Sentry traces.
+  final double sentryTracesSampleRate;
+
+  /// In debug builds: turns on SDK debug logs and opts PostHog out of sending.
+  final bool verboseSdksInDebug;
+
+  /// Uses App Check debug providers even in release builds. Staging builds
+  /// must never be submitted to the stores.
+  final bool alwaysUseDebugAppCheck;
+
+  /// Maps the build flavor (Flutter's `appFlavor`) to an environment.
+  /// Throws [StateError] when the app was started without a known flavor.
+  static AppEnv fromFlavor(String? flavor) => switch (flavor) {
+    'staging' => AppEnv.staging,
+    'production' => AppEnv.production,
+    _ => throw StateError(
+      'Unknown build flavor "$flavor". Run with --flavor staging or '
+      '--flavor production (make run-staging / make run-prod).',
+    ),
+  };
+}

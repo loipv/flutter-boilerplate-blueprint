@@ -31,12 +31,12 @@ Never benchmark or performance-test in debug mode. Always do final QA in **relea
 
 ### Flavors
 
-| Flavor       | Entry point                | Firebase project     | Bundle ID                     |
-| ------------ | -------------------------- | -------------------- | ----------------------------- |
-| `staging`    | `lib/main_staging.dart`    | `<your-app>-staging` | `com.example.yourapp.staging` |
-| `production` | `lib/main_production.dart` | `<your-app>-prod`    | `com.example.yourapp`         |
+| Flavor       | Firebase options                       | Firebase project     | Bundle ID                     |
+| ------------ | -------------------------------------- | -------------------- | ----------------------------- |
+| `staging`    | `lib/firebase_options_staging.dart`    | `<your-app>-staging` | `com.example.yourapp.staging` |
+| `production` | `lib/firebase_options_production.dart` | `<your-app>-prod`    | `com.example.yourapp`         |
 
-All store submissions use the **production** flavor. The `Makefile` injects `--dart-define=APP_ENV=<flavor>` automatically.
+Both flavors share one entry point, `lib/main.dart`. It reads the flavor from `--flavor` (Flutter's `appFlavor`) and picks the matching config, so always pass `--flavor`. All store submissions use the **production** flavor.
 
 ---
 
@@ -258,9 +258,8 @@ Simulators/emulators do not reflect real release performance (JIT vs AOT). Alway
 ```bash
 # Source env vars and run in release mode
 set -a && . ./.env.production && set +a && \
-fvm flutter run --flavor production -t lib/main_production.dart \
+fvm flutter run --flavor production \
   --release \
-  --dart-define=APP_ENV=production \
   --dart-define=POSTHOG_API_KEY=$POSTHOG_API_KEY \
   --dart-define=SENTRY_DSN=$SENTRY_DSN \
   --dart-define=GOOGLE_SERVER_CLIENT_ID=$GOOGLE_SERVER_CLIENT_ID
@@ -289,8 +288,7 @@ make run-prod-release RELEASE_DEVICE=<device-id>
 If you spot jank, use profile mode and Flutter DevTools before switching to release:
 
 ```bash
-fvm flutter run --flavor production -t lib/main_production.dart --profile \
-  --dart-define=APP_ENV=production --dart-define=...
+fvm flutter run --flavor production --profile --dart-define=...
 ```
 
 ---

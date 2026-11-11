@@ -61,41 +61,41 @@ help:
 	@echo ""
 
 run-staging:
-	@$(FLUTTER) run --flavor staging -t lib/main_staging.dart $(if $(DEVICE),-d "$(DEVICE)") \
-	  --dart-define=APP_ENV=staging $(call dart_defines,.env.staging .env)
+	@$(FLUTTER) run --flavor staging $(if $(DEVICE),-d "$(DEVICE)") \
+	  $(call dart_defines,.env.staging .env)
 
 run-prod:
-	@$(FLUTTER) run --flavor production -t lib/main_production.dart $(if $(DEVICE),-d "$(DEVICE)") \
-	  --dart-define=APP_ENV=production $(call dart_defines,.env.production .env)
+	@$(FLUTTER) run --flavor production $(if $(DEVICE),-d "$(DEVICE)") \
+	  $(call dart_defines,.env.production .env)
 
 run-prod-release:
-	@$(FLUTTER) run --flavor production -t lib/main_production.dart \
+	@$(FLUTTER) run --flavor production \
 	  $(if $(RELEASE_DEVICE),-d "$(RELEASE_DEVICE)") --release \
-	  --dart-define=APP_ENV=production $(call dart_defines,.env.production .env)
+	  $(call dart_defines,.env.production .env)
 
 build-staging-ios:
-	@$(FLUTTER) build ios --flavor staging -t lib/main_staging.dart \
-	  --dart-define=APP_ENV=staging $(call dart_defines,.env.staging .env)
+	@$(FLUTTER) build ios --flavor staging \
+	  $(call dart_defines,.env.staging .env)
 
 build-staging-apk:
-	@$(FLUTTER) build apk --flavor staging -t lib/main_staging.dart \
-	  --dart-define=APP_ENV=staging $(call dart_defines,.env.staging .env)
+	@$(FLUTTER) build apk --flavor staging \
+	  $(call dart_defines,.env.staging .env)
 
 build-prod-ios:
-	@$(FLUTTER) build ios --flavor production -t lib/main_production.dart \
-	  --dart-define=APP_ENV=production $(call dart_defines,.env.production .env)
+	@$(FLUTTER) build ios --flavor production \
+	  $(call dart_defines,.env.production .env)
 
 build-prod-apk:
-	@$(FLUTTER) build apk --flavor production -t lib/main_production.dart \
-	  --dart-define=APP_ENV=production $(call dart_defines,.env.production .env)
+	@$(FLUTTER) build apk --flavor production \
+	  $(call dart_defines,.env.production .env)
 
 build-prod-ipa:
-	@$(FLUTTER) build ipa --flavor production -t lib/main_production.dart \
-	  --dart-define=APP_ENV=production $(call dart_defines,.env.production .env)
+	@$(FLUTTER) build ipa --flavor production \
+	  $(call dart_defines,.env.production .env)
 
 build-prod-aab:
-	@$(FLUTTER) build appbundle --flavor production -t lib/main_production.dart \
-	  --dart-define=APP_ENV=production $(call dart_defines,.env.production .env) \
+	@$(FLUTTER) build appbundle --flavor production \
+	  $(call dart_defines,.env.production .env) \
 	  --obfuscate --split-debug-info=build/app/outputs/symbols
 
 release-preflight:
