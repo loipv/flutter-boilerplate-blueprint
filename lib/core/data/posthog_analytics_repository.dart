@@ -16,7 +16,14 @@ part 'posthog_analytics_repository.g.dart';
 /// disabled at scaffold time the method bodies become no-ops; the class still
 /// implements [AnalyticsRepository] so callers remain unchanged.
 class PostHogAnalyticsRepository implements AnalyticsRepository {
+  PostHogAnalyticsRepository(
+    // BEGIN_POSTHOG
+    this._posthog,
+    // END_POSTHOG
+  );
+
   // BEGIN_POSTHOG
+  final Posthog _posthog;
   static const _log = AppLogger('PostHogAnalyticsRepository');
   // END_POSTHOG
 
@@ -27,7 +34,7 @@ class PostHogAnalyticsRepository implements AnalyticsRepository {
   }) async {
     // BEGIN_POSTHOG
     try {
-      await Posthog().capture(eventName: eventName, properties: properties);
+      await _posthog.capture(eventName: eventName, properties: properties);
     } catch (e, st) {
       // Swallow: analytics must never crash the app.
       _log.error('captureEvent failed', error: e, stackTrace: st);
@@ -39,7 +46,7 @@ class PostHogAnalyticsRepository implements AnalyticsRepository {
   Future<void> captureScreen(String screenName) async {
     // BEGIN_POSTHOG
     try {
-      await Posthog().screen(screenName: screenName);
+      await _posthog.screen(screenName: screenName);
     } catch (e, st) {
       _log.error('captureScreen failed', error: e, stackTrace: st);
     }
@@ -50,7 +57,7 @@ class PostHogAnalyticsRepository implements AnalyticsRepository {
   Future<void> reset() async {
     // BEGIN_POSTHOG
     try {
-      await Posthog().reset();
+      await _posthog.reset();
     } catch (e, st) {
       _log.error('reset failed', error: e, stackTrace: st);
     }
@@ -61,5 +68,9 @@ class PostHogAnalyticsRepository implements AnalyticsRepository {
 /// Exposes the ABSTRACT type so consumers never depend on PostHog directly.
 @Riverpod(keepAlive: true)
 PostHogAnalyticsRepository analyticsRepository(Ref ref) {
-  return PostHogAnalyticsRepository();
+  return PostHogAnalyticsRepository(
+    // BEGIN_POSTHOG
+    Posthog(),
+    // END_POSTHOG
+  );
 }
