@@ -1,4 +1,6 @@
+// BEGIN_ADS
 import 'package:blueprint_app/core/domain/config_key.dart';
+// END_ADS
 import 'package:blueprint_app/core/domain/config_keys.dart';
 import 'package:flutter_test/flutter_test.dart';
 
