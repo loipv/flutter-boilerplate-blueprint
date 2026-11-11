@@ -176,5 +176,134 @@
   },
   "@anonConfirmContinue": {
     "description": "Confirm button of the guest confirmation dialog."
+  },
+  "settingsAppearance": "Appearance",
+  "settingsTheme": "Theme",
+  "settingsThemeSystem": "System",
+  "settingsThemeLight": "Light",
+  "settingsThemeDark": "Dark",
+  "settingsAccessibility": "Accessibility",
+  "settingsHaptics": "Haptic feedback",
+  "settingsAccount": "Account",
+  "settingsSaveProgressTitle": "Save your progress",
+  "settingsSaveProgressBody": "Link Apple or Google to keep your data across devices.",
+  "settingsAccountLinked": "Account linked successfully.",
+  "settingsSignOutTitle": "Sign out?",
+  "settingsSignOutBody": "You can sign back in at any time.",
+  "settingsDeleteAccount": "Delete account",
+  "settingsDeleteAccountTitle": "Delete account?",
+  "settingsDeleteAccountBody": "This will permanently delete your account and associated data. This cannot be undone.",
+  "commonDelete": "Delete",
+  "settingsGuest": "Guest",
+  "settingsGuestSession": "Guest session",
+  "settingsSignedIn": "Signed in",
+  "settingsSignedInWithApple": "Signed in with Apple",
+  "settingsSignedInWithGoogle": "Signed in with Google",
+  "notificationsSectionTitle": "Reminders",
+  "notificationsDailyReminder": "Daily reminder",
+  "notificationsOff": "Off",
+  "notificationsScheduledFor": "Scheduled for {time}",
+  "notificationsReminderTime": "Reminder time",
+  "notificationsPermissionDenied": "Notifications are disabled for this app. Enable them in system settings and try again.",
+  "adsPrivacySection": "Privacy",
+  "adsPrivacyOptions": "Privacy options",
+  "adsManageConsent": "Manage ad consent",
+  "@settingsAppearance": {
+    "description": "Section header for appearance settings."
+  },
+  "@settingsTheme": {
+    "description": "Label of the theme mode tile."
+  },
+  "@settingsThemeSystem": {
+    "description": "Theme option: follow the system."
+  },
+  "@settingsThemeLight": {
+    "description": "Theme option: light."
+  },
+  "@settingsThemeDark": {
+    "description": "Theme option: dark."
+  },
+  "@settingsAccessibility": {
+    "description": "Section header for accessibility settings."
+  },
+  "@settingsHaptics": {
+    "description": "Label of the haptic feedback switch."
+  },
+  "@settingsAccount": {
+    "description": "Section header for account settings."
+  },
+  "@settingsSaveProgressTitle": {
+    "description": "Title of the prompt to link an account."
+  },
+  "@settingsSaveProgressBody": {
+    "description": "Body of the prompt to link an account."
+  },
+  "@settingsAccountLinked": {
+    "description": "Snackbar shown after an account is linked."
+  },
+  "@settingsSignOutTitle": {
+    "description": "Title of the sign-out confirmation dialog."
+  },
+  "@settingsSignOutBody": {
+    "description": "Body of the sign-out confirmation dialog."
+  },
+  "@settingsDeleteAccount": {
+    "description": "Label of the delete account tile."
+  },
+  "@settingsDeleteAccountTitle": {
+    "description": "Title of the delete account confirmation dialog."
+  },
+  "@settingsDeleteAccountBody": {
+    "description": "Body of the delete account confirmation dialog."
+  },
+  "@commonDelete": {
+    "description": "Generic delete button label."
+  },
+  "@settingsGuest": {
+    "description": "Display name for a guest user."
+  },
+  "@settingsGuestSession": {
+    "description": "Subtitle for an anonymous user."
+  },
+  "@settingsSignedIn": {
+    "description": "Subtitle for a signed-in user."
+  },
+  "@settingsSignedInWithApple": {
+    "description": "Subtitle for a user signed in with Apple."
+  },
+  "@settingsSignedInWithGoogle": {
+    "description": "Subtitle for a user signed in with Google."
+  },
+  "@notificationsSectionTitle": {
+    "description": "Section header for reminders."
+  },
+  "@notificationsDailyReminder": {
+    "description": "Label of the daily reminder switch."
+  },
+  "@notificationsOff": {
+    "description": "Subtitle when the reminder is off."
+  },
+  "@notificationsScheduledFor": {
+    "description": "Subtitle when the reminder is scheduled; time is a formatted time.",
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "@notificationsReminderTime": {
+    "description": "Label of the reminder time tile."
+  },
+  "@notificationsPermissionDenied": {
+    "description": "Error when notification permission is denied."
+  },
+  "@adsPrivacySection": {
+    "description": "Section header for privacy settings."
+  },
+  "@adsPrivacyOptions": {
+    "description": "Title of the ad privacy options tile."
+  },
+  "@adsManageConsent": {
+    "description": "Subtitle of the ad privacy options tile."
   }
 }

@@ -107,5 +107,35 @@ void main() {
       expect(find.text('Ngôn ngữ'), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
+
+    testWidgets('Given locale vi, When pumped, Then \'Giao diện\', '
+        '\'Trợ năng\' and \'Xóa tài khoản\' are shown', (tester) async {
+      await pump(tester, locale: const Locale('vi'));
+
+      expect(find.text('Giao diện'), findsOneWidget);
+      expect(find.text('Trợ năng'), findsOneWidget);
+      expect(find.text('Xóa tài khoản', skipOffstage: false), findsOneWidget);
+    });
+
+    // BEGIN_NOTIFICATIONS
+    testWidgets('Given locale vi and a reminder at 08:00, When pumped, Then '
+        '\'Nhắc nhở hằng ngày\' is shown', (tester) async {
+      const reminderUser = UserEntity(
+        id: 'u1',
+        preferences: UserPreferences(notificationTime: '08:00'),
+      );
+      when(
+        () => authRepo.authStateChanges(),
+      ).thenAnswer((_) => Stream.value(reminderUser));
+      when(
+        () => userRepo.getUserStream(any()),
+      ).thenAnswer((_) => Stream.value(reminderUser));
+
+      await pump(tester, locale: const Locale('vi'));
+
+      expect(find.text('Nhắc nhở hằng ngày'), findsOneWidget);
+      expect(find.textContaining('Đã hẹn lúc'), findsOneWidget);
+    });
+    // END_NOTIFICATIONS
   });
 }

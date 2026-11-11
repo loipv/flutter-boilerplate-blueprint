@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:blueprint_app/core/l10n/l10n_extension.dart';
 import 'package:blueprint_app/core/theme/app_spacing.dart';
 import 'package:blueprint_app/features/ads/application/ads_consent_controller.dart';
 
@@ -26,8 +27,8 @@ class AdPrivacyOptionsTile extends ConsumerWidget {
         header,
         ListTile(
           leading: const Icon(LucideIcons.shieldCheck),
-          title: const Text('Privacy options'),
-          subtitle: const Text('Manage ad consent'),
+          title: Text(context.l10n.adsPrivacyOptions),
+          subtitle: Text(context.l10n.adsManageConsent),
           onTap: () => ref
               .read(adsConsentControllerProvider.notifier)
               .showPrivacyOptions(),

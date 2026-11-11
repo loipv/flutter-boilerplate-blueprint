@@ -56,7 +56,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Settings', style: AppTypography.titleLarge),
+        title: Text(
+          context.l10n.settingsTitle,
+          style: AppTypography.titleLarge,
+        ),
         centerTitle: false,
       ),
       body: SafeArea(
@@ -66,17 +69,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             vertical: AppSpacing.p2,
           ),
           children: [
-            _SectionHeader('Appearance'),
+            _SectionHeader(context.l10n.settingsAppearance),
             const Gap(AppSpacing.p2),
             _ThemeTile(currentMode: themeMode),
             const Gap(AppSpacing.p2),
             const _LanguageTile(),
             const Gap(AppSpacing.p4),
-            _SectionHeader('Accessibility'),
+            _SectionHeader(context.l10n.settingsAccessibility),
             const Gap(AppSpacing.p2),
             SwitchListTile(
               secondary: const Icon(LucideIcons.vibrate),
-              title: const Text('Haptic feedback'),
+              title: Text(context.l10n.settingsHaptics),
               value: hapticsEnabled,
               onChanged: (val) => ref
                   .read(settingsControllerProvider.notifier)
@@ -87,15 +90,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
             // BEGIN_NOTIFICATIONS_SECTION
             const Gap(AppSpacing.p4),
-            _SectionHeader('Reminders'),
+            _SectionHeader(context.l10n.notificationsSectionTitle),
             const Gap(AppSpacing.p2),
             SwitchListTile(
               secondary: const Icon(LucideIcons.bell),
-              title: const Text('Daily reminder'),
+              title: Text(context.l10n.notificationsDailyReminder),
               subtitle: Text(
                 notificationTime == null
-                    ? 'Off'
-                    : 'Scheduled for ${_formatTime(context, notificationTime)}',
+                    ? context.l10n.notificationsOff
+                    : context.l10n.notificationsScheduledFor(
+                        _formatTime(context, notificationTime),
+                      ),
               ),
               value: notificationTime != null,
               onChanged: user == null
@@ -110,7 +115,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               const Gap(AppSpacing.p2),
               ListTile(
                 leading: const Icon(LucideIcons.clock3),
-                title: const Text('Reminder time'),
+                title: Text(context.l10n.notificationsReminderTime),
                 subtitle: Text(_formatTime(context, notificationTime)),
                 trailing: const Icon(LucideIcons.chevronRight),
                 onTap: user == null
@@ -126,22 +131,22 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ],
             // END_NOTIFICATIONS_SECTION
             // BEGIN_ADS
-            AdPrivacyOptionsTile(header: _SectionHeader('Privacy')),
+            AdPrivacyOptionsTile(
+              header: _SectionHeader(context.l10n.adsPrivacySection),
+            ),
             // END_ADS
             const Gap(AppSpacing.p8),
-            _SectionHeader('Account'),
+            _SectionHeader(context.l10n.settingsAccount),
             const Gap(AppSpacing.p2),
             if (user != null) ...[
               _AccountSummaryTile(user: user),
               const Gap(AppSpacing.p2),
             ],
             if (isAnonymous) ...[
-              const ListTile(
+              ListTile(
                 contentPadding: EdgeInsets.zero,
-                title: Text('Save your progress'),
-                subtitle: Text(
-                  'Link Apple or Google to keep your data across devices.',
-                ),
+                title: Text(context.l10n.settingsSaveProgressTitle),
+                subtitle: Text(context.l10n.settingsSaveProgressBody),
               ),
               // BEGIN_APPLE
               AuthButton(
@@ -179,7 +184,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   color: Theme.of(context).colorScheme.error,
                 ),
                 title: Text(
-                  'Sign out',
+                  context.l10n.authSignOut,
                   style: TextStyle(color: Theme.of(context).colorScheme.error),
                 ),
                 onTap: () => _confirmSignOut(context),
@@ -193,7 +198,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 color: Theme.of(context).colorScheme.error,
               ),
               title: Text(
-                'Delete account',
+                context.l10n.settingsDeleteAccount,
                 style: TextStyle(color: Theme.of(context).colorScheme.error),
               ),
               onTap: () => _confirmDeleteAccount(context),
@@ -222,7 +227,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     try {
       await signIn();
       if (mounted) {
-        AppSnackBar.success(context, 'Account linked successfully.');
+        AppSnackBar.success(context, context.l10n.settingsAccountLinked);
       }
     } on Failure catch (e) {
       final isCanceled = e.maybeWhen(
@@ -250,16 +255,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Sign out?'),
-        content: const Text('You can sign back in at any time.'),
+        title: Text(context.l10n.settingsSignOutTitle),
+        content: Text(context.l10n.settingsSignOutBody),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
+            child: Text(context.l10n.commonCancel),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Sign out'),
+            child: Text(context.l10n.authSignOut),
           ),
         ],
       ),
@@ -274,21 +279,19 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Delete account?'),
-        content: const Text(
-          'This will permanently delete your account and associated data. This cannot be undone.',
-        ),
+        title: Text(context.l10n.settingsDeleteAccountTitle),
+        content: Text(context.l10n.settingsDeleteAccountBody),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
+            child: Text(context.l10n.commonCancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
             style: TextButton.styleFrom(
               foregroundColor: Theme.of(ctx).colorScheme.error,
             ),
-            child: const Text('Delete'),
+            child: Text(context.l10n.commonDelete),
           ),
         ],
       ),
@@ -320,10 +323,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         .requestPermissions();
     if (!context.mounted) return;
     if (granted == false) {
-      AppSnackBar.error(
-        context,
-        'Notifications are disabled for this app. Enable them in system settings and try again.',
-      );
+      AppSnackBar.error(context, context.l10n.notificationsPermissionDenied);
       return;
     }
 
@@ -391,14 +391,23 @@ class _ThemeTile extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return ListTile(
       leading: Icon(_iconFor(currentMode)),
-      title: const Text('Theme'),
+      title: Text(context.l10n.settingsTheme),
       trailing: DropdownButton<ThemeMode>(
         value: currentMode,
         underline: const SizedBox.shrink(),
-        items: const [
-          DropdownMenuItem(value: ThemeMode.system, child: Text('System')),
-          DropdownMenuItem(value: ThemeMode.light, child: Text('Light')),
-          DropdownMenuItem(value: ThemeMode.dark, child: Text('Dark')),
+        items: [
+          DropdownMenuItem(
+            value: ThemeMode.system,
+            child: Text(context.l10n.settingsThemeSystem),
+          ),
+          DropdownMenuItem(
+            value: ThemeMode.light,
+            child: Text(context.l10n.settingsThemeLight),
+          ),
+          DropdownMenuItem(
+            value: ThemeMode.dark,
+            child: Text(context.l10n.settingsThemeDark),
+          ),
         ],
         onChanged: (mode) {
           if (mode != null) {
@@ -460,25 +469,30 @@ class _AccountSummaryTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final guest = l10n.settingsGuest;
     final subtitle = user.isAnonymous
-        ? 'Guest session'
-        : user.email ?? _providerLabel(user.signInProvider);
+        ? l10n.settingsGuestSession
+        : user.email ?? _providerLabel(l10n, user.signInProvider);
 
     return ListTile(
       leading: CircleAvatar(
         child: Text(
-          (user.displayName ?? user.email ?? 'G').substring(0, 1).toUpperCase(),
+          (user.displayName ?? user.email ?? guest.substring(0, 1))
+              .substring(0, 1)
+              .toUpperCase(),
         ),
       ),
-      title: Text(user.displayName ?? user.email ?? 'Guest'),
+      title: Text(user.displayName ?? user.email ?? guest),
       subtitle: Text(subtitle),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
     );
   }
 
-  String _providerLabel(String? provider) => switch (provider) {
-    'apple' => 'Signed in with Apple',
-    'google' => 'Signed in with Google',
-    _ => 'Signed in',
-  };
+  String _providerLabel(AppLocalizations l10n, String? provider) =>
+      switch (provider) {
+        'apple' => l10n.settingsSignedInWithApple,
+        'google' => l10n.settingsSignedInWithGoogle,
+        _ => l10n.settingsSignedIn,
+      };
 }
