@@ -15,6 +15,7 @@ import 'package:blueprint_app/features/ads/domain/ad_banner_handle.dart';
 import 'package:blueprint_app/features/ads/domain/ad_format.dart';
 import 'package:blueprint_app/features/ads/domain/ad_unit_ids.dart';
 import 'package:blueprint_app/features/ads/presentation/ad_banner.dart';
+import 'package:blueprint_app/l10n/generated/app_localizations.dart';
 
 import '../../../helpers/fakes.dart';
 import '../../../helpers/mocks.dart';
@@ -54,6 +55,9 @@ void main() {
         controllerOverride(),
       ],
       child: MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('en'),
         theme: AppTheme.lightTheme,
         home: Scaffold(body: child ?? const AdBanner()),
       ),
@@ -236,6 +240,9 @@ void main() {
       UncontrolledProviderScope(
         container: container,
         child: MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('en'),
           theme: AppTheme.lightTheme,
           home: const Scaffold(body: AdBanner()),
         ),

@@ -34,6 +34,7 @@ void main() {
     await resetEmulators();
     final prefs = await SharedPreferences.getInstance();
     await prefs.clear();
+    await prefs.setString('locale_code', 'en');
   });
 
   DocumentReference<Map<String, dynamic>> userDoc(String uid) =>

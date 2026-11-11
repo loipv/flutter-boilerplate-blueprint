@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:blueprint_app/features/onboarding/presentation/onboarding_scaffold.dart';
+import 'package:blueprint_app/l10n/generated/app_localizations.dart';
 
 void main() {
   /// Pumps the scaffold under a plain MaterialApp: no GoRouter, so no
@@ -10,6 +11,9 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         child: MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('en'),
           home: OnboardingScaffold(path: path, child: const Text('step')),
         ),
       ),

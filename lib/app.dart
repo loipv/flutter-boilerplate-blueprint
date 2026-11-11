@@ -7,6 +7,9 @@ import 'package:blueprint_app/core/services/notification_service.dart';
 import 'package:blueprint_app/core/services/timezone_lifecycle_observer.dart';
 import 'package:blueprint_app/features/notifications/application/notification_scheduler.dart';
 // END_NOTIFICATIONS
+import 'package:blueprint_app/core/l10n/l10n_extension.dart';
+import 'package:blueprint_app/core/l10n/locale_provider.dart';
+import 'package:blueprint_app/core/l10n/resolve_app_locale.dart';
 import 'package:blueprint_app/core/providers/haptics_provider.dart';
 import 'package:blueprint_app/core/router/app_router.dart';
 import 'package:blueprint_app/core/services/session_lifecycle_observer.dart';
@@ -17,6 +20,7 @@ import 'package:blueprint_app/features/auth/application/auth_controller.dart';
 import 'package:blueprint_app/features/auth/data/firebase_auth_repository.dart';
 // END_ANON
 import 'package:blueprint_app/features/user_profile/data/firebase_user_repository.dart';
+import 'package:blueprint_app/l10n/generated/app_localizations.dart';
 
 class App extends ConsumerStatefulWidget {
   const App({super.key});
@@ -95,7 +99,15 @@ class _AppState extends ConsumerState<App> {
     ref.listen(hapticsEnabledProvider, (_, _) {});
 
     Widget app = MaterialApp.router(
-      title: 'Blueprint App',
+      onGenerateTitle: (context) => context.l10n.appTitle,
+      locale: ref.watch(localeProvider).value,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      localeListResolutionCallback: (system, supported) => resolveAppLocale(
+        null,
+        system ?? const [],
+        supported: supported.toList(),
+      ),
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: themeMode,

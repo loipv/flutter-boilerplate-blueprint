@@ -1,6 +1,9 @@
 // BEGIN_NOTIFICATIONS
 import 'package:flutter/material.dart' show TimeOfDay;
 // END_NOTIFICATIONS
+import 'dart:ui' show Locale;
+
+import 'package:flutter/widgets.dart' show Localizations;
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -84,8 +87,10 @@ void main() {
     WidgetTester tester,
     FakeAuthRepository authRepo, {
     bool onboardingComplete = false,
+    Map<String, Object> extraPrefs = const {},
   }) async {
     SharedPreferences.setMockInitialValues({
+      ...extraPrefs,
       if (onboardingComplete) AppConstants.onboardingCompleteKey: true,
     });
     await tester.pumpWidget(
@@ -151,6 +156,37 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(hapticCalls, isEmpty);
+      },
+    );
+
+    testWidgets(
+      'Given stored locale_code vi, When App is pumped, Then Localizations.localeOf on HomeScreen is vi',
+      (tester) async {
+        final authRepo = FakeAuthRepository(initialUser: signedInUser);
+
+        await pumpWholeApp(
+          tester,
+          authRepo,
+          onboardingComplete: true,
+          extraPrefs: {'locale_code': 'vi'},
+        );
+
+        final context = tester.element(find.byType(HomeScreen));
+        expect(Localizations.localeOf(context).languageCode, 'vi');
+      },
+    );
+
+    testWidgets(
+      'Given no stored locale and device locales fr_FR, When App is pumped, Then the locale is en',
+      (tester) async {
+        tester.platformDispatcher.localesTestValue = [const Locale('fr', 'FR')];
+        addTearDown(tester.platformDispatcher.clearLocalesTestValue);
+        final authRepo = FakeAuthRepository(initialUser: signedInUser);
+
+        await pumpWholeApp(tester, authRepo, onboardingComplete: true);
+
+        final context = tester.element(find.byType(HomeScreen));
+        expect(Localizations.localeOf(context).languageCode, 'en');
       },
     );
 

@@ -12,6 +12,7 @@ import 'package:blueprint_app/features/auth/data/firebase_auth_repository.dart';
 import 'package:blueprint_app/features/auth/domain/user_entity.dart';
 import 'package:blueprint_app/features/onboarding/application/onboarding_controller.dart';
 import 'package:blueprint_app/features/user_profile/data/firebase_user_repository.dart';
+import 'package:blueprint_app/l10n/generated/app_localizations.dart';
 
 import '../../helpers/mocks.dart';
 
@@ -64,7 +65,12 @@ void main() {
     await tester.pumpWidget(
       UncontrolledProviderScope(
         container: container,
-        child: MaterialApp.router(routerConfig: router),
+        child: MaterialApp.router(
+          routerConfig: router,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('en'),
+        ),
       ),
     );
     await tester.pumpAndSettle();
