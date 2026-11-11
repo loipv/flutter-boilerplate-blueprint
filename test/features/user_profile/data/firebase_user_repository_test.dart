@@ -57,6 +57,51 @@ void main() {
       },
     );
 
+    // Regression: Firestore returns Timestamps for date fields (recordLogin
+    // writes serverTimestamp), which UserEntity.fromJson cannot cast.
+    test(
+      'Given a document with Timestamp dates, When listening, Then it emits the entity with matching DateTimes and the stored preferences',
+      () async {
+        final created = DateTime.utc(2026, 1, 2, 3, 4, 5);
+        final lastLogin = DateTime.utc(2026, 11, 11, 9, 30);
+        await userDoc.set({
+          'createdAt': Timestamp.fromDate(created),
+          'lastLoginAt': Timestamp.fromDate(lastLogin),
+          'signInProvider': 'anonymous',
+          'totalSessionCount': 2,
+          'preferences': {'themeMode': 'dark', 'hapticsEnabled': false},
+        });
+
+        final user = await repository.getUserStream(_uid).first;
+
+        expect(user, isNotNull);
+        expect(user!.createdAt, created);
+        expect(user.lastLoginAt, lastLogin);
+        expect(user.lastAccessedAt, isNull);
+        expect(user.totalSessionCount, 2);
+        expect(
+          user.preferences,
+          const UserPreferences(
+            themeMode: ThemeMode.dark,
+            hapticsEnabled: false,
+          ),
+        );
+      },
+    );
+
+    test(
+      'Given recordLogin wrote the document, When listening, Then it emits a non-null entity with lastLoginAt set',
+      () async {
+        await repository.recordLogin(_uid, signInProvider: 'anonymous');
+
+        final user = await repository.getUserStream(_uid).first;
+
+        expect(user, isNotNull);
+        expect(user!.lastLoginAt, isNotNull);
+        expect(user.signInProvider, 'anonymous');
+      },
+    );
+
     test(
       'Given a malformed document, When listening, Then it emits null and does not throw',
       () async {

@@ -27,13 +27,29 @@ class FirebaseUserRepository implements UserRepository {
     return _userDoc(uid).snapshots().map((snap) {
       if (!snap.exists || snap.data() == null) return null;
       try {
-        return UserEntity.fromJson({'id': uid, ...snap.data()!});
+        return UserEntity.fromJson({
+          'id': uid,
+          ..._decodeTimestamps(snap.data()!),
+        });
       } catch (e, st) {
         _log.error('Failed to parse user document', error: e, stackTrace: st);
         return null;
       }
     });
   }
+
+  /// Replaces Firestore [Timestamp]s (e.g. from `serverTimestamp()`) with
+  /// UTC ISO-8601 strings, the form `UserEntity.fromJson` expects for
+  /// `DateTime` fields. Nested maps are converted too. Keeps the domain layer
+  /// free of Firebase types.
+  static Map<String, dynamic> _decodeTimestamps(Map<String, dynamic> data) => {
+    for (final MapEntry(:key, :value) in data.entries)
+      key: switch (value) {
+        Timestamp() => value.toDate().toUtc().toIso8601String(),
+        Map<String, dynamic>() => _decodeTimestamps(value),
+        _ => value,
+      },
+  };
 
   // ---------------------------------------------------------------------------
   // Write
