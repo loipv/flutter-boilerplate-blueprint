@@ -4,6 +4,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart';
+// BEGIN_REMOTE_CONFIG
+import 'package:firebase_remote_config/firebase_remote_config.dart';
+// END_REMOTE_CONFIG
 // BEGIN_GOOGLE
 import 'package:google_sign_in/google_sign_in.dart';
 // END_GOOGLE
@@ -19,6 +23,9 @@ import 'package:blueprint_app/core/config/app_env.dart';
 import 'package:blueprint_app/core/services/timezone_sync_service.dart';
 import 'package:workmanager/workmanager.dart';
 // END_NOTIFICATIONS
+// BEGIN_REMOTE_CONFIG
+import 'package:blueprint_app/core/data/firebase_remote_config_repository.dart';
+// END_REMOTE_CONFIG
 import 'package:blueprint_app/core/utils/app_logger.dart';
 
 // TODO: Generate one file per Firebase project with:
@@ -39,6 +46,9 @@ const _postHogHost = String.fromEnvironment('POSTHOG_HOST');
 // BEGIN_SENTRY
 const _sentryDsn = String.fromEnvironment('SENTRY_DSN');
 // END_SENTRY
+// BEGIN_REMOTE_CONFIG
+const _remoteConfigEnv = String.fromEnvironment('REMOTE_CONFIG_ENV');
+// END_REMOTE_CONFIG
 const _firebaseAuthDomain = String.fromEnvironment('FIREBASE_AUTH_DOMAIN');
 
 Future<void> main() async {
@@ -140,12 +150,29 @@ Future<void> main() async {
     await FirebaseAppCheck.instance.getToken(true);
   } catch (_) {}
 
+  // BEGIN_REMOTE_CONFIG
+  final remoteConfig = FirebaseRemoteConfigRepository(
+    FirebaseRemoteConfig.instance,
+  );
+  await remoteConfig.initialize(
+    environment: _remoteConfigEnv.isNotEmpty ? _remoteConfigEnv : env.name,
+    minimumFetchInterval: env.remoteConfigMinFetchInterval,
+  );
+  // END_REMOTE_CONFIG
+
   // BEGIN_NOTIFICATIONS
   await Workmanager().initialize(timezoneSyncCallbackDispatcher);
   await TimezoneSyncService.registerPeriodicTask();
   // END_NOTIFICATIONS
 
-  void startApp() => runApp(const ProviderScope(child: App()));
+  final overrides = <Override>[
+    // BEGIN_REMOTE_CONFIG
+    remoteConfigRepositoryProvider.overrideWithValue(remoteConfig),
+    // END_REMOTE_CONFIG
+  ];
+
+  void startApp() =>
+      runApp(ProviderScope(overrides: overrides, child: const App()));
 
   // BEGIN_SENTRY
   // 4. Sentry wraps runApp; captures Flutter framework errors automatically
