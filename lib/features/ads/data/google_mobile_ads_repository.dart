@@ -21,12 +21,16 @@ class GoogleMobileAdsRepository implements AdsRepository {
   }) : _now = now;
 
   final GoogleMobileAdsGateway _gateway;
-  // ignore: unused_field
   final DateTime Function() _now;
 
   static const _log = AppLogger('GoogleMobileAdsRepository');
 
+  static const _appOpenMaxAge = Duration(hours: 4);
+
   Future<void>? _sdkInit;
+  final Map<AdFormat, ({LoadedAd ad, DateTime loadedAt})> _slots = {};
+  final Map<AdFormat, Future<void>> _loading = {};
+  final Map<AdFormat, String> _unitIds = {};
 
   @override
   Future<AdsConsent> initialize({required bool debugGeographyEea}) async {
@@ -63,20 +67,70 @@ class GoogleMobileAdsRepository implements AdsRepository {
   Future<AdBannerHandle?> loadBanner({
     required String adUnitId,
     required double width,
-  }) => throw UnimplementedError();
+  }) => _guard(
+    'loadBanner',
+    () => _gateway.loadBanner(adUnitId: adUnitId, width: width),
+  );
 
   @override
-  Future<void> preload(AdFormat format, {required String adUnitId}) =>
-      throw UnimplementedError();
+  Future<void> preload(AdFormat format, {required String adUnitId}) async {
+    if (format == AdFormat.banner) {
+      _log.warning('preload ignored for banner; use loadBanner');
+      return;
+    }
+    _unitIds[format] = adUnitId;
+    if (_slots.containsKey(format)) return;
+    final inFlight = _loading[format] ??= _load(format).whenComplete(() {
+      _loading.remove(format);
+    });
+    await inFlight;
+  }
 
   @override
-  Future<bool> showInterstitial() => throw UnimplementedError();
+  Future<bool> showInterstitial() async =>
+      (await _show(AdFormat.interstitial))?.shown ?? false;
 
   @override
-  Future<RewardedOutcome> showRewarded() => throw UnimplementedError();
+  Future<RewardedOutcome> showRewarded() async {
+    final result = await _show(AdFormat.rewarded);
+    if (result == null || !result.shown) return const RewardUnavailable();
+    return result.reward ?? const RewardDismissed();
+  }
 
   @override
-  Future<bool> showAppOpen() => throw UnimplementedError();
+  Future<bool> showAppOpen() async =>
+      (await _show(AdFormat.appOpen))?.shown ?? false;
+
+  Future<void> _load(AdFormat format) async {
+    final unitId = _unitIds[format];
+    if (unitId == null) return;
+    final ad = await _guard(
+      'load ${format.name}',
+      () => _gateway.loadFullScreen(format, unitId),
+    );
+    if (ad != null) _slots[format] = (ad: ad, loadedAt: _now());
+  }
+
+  /// Shows the cached ad for [format]. Returns null when nothing was shown
+  /// because the slot was empty or stale. Always disposes and reloads a
+  /// consumed ad.
+  Future<AdShowResult?> _show(AdFormat format) async {
+    final slot = _slots.remove(format);
+    if (slot == null) return null;
+    final AdShowResult? result;
+    if (format == AdFormat.appOpen &&
+        _now().difference(slot.loadedAt) >= _appOpenMaxAge) {
+      result = null;
+    } else {
+      result =
+          await _guard('show ${format.name}', slot.ad.show) ??
+          const AdShowResult(shown: false);
+    }
+    await _guard('dispose ${format.name}', () async => slot.ad.dispose());
+    final unitId = _unitIds[format];
+    if (unitId != null) unawaited(preload(format, adUnitId: unitId));
+    return result;
+  }
 
   /// Starts the SDK once; never throws and is never awaited behind the form.
   void _startSdk() {
@@ -95,7 +149,11 @@ class GoogleMobileAdsRepository implements AdsRepository {
     try {
       return await call();
     } catch (e, st) {
-      _log.error('$step failed', error: e, stackTrace: st);
+      if (e is AdLoadException && e.code == 3) {
+        _log.warning('$step failed', error: e, stackTrace: st);
+      } else {
+        _log.error('$step failed', error: e, stackTrace: st);
+      }
       return null;
     }
   }
