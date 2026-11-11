@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:gap/gap.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:blueprint_app/features/ads/application/ads_settings.dart';
 import 'package:blueprint_app/features/ads/data/google_mobile_ads_repository.dart';
@@ -50,6 +51,7 @@ void main() {
 
     expect(find.text('Privacy options'), findsNothing);
     expect(find.text('Ads header'), findsNothing);
+    expect(find.byType(Gap), findsNothing);
   });
 
   testWidgets('Given privacy options required, When tapped, Then header and '

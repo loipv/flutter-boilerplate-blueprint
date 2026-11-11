@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gap/gap.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:blueprint_app/core/theme/app_spacing.dart';
 import 'package:blueprint_app/features/ads/application/ads_consent_controller.dart';
 
 /// Settings tile that re-opens the ad privacy options form. Renders nothing
@@ -20,6 +22,7 @@ class AdPrivacyOptionsTile extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        const Gap(AppSpacing.p4),
         header,
         ListTile(
           leading: const Icon(LucideIcons.shieldCheck),

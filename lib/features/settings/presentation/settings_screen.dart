@@ -120,7 +120,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ],
             // END_NOTIFICATIONS_SECTION
             // BEGIN_ADS
-            const Gap(AppSpacing.p4),
             AdPrivacyOptionsTile(header: _SectionHeader('Privacy')),
             // END_ADS
             const Gap(AppSpacing.p8),
