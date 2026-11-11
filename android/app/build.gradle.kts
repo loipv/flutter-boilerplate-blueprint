@@ -30,10 +30,16 @@ android {
             dimension = "env"
             applicationIdSuffix = ".staging"
             resValue("string", "app_name", "[S] Blueprint App")
+            // BEGIN_ADS
+            manifestPlaceholders["admobAppId"] = "ca-app-pub-3940256099942544~3347511713"
+            // END_ADS
         }
         create("production") {
             dimension = "env"
             resValue("string", "app_name", "Blueprint App")
+            // BEGIN_ADS
+            manifestPlaceholders["admobAppId"] = "ca-app-pub-3940256099942544~3347511713"
+            // END_ADS
         }
     }
 
