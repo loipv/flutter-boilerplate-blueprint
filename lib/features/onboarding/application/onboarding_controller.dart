@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:blueprint_app/core/l10n/locale_provider.dart';
 import 'package:blueprint_app/core/theme/theme_provider.dart';
 import 'package:blueprint_app/core/utils/app_logger.dart';
 import 'package:blueprint_app/features/auth/data/firebase_auth_repository.dart';
@@ -56,9 +57,12 @@ class OnboardingController extends _$OnboardingController {
 
     _log.info('Persisting onboarding; theme: ${currentState.themeMode}');
 
+    // Keep the stored language so the merge does not wipe it in Firestore.
+    final locale = await ref.read(localeProvider.future);
     final prefs = UserPreferences(
       themeMode: currentState.themeMode,
       hapticsEnabled: true,
+      languageCode: locale?.languageCode,
     );
 
     await userRepo.savePreferences(user.id, prefs);

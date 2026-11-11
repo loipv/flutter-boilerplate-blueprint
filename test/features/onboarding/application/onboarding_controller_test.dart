@@ -116,6 +116,25 @@ void main() {
   );
 
   test(
+    'Given stored locale_code vi, When onboarding completes and persists, Then savePreferences receives languageCode vi',
+    () async {
+      when(() => authRepo.currentUser).thenReturn(const UserEntity(id: 'u1'));
+      final container = await buildContainer({'locale_code': 'vi'});
+
+      await container
+          .read(onboardingControllerProvider.notifier)
+          .completeOnboarding();
+
+      final saved =
+          verify(() => userRepo.savePreferences('u1', captureAny()))
+                  .captured
+                  .single
+              as UserPreferences;
+      expect(saved.languageCode, 'vi');
+    },
+  );
+
+  test(
     'Given no user, When completeOnboarding is called, Then Firestore is skipped and onboarding is complete',
     () async {
       when(() => authRepo.currentUser).thenReturn(null);
