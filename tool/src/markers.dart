@@ -53,10 +53,8 @@ String stripBlocks(String text, String marker) {
 }
 
 /// Removes every marker line of any name, keeping the content between them.
-String stripMarkerLines(String text) => text
-    .split('\n')
-    .where((line) => !_markerLine.hasMatch(line))
-    .join('\n');
+String stripMarkerLines(String text) =>
+    text.split('\n').where((line) => !_markerLine.hasMatch(line)).join('\n');
 
 /// Whether [text] contains at least one marker line.
 bool hasMarkerLines(String text) => text.split('\n').any(_markerLine.hasMatch);

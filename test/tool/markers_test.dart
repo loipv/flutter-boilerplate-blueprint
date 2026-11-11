@@ -9,16 +9,14 @@ void main() {
   });
 
   test('stripBlocks removes every occurrence', () {
-    const input = '// BEGIN_POSTHOG\np();\n// END_POSTHOG\nkeep\n'
+    const input =
+        '// BEGIN_POSTHOG\np();\n// END_POSTHOG\nkeep\n'
         '// BEGIN_POSTHOG\nq();\n// END_POSTHOG\n';
     expect(stripBlocks(input, 'POSTHOG'), 'keep\n');
   });
 
   test('stripBlocks handles yaml and xml comment forms', () {
-    expect(
-      stripBlocks('# BEGIN_SENTRY\n  s: 1\n# END_SENTRY\n', 'SENTRY'),
-      '',
-    );
+    expect(stripBlocks('# BEGIN_SENTRY\n  s: 1\n# END_SENTRY\n', 'SENTRY'), '');
     expect(
       stripBlocks(
         '<!-- BEGIN_NOTIFICATIONS -->\n<p/>\n<!-- END_NOTIFICATIONS -->\n',
