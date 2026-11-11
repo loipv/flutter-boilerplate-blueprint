@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
+import 'package:blueprint_app/core/l10n/l10n_extension.dart';
 import 'package:blueprint_app/core/theme/app_spacing.dart';
 import 'package:blueprint_app/core/theme/app_typography.dart';
 
@@ -11,7 +12,7 @@ class ExploreScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Explore', style: AppTypography.titleLarge),
+        title: Text(context.l10n.navExplore, style: AppTypography.titleLarge),
         centerTitle: false,
       ),
       body: const SafeArea(
@@ -33,10 +34,10 @@ class _ExploreBody extends ConsumerWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text('Explore', style: AppTypography.headlineMedium),
+          Text(context.l10n.navExplore, style: AppTypography.headlineMedium),
           const Gap(AppSpacing.p2),
           Text(
-            'Your explore / discovery content goes here.',
+            context.l10n.explorePlaceholder,
             style: AppTypography.bodyMedium,
             textAlign: TextAlign.center,
           ),

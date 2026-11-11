@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:blueprint_app/core/l10n/l10n_extension.dart';
 import 'package:blueprint_app/core/theme/app_spacing.dart';
 import 'package:blueprint_app/core/theme/app_typography.dart';
 import 'package:blueprint_app/core/theme/app_colors.dart';
@@ -47,14 +48,14 @@ class _ThemeSelectionViewState extends ConsumerState<ThemeSelectionView> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Choose Your Vibe',
+            context.l10n.onboardingThemeHeadline,
             style: AppTypography.displayMedium.copyWith(
               color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
           const Gap(AppSpacing.p2),
           Text(
-            'Pick a look that feels right. You can change this later.',
+            context.l10n.onboardingThemeBody,
             style: AppTypography.bodyLarge.copyWith(
               color: AppColors.textSecondary(context),
             ),
@@ -62,8 +63,8 @@ class _ThemeSelectionViewState extends ConsumerState<ThemeSelectionView> {
           const Gap(AppSpacing.p8),
 
           _ThemeOption(
-            label: 'Dawn',
-            subtitle: 'Light mode',
+            label: context.l10n.onboardingThemeDawn,
+            subtitle: context.l10n.onboardingThemeDawnSubtitle,
             icon: LucideIcons.sun,
             mode: ThemeMode.light,
             selected: _selected == ThemeMode.light,
@@ -71,8 +72,8 @@ class _ThemeSelectionViewState extends ConsumerState<ThemeSelectionView> {
           ),
           const Gap(AppSpacing.p3),
           _ThemeOption(
-            label: 'Auto',
-            subtitle: 'Follows system',
+            label: context.l10n.onboardingThemeAuto,
+            subtitle: context.l10n.onboardingThemeAutoSubtitle,
             icon: LucideIcons.monitor,
             mode: ThemeMode.system,
             selected: _selected == ThemeMode.system,
@@ -80,8 +81,8 @@ class _ThemeSelectionViewState extends ConsumerState<ThemeSelectionView> {
           ),
           const Gap(AppSpacing.p3),
           _ThemeOption(
-            label: 'Dusk',
-            subtitle: 'Dark mode',
+            label: context.l10n.onboardingThemeDusk,
+            subtitle: context.l10n.onboardingThemeDuskSubtitle,
             icon: LucideIcons.moon,
             mode: ThemeMode.dark,
             selected: _selected == ThemeMode.dark,
@@ -96,7 +97,7 @@ class _ThemeSelectionViewState extends ConsumerState<ThemeSelectionView> {
             child: FilledButton(
               onPressed: _confirm,
               child: Text(
-                'Confirm',
+                context.l10n.commonConfirm,
                 style: AppTypography.labelLarge.copyWith(
                   color: Theme.of(context).colorScheme.onPrimary,
                 ),

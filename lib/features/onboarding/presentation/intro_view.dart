@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:blueprint_app/core/l10n/l10n_extension.dart';
 import 'package:blueprint_app/core/theme/app_spacing.dart';
 import 'package:blueprint_app/core/theme/app_typography.dart';
 import 'package:blueprint_app/core/theme/app_colors.dart';
@@ -44,7 +45,7 @@ class IntroView extends ConsumerWidget {
 
           // Headline: replace with your value proposition
           Text(
-            'Welcome to\nBlueprint App',
+            context.l10n.onboardingIntroHeadline(context.l10n.appTitle),
             style: AppTypography.displayLarge.copyWith(
               color: Theme.of(context).colorScheme.onSurface,
             ),
@@ -53,7 +54,7 @@ class IntroView extends ConsumerWidget {
 
           // Subheadline: replace with your app description
           Text(
-            'A Flutter + Firebase starter app',
+            context.l10n.appDescription,
             style: AppTypography.bodyLarge.copyWith(
               color: AppColors.textSecondary(context),
             ),
@@ -67,7 +68,7 @@ class IntroView extends ConsumerWidget {
             child: FilledButton(
               onPressed: () => context.go('/onboarding/theme'),
               child: Text(
-                'Get Started',
+                context.l10n.onboardingGetStarted,
                 style: AppTypography.labelLarge.copyWith(
                   color: Theme.of(context).colorScheme.onPrimary,
                 ),

@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:blueprint_app/core/l10n/l10n_extension.dart';
 import 'package:blueprint_app/core/utils/app_haptics.dart';
 // BEGIN_ADS
 import 'package:blueprint_app/features/ads/application/ads_controller.dart';
 import 'package:blueprint_app/features/ads/application/app_open_ad_observer.dart';
+
 // END_ADS
 
 class MainScaffold extends ConsumerStatefulWidget {
@@ -101,15 +103,18 @@ class _MainScaffoldState extends ConsumerState<MainScaffold>
             AppHaptics.selectionClick(ref);
             _switchTab(index);
           },
-          destinations: const [
-            NavigationDestination(icon: Icon(LucideIcons.house), label: 'Home'),
+          destinations: [
             NavigationDestination(
-              icon: Icon(LucideIcons.compass),
-              label: 'Explore',
+              icon: const Icon(LucideIcons.house),
+              label: context.l10n.navHome,
             ),
             NavigationDestination(
-              icon: Icon(LucideIcons.circleUserRound),
-              label: 'Profile',
+              icon: const Icon(LucideIcons.compass),
+              label: context.l10n.navExplore,
+            ),
+            NavigationDestination(
+              icon: const Icon(LucideIcons.circleUserRound),
+              label: context.l10n.navProfile,
             ),
           ],
         ),

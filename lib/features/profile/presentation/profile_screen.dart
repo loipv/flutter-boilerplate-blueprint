@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:blueprint_app/core/l10n/l10n_extension.dart';
 import 'package:blueprint_app/core/theme/app_spacing.dart';
 import 'package:blueprint_app/core/theme/app_typography.dart';
 import 'package:blueprint_app/features/auth/application/auth_controller.dart';
@@ -17,12 +18,12 @@ class ProfileScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Profile', style: AppTypography.titleLarge),
+        title: Text(context.l10n.navProfile, style: AppTypography.titleLarge),
         centerTitle: false,
         actions: [
           IconButton(
             icon: const Icon(LucideIcons.settings),
-            tooltip: 'Settings',
+            tooltip: context.l10n.settingsTitle,
             onPressed: () => context.push('/profile/settings'),
           ),
         ],
@@ -32,11 +33,9 @@ class ProfileScreen extends ConsumerWidget {
           padding: const EdgeInsets.all(AppSpacing.p4),
           child: userAsync.when(
             loading: () => const Center(child: CircularProgressIndicator()),
-            error: (e, _) => const Center(
-              child: Text('Could not load profile. Please try again.'),
-            ),
+            error: (e, _) => Center(child: Text(context.l10n.profileLoadError)),
             data: (user) => user == null
-                ? const Center(child: Text('Not signed in'))
+                ? Center(child: Text(context.l10n.profileNotSignedIn))
                 : _ProfileBody(
                     displayName: user.displayName,
                     email: user.email,
@@ -88,7 +87,7 @@ class _ProfileBody extends ConsumerWidget {
         // Sign-out tile
         ListTile(
           leading: const Icon(LucideIcons.logOut),
-          title: const Text('Sign out'),
+          title: Text(context.l10n.authSignOut),
           onTap: () => ref.read(authControllerProvider.notifier).signOut(),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),

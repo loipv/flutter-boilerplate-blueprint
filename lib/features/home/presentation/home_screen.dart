@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
+import 'package:blueprint_app/core/l10n/l10n_extension.dart';
 import 'package:blueprint_app/core/theme/app_spacing.dart';
 import 'package:blueprint_app/core/theme/app_typography.dart';
 // BEGIN_ADS
 import 'package:blueprint_app/features/ads/presentation/ad_banner.dart';
+
 // END_ADS
 
 class HomeScreen extends ConsumerWidget {
@@ -14,7 +16,7 @@ class HomeScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Home', style: AppTypography.titleLarge),
+        title: Text(context.l10n.navHome, style: AppTypography.titleLarge),
         centerTitle: false,
       ),
       body: SafeArea(
@@ -45,10 +47,10 @@ class _HomeBody extends ConsumerWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text('Welcome', style: AppTypography.headlineMedium),
+          Text(context.l10n.homeWelcome, style: AppTypography.headlineMedium),
           const Gap(AppSpacing.p2),
           Text(
-            'Your home screen content goes here.',
+            context.l10n.homePlaceholder,
             style: AppTypography.bodyMedium,
             textAlign: TextAlign.center,
           ),

@@ -5,9 +5,108 @@
   "languageNativeName": "English",
   "settingsLanguage": "Language",
   "settingsLanguageSystem": "System",
-  "@appTitle": {"description": "The application name shown in the title bar and app switcher."},
-  "@appDescription": {"description": "Short description of the application."},
-  "@languageNativeName": {"description": "This language written in itself, shown in the language picker."},
-  "@settingsLanguage": {"description": "Title of the language row in Settings."},
-  "@settingsLanguageSystem": {"description": "Language picker option that follows the device language."}
+  "navHome": "Home",
+  "navExplore": "Explore",
+  "navProfile": "Profile",
+  "settingsTitle": "Settings",
+  "homeWelcome": "Welcome",
+  "homePlaceholder": "Your home screen content goes here.",
+  "explorePlaceholder": "Your explore / discovery content goes here.",
+  "profileLoadError": "Could not load profile. Please try again.",
+  "profileNotSignedIn": "Not signed in",
+  "authSignOut": "Sign out",
+  "onboardingIntroHeadline": "Welcome to\n{appName}",
+  "onboardingGetStarted": "Get Started",
+  "onboardingThemeHeadline": "Choose Your Vibe",
+  "onboardingThemeBody": "Pick a look that feels right. You can change this later.",
+  "onboardingThemeDawn": "Dawn",
+  "onboardingThemeDawnSubtitle": "Light mode",
+  "onboardingThemeAuto": "Auto",
+  "onboardingThemeAutoSubtitle": "Follows system",
+  "onboardingThemeDusk": "Dusk",
+  "onboardingThemeDuskSubtitle": "Dark mode",
+  "commonConfirm": "Confirm",
+  "@appTitle": {
+    "description": "The application name shown in the title bar and app switcher."
+  },
+  "@appDescription": {
+    "description": "Short description of the application."
+  },
+  "@languageNativeName": {
+    "description": "This language written in itself, shown in the language picker."
+  },
+  "@settingsLanguage": {
+    "description": "Title of the language row in Settings."
+  },
+  "@settingsLanguageSystem": {
+    "description": "Language picker option that follows the device language."
+  },
+  "@navHome": {
+    "description": "Label of the Home tab and title of the Home screen."
+  },
+  "@navExplore": {
+    "description": "Label of the Explore tab, title and headline of the Explore screen."
+  },
+  "@navProfile": {
+    "description": "Label of the Profile tab and title of the Profile screen."
+  },
+  "@settingsTitle": {
+    "description": "Title of the Settings screen and the Settings button tooltip."
+  },
+  "@homeWelcome": {
+    "description": "Headline on the Home screen."
+  },
+  "@homePlaceholder": {
+    "description": "Placeholder body text on the Home screen."
+  },
+  "@explorePlaceholder": {
+    "description": "Placeholder body text on the Explore screen."
+  },
+  "@profileLoadError": {
+    "description": "Error shown when the profile fails to load."
+  },
+  "@profileNotSignedIn": {
+    "description": "Shown on the Profile screen when no user is signed in."
+  },
+  "@authSignOut": {
+    "description": "Sign out button label."
+  },
+  "@onboardingIntroHeadline": {
+    "description": "Onboarding intro headline; the app name goes on the second line.",
+    "placeholders": {
+      "appName": {
+        "type": "String"
+      }
+    }
+  },
+  "@onboardingGetStarted": {
+    "description": "Button on the onboarding intro that starts the flow."
+  },
+  "@onboardingThemeHeadline": {
+    "description": "Headline of the onboarding theme step."
+  },
+  "@onboardingThemeBody": {
+    "description": "Body text of the onboarding theme step."
+  },
+  "@onboardingThemeDawn": {
+    "description": "Name of the light theme option."
+  },
+  "@onboardingThemeDawnSubtitle": {
+    "description": "Subtitle of the light theme option."
+  },
+  "@onboardingThemeAuto": {
+    "description": "Name of the follow-system theme option."
+  },
+  "@onboardingThemeAutoSubtitle": {
+    "description": "Subtitle of the follow-system theme option."
+  },
+  "@onboardingThemeDusk": {
+    "description": "Name of the dark theme option."
+  },
+  "@onboardingThemeDuskSubtitle": {
+    "description": "Subtitle of the dark theme option."
+  },
+  "@commonConfirm": {
+    "description": "Generic confirm button label."
+  }
 }
