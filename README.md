@@ -124,21 +124,21 @@ This blueprint is intentionally optimized for:
 
 Each prompt has a flag. `--yes` accepts the default for anything you do not pass.
 
-| Prompt                       | Flag                 | Default                          |
-| ---------------------------- | -------------------- | -------------------------------- |
-| Package name (snake_case)    | `--name`             | target directory name            |
-| Organization (reverse domain) | `--org`              | `com.example`                    |
-| Display name                 | `--title`            | package name in Title Case       |
-| Short description            | `--description`      | `A new Flutter app`              |
-| Notifications                | `--no-notifications` | on                               |
-| PostHog analytics            | `--no-posthog`       | on                               |
-| Sentry error monitoring      | `--no-sentry`        | on                               |
-| Cloud Functions (TypeScript) | `--no-functions`     | on                               |
-| Apple Sign-In                | `--no-apple`         | on                               |
-| Google Sign-In               | `--no-google`        | on                               |
-| Anonymous sign-in            | `--no-anon`          | on                               |
-| Firebase Remote Config       | `--no-remote-config` | on                               |
-| One app id for both flavors  | `--shared-app-id`    | off (staging uses `<id>.staging`) |
+| Prompt                        | Flag                 | Default                           |
+| ----------------------------- | -------------------- | --------------------------------- |
+| Package name (snake_case)     | `--name`             | target directory name             |
+| Organization (reverse domain) | `--org`              | `com.example`                     |
+| Display name                  | `--title`            | package name in Title Case        |
+| Short description             | `--description`      | `A new Flutter app`               |
+| Notifications                 | `--no-notifications` | on                                |
+| PostHog analytics             | `--no-posthog`       | on                                |
+| Sentry error monitoring       | `--no-sentry`        | on                                |
+| Cloud Functions (TypeScript)  | `--no-functions`     | on                                |
+| Apple Sign-In                 | `--no-apple`         | on                                |
+| Google Sign-In                | `--no-google`        | on                                |
+| Anonymous sign-in             | `--no-anon`          | on                                |
+| Firebase Remote Config        | `--no-remote-config` | on                                |
+| One app id for both flavors   | `--shared-app-id`    | off (staging uses `<id>.staging`) |
 
 `--shared-app-id` lets staging builds go to the same TestFlight / Play Console app as production; see "One store app for both flavors" in `docs/release_guide.md` for the trade-offs.
 
