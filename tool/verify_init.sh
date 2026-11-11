@@ -59,6 +59,18 @@ else
   echo "App id: staging uses the .staging suffix"
 fi
 
+if [[ " $* " == *" --no-ads "* ]]; then
+  ! grep -q 'ADMOB_APP_ID' "$pbxproj" || fail "$pbxproj still has ADMOB_APP_ID"
+  ! grep -q 'google_mobile_ads' pubspec.yaml || fail "pubspec.yaml still has google_mobile_ads"
+  [ ! -e lib/features/ads ] || fail "lib/features/ads still exists"
+  echo "Ads: removed"
+else
+  grep -q 'ADMOB_APP_ID' "$pbxproj" || fail "$pbxproj lost ADMOB_APP_ID"
+  grep -q 'google_mobile_ads' pubspec.yaml || fail "pubspec.yaml lost google_mobile_ads"
+  [ -e lib/features/ads ] || fail "lib/features/ads is missing"
+  echo "Ads: kept"
+fi
+
 make setup analyze check-test-layout coverage || fail "make setup analyze check-test-layout coverage"
 
 if [ -n "${VERIFY_KEEP:-}" ]; then

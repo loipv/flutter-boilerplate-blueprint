@@ -52,6 +52,13 @@ lib/
     │   ├── application/     # SettingsController
     │   └── presentation/    # SettingsScreen
     ├── notifications/       # Notification scheduling wrapper (optional)
+<!-- BEGIN_ADS -->
+    ├── ads/                 # Google AdMob ads and UMP consent (optional)
+    │   ├── domain/          # AdsRepository interface, AdFormat, RewardedOutcome
+    │   ├── data/            # GoogleMobileAdsRepository (only place that imports google_mobile_ads)
+    │   ├── application/     # AdsController, AdsConsentController, AdsSettings, adFreeProvider
+    │   └── presentation/    # AdBanner, AdPrivacyOptionsTile
+<!-- END_ADS -->
     ├── home/                # Home tab (replace with your content)
     ├── explore/             # Explore tab (optional; 3+ tab layouts)
     └── profile/             # Profile tab
@@ -77,6 +84,10 @@ presentation/→ Widgets only; reads providers, dispatches actions
 <!-- BEGIN_REMOTE_CONFIG -->
 `firebase_remote_config` is confined to `core/data/` and `main.dart`.
 <!-- END_REMOTE_CONFIG -->
+
+<!-- BEGIN_ADS -->
+`google_mobile_ads` is confined to `features/ads/data/`.
+<!-- END_ADS -->
 
 ### Riverpod Code-Gen
 
@@ -143,6 +154,9 @@ The router lives in a `@Riverpod(keepAlive: true)` provider. Auth and onboarding
 <!-- BEGIN_REMOTE_CONFIG -->
 | `firebase_remote_config`                                   | Remote Config (feature flags, per-env values)        |
 <!-- END_REMOTE_CONFIG -->
+<!-- BEGIN_ADS -->
+| `google_mobile_ads`                                        | AdMob ads and UMP consent (`features/ads/data/` only) |
+<!-- END_ADS -->
 
 ## Flavors
 

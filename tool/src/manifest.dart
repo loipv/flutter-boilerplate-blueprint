@@ -68,7 +68,15 @@ const Map<Feature, FeatureRule> featureRules = {
   Feature.google: FeatureRule(markers: ['GOOGLE']),
   Feature.anon: FeatureRule(markers: ['ANON']),
   Feature.remoteConfig: FeatureRule(markers: ['REMOTE_CONFIG']),
-  Feature.ads: FeatureRule(markers: ['ADS']),
+  Feature.ads: FeatureRule(
+    markers: ['ADS'],
+    paths: [
+      'lib/features/ads',
+      'scripts/check_ads_config.dart',
+      'test/scripts/check_ads_config_test.dart',
+      'docs/ads_setup.md',
+    ],
+  ),
 };
 
 /// Every marker name init understands: the feature markers plus

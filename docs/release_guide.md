@@ -104,6 +104,10 @@ make release-preflight
 
 `make release-preflight` formats the Dart source folders with `fvm dart format`, then runs `make analyze`, `make check-test-layout` and `make coverage`. Do not proceed if formatting changed files you have not reviewed and committed, or if any command fails.
 
+<!-- BEGIN_ADS -->
+Before these steps, `make check-ads-config` runs and fails on Google's sample App IDs, on Google test unit IDs, and on a missing production App ID. It also runs before `make build-prod-ipa` and `make build-prod-aab`. See `docs/ads_setup.md`.
+<!-- END_ADS -->
+
 ### Step 2: Bump Version
 
 ```bash
@@ -520,6 +524,21 @@ Short version for updates: **bump version → preflight → build → upload →
 [ ] Test release build on physical device (§5)
 ```
 
+<!-- BEGIN_ADS -->
+### Ads (if included)
+
+```
+[ ] Real production App IDs set (build.gradle.kts, ADMOB_APP_ID in Xcode)
+[ ] Production ad unit IDs set in .env.production (or ADS_ENABLED=false)
+[ ] make check-ads-config passes with no unexpected warnings
+[ ] SKAdNetworkItems in Info.plist refreshed from Google's iOS quick start
+[ ] GDPR message and IDFA explainer published in AdMob
+[ ] app-ads.txt hosted on the developer domain
+[ ] Play Console: "Contains ads" and Data safety updated
+[ ] App Store Connect: privacy labels updated for advertising data
+```
+
+<!-- END_ADS -->
 ### iOS App Store Submission
 
 ```

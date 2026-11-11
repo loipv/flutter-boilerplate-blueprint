@@ -141,6 +141,18 @@ API_BASE_URL=
 # BEGIN_REMOTE_CONFIG
 REMOTE_CONFIG_ENV=
 # END_REMOTE_CONFIG
+# BEGIN_ADS
+ADS_ENABLED=
+ADMOB_BANNER_ANDROID=
+ADMOB_BANNER_IOS=
+ADMOB_INTERSTITIAL_ANDROID=
+ADMOB_INTERSTITIAL_IOS=
+ADMOB_REWARDED_ANDROID=
+ADMOB_REWARDED_IOS=
+ADMOB_APP_OPEN_ANDROID=
+ADMOB_APP_OPEN_IOS=
+ADS_DEBUG_GEOGRAPHY=
+# END_ADS
 APP_CHECK_DEBUG_TOKEN_IOS=
 APP_CHECK_DEBUG_TOKEN_ANDROID=
 UPLOAD_KEYSTORE_PATH=
@@ -158,6 +170,10 @@ UPLOAD_KEY_PASSWORD=
 <!-- BEGIN_REMOTE_CONFIG -->
 `REMOTE_CONFIG_ENV` is optional. It is the value of the Remote Config custom signal `environment`. Leave it blank to use the flavor name (`staging` / `production`).
 <!-- END_REMOTE_CONFIG -->
+
+<!-- BEGIN_ADS -->
+`ADS_ENABLED=false` turns ads off for a flavor. The `ADMOB_*` values are production ad unit IDs; every other build uses Google's test IDs, and a blank value turns that format off. `ADS_DEBUG_GEOGRAPHY=eea` tests the consent form outside production release builds. App IDs are native config, not env values. See `docs/ads_setup.md`.
+<!-- END_ADS -->
 
 `APP_CHECK_DEBUG_TOKEN_*` is useful for local device runs. The production flavor uses the same debug-token path only in debug mode, so you can test production builds locally without weakening release builds.
 

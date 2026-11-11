@@ -34,6 +34,19 @@ void main() {
     expect(featureRules[Feature.ads]!.markers, contains('ADS'));
   });
 
+  test('Given ads, When its rule is read, Then it removes lib/features/ads, '
+      'the guard script and its test, and docs/ads_setup.md', () {
+    expect(
+      featureRules[Feature.ads]!.paths,
+      containsAll([
+        'lib/features/ads',
+        'scripts/check_ads_config.dart',
+        'test/scripts/check_ads_config_test.dart',
+        'docs/ads_setup.md',
+      ]),
+    );
+  });
+
   test('Given remoteConfig, When its rule is read, '
       'Then it strips REMOTE_CONFIG only', () {
     expect(featureRules[Feature.remoteConfig]!.markers, ['REMOTE_CONFIG']);

@@ -21,6 +21,9 @@ For blueprint release or versioning tasks, also read:
 - **`docs/setup.md`**: Firebase setup, env files, platform config
 - **`docs/auth_setup.md`**: Google Sign-In, Apple Sign-In, App Check, custom auth domains
 - **`docs/release_guide.md`**: iOS and Android publishing flow
+<!-- BEGIN_ADS -->
+- **`docs/ads_setup.md`**: AdMob IDs, consent, store declarations, release guard
+<!-- END_ADS -->
 
 If a task touches analytics, auth redirects, or platform setup, check env-driven config first. The app may use `POSTHOG_HOST` or `FIREBASE_AUTH_DOMAIN` in the entrypoints.
 

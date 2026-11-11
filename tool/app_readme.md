@@ -38,5 +38,8 @@ See the [`Makefile`](Makefile) for the full list of targets.
 - [`docs/tech.md`](docs/tech.md) — Architecture, packages, directory layout
 - [`docs/ui_ux.md`](docs/ui_ux.md) — Design system, spacing, typography
 - [`docs/testing_guide.md`](docs/testing_guide.md) — Test patterns and mocks
+<!-- BEGIN_ADS -->
+- [`docs/ads_setup.md`](docs/ads_setup.md) — AdMob IDs, consent, store declarations
+<!-- END_ADS -->
 - [`docs/release_guide.md`](docs/release_guide.md) — iOS and Android release prep
 - [`docs/android_signing.md`](docs/android_signing.md) — Android signing setup

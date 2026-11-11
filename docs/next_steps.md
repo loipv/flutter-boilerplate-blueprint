@@ -29,6 +29,9 @@ Scaffolded from `flutter-boilerplate-blueprint`. See `BLUEPRINT_VERSION.md` in t
 - [ ] **Set up App Check**: register your apps and fill in `APP_CHECK_DEBUG_TOKEN_IOS` / `APP_CHECK_DEBUG_TOKEN_ANDROID` in env files
 - [ ] **Read `docs/auth_setup.md`** and verify both environments separately before testing sign-in
 - [ ] **If you included PostHog or Sentry**: fill in the matching env values, set `POSTHOG_HOST` if you use a custom domain or EU region, and confirm they report correctly in staging
+<!-- BEGIN_ADS -->
+- [ ] **If you included ads**: create the AdMob apps, set real App IDs and production ad unit IDs, and publish the consent messages (see `docs/ads_setup.md`). Until then the app serves Google test ads and `make check-ads-config` blocks a release
+<!-- END_ADS -->
 - [ ] **Android release signing**: generate an upload keystore and configure env vars (see `docs/android_signing.md`)
 - [ ] **Describe your app**: init wrote your `--description` into the one-line summary in `AGENTS.md` and `CLAUDE.md`; expand it so AI assistants know what the app does
 

@@ -20,6 +20,9 @@
 <!-- BEGIN_REMOTE_CONFIG -->
 - **STRICTLY FORBID `firebase_remote_config` imports** outside of `core/data/` and entrypoints.
 <!-- END_REMOTE_CONFIG -->
+<!-- BEGIN_ADS -->
+- **STRICTLY FORBID `google_mobile_ads` imports** outside of `features/ads/data/`.
+<!-- END_ADS -->
 - Read config only through `RemoteConfigRepository` / `ConfigKeys` (`ref.watchConfig(key)` or `ref.read(remoteConfigRepositoryProvider).get(key)`); declare new keys in `ConfigKeys`.
 - **STRICTLY FORBID leaking raw backend exceptions** (`FirebaseException`, etc.) past the data layer. All exceptions must be mapped to the `Failure` union type.
 
@@ -111,6 +114,9 @@ class ExampleController extends _$ExampleController {
 ```
 
 **keepAlive providers:** `AuthController`, `FirebaseAuthRepository` (as `AuthRepository`), `FirebaseUserRepository` (as `UserRepository`), `PostHogAnalyticsRepository` (as `AnalyticsRepository`), `FirebaseRemoteConfigRepository` (as `RemoteConfigRepository`), `RemoteConfigRevision`, `ThemeNotifier`, `OnboardingController`.
+<!-- BEGIN_ADS -->
+Ads (`features/ads/`): `GoogleMobileAdsRepository` (as `AdsRepository`), `AdsSettings`, `AdFree`, `AdsConsentController`, `AdsController`.
+<!-- END_ADS -->
 
 After editing annotated classes, run:
 
@@ -198,6 +204,9 @@ lib/
     ├── home/                   # Home screen (customize per app)
     ├── settings/               # Account, linking, theme, notifications, delete
     ├── notifications/          # Optional notification scheduling wrapper
+<!-- BEGIN_ADS -->
+    ├── ads/                    # Optional Google AdMob ads and consent
+<!-- END_ADS -->
     └── user_profile/           # Firestore user document CRUD
 ```
 
