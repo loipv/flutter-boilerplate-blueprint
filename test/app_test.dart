@@ -1,6 +1,7 @@
 // BEGIN_NOTIFICATIONS
 import 'package:flutter/material.dart' show TimeOfDay;
 // END_NOTIFICATIONS
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -13,6 +14,7 @@ import 'package:blueprint_app/core/services/notification_service.dart';
 // END_NOTIFICATIONS
 import 'package:blueprint_app/features/auth/data/firebase_auth_repository.dart';
 import 'package:blueprint_app/features/auth/domain/user_entity.dart';
+import 'package:blueprint_app/features/auth/domain/user_preferences.dart';
 import 'package:blueprint_app/features/home/presentation/home_screen.dart';
 import 'package:blueprint_app/features/user_profile/data/firebase_user_repository.dart';
 
@@ -117,6 +119,38 @@ void main() {
         // BEGIN_NOTIFICATIONS
         verify(() => notifications.init()).called(1);
         // END_NOTIFICATIONS
+      },
+    );
+
+    testWidgets(
+      'Given a signed-in user whose stored hapticsEnabled is false, When they switch tabs, Then no haptic feedback fires',
+      (tester) async {
+        // AppHaptics only reads hapticsEnabled; App's listener is what keeps
+        // the profile stream delivering, whatever else is (not) listening.
+        userRepo.users['u1'] = signedInUser.copyWith(
+          preferences: const UserPreferences(hapticsEnabled: false),
+        );
+        final hapticCalls = <MethodCall>[];
+        tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+          SystemChannels.platform,
+          (call) async {
+            if (call.method == 'HapticFeedback.vibrate') hapticCalls.add(call);
+            return null;
+          },
+        );
+        addTearDown(
+          () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+            SystemChannels.platform,
+            null,
+          ),
+        );
+        final authRepo = FakeAuthRepository(initialUser: signedInUser);
+
+        await pumpApp(tester, authRepo, onboardingComplete: true);
+        await tester.tap(find.text('Explore'));
+        await tester.pumpAndSettle();
+
+        expect(hapticCalls, isEmpty);
       },
     );
 

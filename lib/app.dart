@@ -7,6 +7,7 @@ import 'package:blueprint_app/core/services/notification_service.dart';
 import 'package:blueprint_app/core/services/timezone_lifecycle_observer.dart';
 import 'package:blueprint_app/features/notifications/application/notification_scheduler.dart';
 // END_NOTIFICATIONS
+import 'package:blueprint_app/core/providers/haptics_provider.dart';
 import 'package:blueprint_app/core/router/app_router.dart';
 import 'package:blueprint_app/core/services/session_lifecycle_observer.dart';
 import 'package:blueprint_app/core/theme/app_theme.dart';
@@ -87,6 +88,11 @@ class _AppState extends ConsumerState<App> {
   Widget build(BuildContext context) {
     final router = ref.watch(routerProvider);
     final themeMode = ref.watch(themeProvider).value ?? ThemeMode.system;
+    // AppHaptics only `ref.read`s hapticsEnabled. In Riverpod 3 a provider
+    // with no listener is paused between reads, so its profile stream never
+    // delivers and reads return the default `true`. This listener keeps it
+    // (and the profile stream) active for the app's lifetime.
+    ref.listen(hapticsEnabledProvider, (_, _) {});
 
     Widget app = MaterialApp.router(
       title: 'Blueprint App',
