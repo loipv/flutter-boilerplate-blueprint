@@ -396,7 +396,7 @@ make test-integration DEVICE=<simulator-udid>                      # iOS simulat
 make test-integration DEVICE=<id> EMULATOR_HOST=<host>             # override the host
 ```
 
-It checks for the Firebase CLI and Java 21+, runs `scripts/integration_stubs.sh`, then runs `fvm flutter test integration_test --flavor staging` on the device inside `firebase emulators:exec --project demo-test --only auth,firestore`. Without `DEVICE` it prints the usage and stops.
+It checks for the Firebase CLI and Java 21+, runs `scripts/integration_stubs.sh`, then runs `flutter test integration_test --flavor staging` (through `fvm` when it is installed) on the device inside `firebase emulators:exec --project demo-test --only auth,firestore`. Without `DEVICE` it prints the usage and stops.
 
 The device reaches the emulators through `--dart-define=EMULATOR_HOST`:
 

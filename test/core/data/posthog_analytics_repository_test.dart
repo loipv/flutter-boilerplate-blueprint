@@ -42,8 +42,8 @@ void main() {
       'Given the repository, When capturing and resetting, Then they complete',
       () async {
         await repository.captureEvent('e', properties: {'k': 'v'});
-        await repository.captureScreen('Home');
-        await repository.reset();
+        await expectLater(repository.captureScreen('Home'), completes);
+        await expectLater(repository.reset(), completes);
       },
     );
   });
@@ -69,13 +69,13 @@ void main() {
         ),
       ).thenThrow(Exception('boom'));
 
-      await repository.captureEvent('e');
+      await expectLater(repository.captureEvent('e'), completes);
     });
   });
 
   group('captureScreen', () {
     test('Given a name, When called, Then Posthog.screen is used', () async {
-      await repository.captureScreen('Home');
+      await expectLater(repository.captureScreen('Home'), completes);
 
       verify(() => posthog.screen(screenName: 'Home')).called(1);
     });
@@ -85,7 +85,7 @@ void main() {
         () => posthog.screen(screenName: any(named: 'screenName')),
       ).thenThrow(Exception('boom'));
 
-      await repository.captureScreen('Home');
+      await expectLater(repository.captureScreen('Home'), completes);
     });
   });
 
@@ -93,7 +93,7 @@ void main() {
     test(
       'Given the repository, When called, Then Posthog.reset is used',
       () async {
-        await repository.reset();
+        await expectLater(repository.reset(), completes);
 
         verify(() => posthog.reset()).called(1);
       },
@@ -102,7 +102,7 @@ void main() {
     test('Given the SDK throws, When called, Then it is swallowed', () async {
       when(() => posthog.reset()).thenThrow(Exception('boom'));
 
-      await repository.reset();
+      await expectLater(repository.reset(), completes);
     });
   });
   // END_POSTHOG

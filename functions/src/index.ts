@@ -23,7 +23,9 @@ import { logger } from 'firebase-functions';
 // Initialize the default Firebase Admin app.
 // In Cloud Functions the runtime provides Application Default Credentials —
 // no service account JSON needed here.
-admin.initializeApp();
+// Guarded so a second module (or test file) importing this one does not
+// re-initialize the default app.
+if (admin.apps.length === 0) admin.initializeApp();
 
 const db = admin.firestore();
 

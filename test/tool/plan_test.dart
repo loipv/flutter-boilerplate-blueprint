@@ -45,6 +45,16 @@ void main() {
       },
     );
 
+    test(
+      'Given a non-object emulators value, When dropped, Then it is left as is',
+      () {
+        const input = '{"emulators": [], "functions": []}';
+        final json = jsonDecode(dropFunctions(input)) as Map<String, dynamic>;
+
+        expect(json, {'emulators': <dynamic>[]});
+      },
+    );
+
     test('Given invalid JSON, When dropped, Then it throws InitFailure', () {
       expect(() => dropFunctions('{'), throwsA(isA<InitFailure>()));
     });

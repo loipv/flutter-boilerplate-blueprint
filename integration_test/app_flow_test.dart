@@ -84,7 +84,7 @@ void main() {
 
   group('App flow on the emulator', () {
     testWidgets(
-      'Given a returning user, When haptics is turned off in Settings, Then Home was shown and Firestore stores preferences as a nested map',
+      'Given a returning user on Home, When haptics is turned off in Settings, Then Firestore stores preferences as a nested map',
       (tester) async {
         final uid = await signInReturningUser();
 

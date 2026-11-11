@@ -76,6 +76,7 @@ void main() {
         );
         await Future<void>.delayed(Duration.zero);
 
+        expect(values, isNotEmpty);
         expect(values.every((v) => v.value == null), isTrue);
         verifyNever(() => userRepo.getUserStream(any()));
       },
