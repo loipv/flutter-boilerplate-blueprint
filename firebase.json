@@ -10,7 +10,7 @@
     {
       "source": "functions",
       "codebase": "default",
-      "ignore": ["node_modules", ".git", "lib", "*.local.js"]
+      "ignore": ["node_modules", ".git", "lib", "*.local.js", "test", "vitest.config.mts"]
     }
   ],
   "emulators": {
