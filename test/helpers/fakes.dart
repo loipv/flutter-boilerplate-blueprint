@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:blueprint_app/core/domain/config_key.dart';
+import 'package:blueprint_app/core/domain/remote_config_repository.dart';
 import 'package:blueprint_app/features/auth/data/firebase_auth_repository.dart';
 import 'package:blueprint_app/features/auth/domain/user_entity.dart';
 import 'package:blueprint_app/features/auth/domain/user_preferences.dart';
@@ -135,4 +137,32 @@ class FakeUserRepository implements FirebaseUserRepository {
   Future<void> updateLastAccessed(String uid) async {
     calls.add('updateLastAccessed:$uid');
   }
+}
+
+/// In-memory Remote Config repository. [update] replaces [values] and emits
+/// [onUpdated]; [initialize] is a no-op.
+class FakeRemoteConfigRepository implements RemoteConfigRepository {
+  FakeRemoteConfigRepository({Map<String, Object>? values})
+    : values = values ?? {};
+
+  Map<String, Object> values;
+  final _updates = StreamController<void>.broadcast();
+
+  void update(Map<String, Object> next) {
+    values = next;
+    _updates.add(null);
+  }
+
+  @override
+  Future<void> initialize({
+    required String environment,
+    required Duration minimumFetchInterval,
+  }) async {}
+
+  @override
+  T get<T extends Object>(ConfigKey<T> key) =>
+      values[key.key] as T? ?? key.defaultValue;
+
+  @override
+  Stream<void> get onUpdated => _updates.stream;
 }
