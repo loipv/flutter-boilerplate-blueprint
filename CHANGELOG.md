@@ -4,6 +4,12 @@ All notable changes to the `flutter-boilerplate-blueprint` template should be do
 
 The generated app's `pubspec.yaml` version is separate from the blueprint version. Use this changelog to track scaffold and template changes between blueprint tags.
 
+## Unreleased
+
+### Added
+
+- Localization: gen-l10n with English and Vietnamese, Settings language picker, `make check-l10n`, init strips feature keys from ARB files. See `docs/localization.md`.
+
 ## v1.3.0 - 2026-11-11
 
 ### Added

@@ -18,6 +18,7 @@ For blueprint release or versioning tasks, also read:
 <!-- END_BLUEPRINT -->
 ## Also Read When Relevant
 
+- **`docs/localization.md`**: ARB files, adding a language or a key, feature key prefixes
 - **`docs/setup.md`**: Firebase setup, env files, platform config
 - **`docs/auth_setup.md`**: Google Sign-In, Apple Sign-In, App Check, custom auth domains
 - **`docs/release_guide.md`**: iOS and Android publishing flow
@@ -40,6 +41,7 @@ make run-prod             # Run production flavor
 make analyze              # fvm flutter analyze
 make test                 # fvm flutter test
 make check-test-layout    # every test file mirrors a source file
+make check-l10n           # every locale ARB matches the template keys and placeholders
 make coverage             # tests + per-layer coverage gate
 make test-firebase        # rules + Cloud Functions tests on the Firebase Emulator
 make test-integration DEVICE=<id>  # app flow on a simulator/emulator against the Firebase Emulator
@@ -66,6 +68,7 @@ Use the `make` target; where none exists, `fvm flutter`. Never use bare `flutter
 - **Widgets:** `ConsumerWidget` / `ConsumerStatefulWidget`. No `StatefulWidget`
 - **Imports:** Absolute only: `package:blueprint_app/…`
 - **Spacing:** `Gap(AppSpacing.pX)`. No `SizedBox`
+- **Strings:** ARB + context.l10n. No hardcoded UI text
 - **Icons:** `lucide_icons_flutter`. No Material Icons
 - **Fonts:** Bundled Inter / JetBrainsMono. No `google_fonts`
 - **Logging:** `AppLogger`. No `print()` / `debugPrint()`

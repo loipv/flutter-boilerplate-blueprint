@@ -95,6 +95,10 @@ Never use Material Icons (`Icons.*`) or `phosphor_flutter`.
 
 Users select theme in onboarding (ThemeSelectionView) and can change it in Settings.
 
+## Settings: Language
+
+Settings > Appearance has a Language tile: a `DropdownButton` with "System" plus each supported locale shown by its `languageNativeName` (English, Tiếng Việt). The choice is saved by `LocaleNotifier` (`locale_code` in SharedPreferences) and applies immediately. "System" follows the device language and falls back to English. All visible text comes from ARB files via `context.l10n`.
+
 ## Haptics
 
 ```dart

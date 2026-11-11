@@ -20,12 +20,14 @@ lib/
 ├── main.dart                # Entry point for both flavors
 ├── app.dart                 # ProviderScope + MaterialApp.router
 │
+├── l10n/                    # app_en.arb (template), app_vi.arb; generated/ is gitignored
 ├── core/
 │   ├── config/              # AppEnv: per-flavor runtime config
 │   ├── constants/           # App-wide constants
 │   ├── data/                # Core data impl (analytics, Remote Config)
 │   ├── domain/              # Core interfaces (AnalyticsRepository, RemoteConfigRepository, ConfigKeys)
 │   ├── errors/              # Failure union type
+│   ├── l10n/                # LocaleNotifier, resolveAppLocale, appLocalizationsProvider, context.l10n
 │   ├── presentation/        # MainScaffold, SplashScreen, shared widgets
 │   ├── providers/           # SharedPreferences, haptics, Remote Config revision providers
 │   ├── router/              # GoRouter (app_router.dart)
@@ -145,6 +147,7 @@ The router lives in a `@Riverpod(keepAlive: true)` provider. Auth and onboarding
 | `google_sign_in`                                           | Google OAuth                                         |
 | `sign_in_with_apple`                                       | Apple Sign-In                                        |
 | `freezed` + `json_serializable`                            | Immutable models + JSON                              |
+| `flutter_localizations` + `intl`                           | Localization (`gen-l10n`, ARB files)                 |
 | `shared_preferences`                                       | Local persistence (onboarding, theme)                |
 | `flutter_local_notifications` + `timezone` + `workmanager` | Optional local notifications and timezone sync       |
 | `lucide_icons_flutter`                                     | Icons (do not substitute)                            |
