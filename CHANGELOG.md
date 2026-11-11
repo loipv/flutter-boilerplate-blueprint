@@ -4,7 +4,7 @@ All notable changes to the `flutter-boilerplate-blueprint` template should be do
 
 The generated app's `pubspec.yaml` version is separate from the blueprint version. Use this changelog to track scaffold and template changes between blueprint tags.
 
-## Unreleased
+## v1.2.0 - 2026-11-11
 
 ### Added
 
@@ -12,6 +12,7 @@ The generated app's `pubspec.yaml` version is separate from the blueprint versio
 - Per-environment values through the custom signal `environment` (`REMOTE_CONFIG_ENV` in `.env`, or the flavor name), so conditions work with one shared Firebase project.
 - `API_BASE_URL` env var feeding the `ConfigKeys.apiBaseUrl` default. It stays when Remote Config is removed.
 - `docs/setup.md` Remote Config section.
+- `FakeRemoteConfigRepository` in `test/helpers/fakes.dart`; `docs/testing_guide.md` shows how to override `remoteConfigRepositoryProvider` in widget tests.
 
 ## v1.1.0 - 2026-11-11
 
