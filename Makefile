@@ -16,7 +16,7 @@ dart_defines = $$(for f in $(1); do if [ -f "$$f" ]; then grep -E '^[A-Za-z_][A-
         deploy-functions-staging deploy-functions-prod \
         set-secret-staging set-secret-prod \
         release-preflight bump-version changelog tag-release \
-        analyze test codegen icons splash check-test-layout coverage
+        analyze test test-firebase codegen icons splash check-test-layout coverage
 
 help:
 	@echo ""
@@ -54,9 +54,10 @@ help:
 	@echo "    make set-secret-prod    SECRET=<NAME>"
 	@echo ""
 	@echo "  Dev"
-	@echo "    make setup    (Firebase options stubs + pub get + codegen + functions npm ci)"
+	@echo "    make setup    (Firebase options stubs + pub get + codegen + functions and firebase_tests npm ci)"
 	@echo "    make analyze"
 	@echo "    make test"
+	@echo "    make test-firebase  (Firestore/Storage rules tests on the emulator; needs Firebase CLI + Java 21+)"
 	@echo "    make codegen"
 	@echo "    make check-test-layout  (every test file mirrors a source file)"
 	@echo "    make coverage  (tests + per-layer coverage gate)"
@@ -173,6 +174,19 @@ analyze:
 test:
 	$(FLUTTER) test
 
+# Rules tests (and the functions tests, once functions/test exists) run on the
+# local emulator under the offline demo-test project: no real Firebase.
+test-firebase:
+	@java_major=$$(java -version 2>&1 | sed -nE 's/.*version "([0-9]+).*/\1/p' | head -n 1); \
+	  if ! command -v firebase >/dev/null 2>&1 || [ -z "$$java_major" ] || [ "$$java_major" -lt 21 ]; then \
+	    echo "test-firebase needs the Firebase CLI and Java 21+ (see docs/testing_guide.md)"; exit 1; \
+	  fi
+	cd firebase_tests && npm ci
+	@if [ -d functions/test ]; then cd functions && npm ci; fi
+	@cmd="npm --prefix firebase_tests test"; \
+	  if [ -d functions/test ]; then cmd="$$cmd && npm --prefix functions test"; fi; \
+	  firebase emulators:exec --project demo-test --only firestore,storage "$$cmd"
+
 check-test-layout:
 	$(FLUTTER:flutter=dart) scripts/check_test_layout.dart
 
@@ -209,6 +223,8 @@ setup: firebase-stubs
 	$(FLUTTER) pub get
 	$(FLUTTER) pub run build_runner build --delete-conflicting-outputs
 	@if [ -d functions ]; then cd functions && \
+	  if [ -f package-lock.json ]; then npm ci; else npm install; fi; fi
+	@if [ -d firebase_tests ]; then cd firebase_tests && \
 	  if [ -f package-lock.json ]; then npm ci; else npm install; fi; fi
 
 icons:

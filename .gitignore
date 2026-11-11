@@ -39,6 +39,9 @@ lib/firebase_options_production.dart
 google-services.json
 GoogleService-Info.plist
 
+# Firebase emulator rules tests
+firebase_tests/node_modules/
+
 # Android signing
 *.jks
 *.keystore

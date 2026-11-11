@@ -120,7 +120,7 @@ class InitPlan {
       }
       text = stripMarkerLines(text);
       if (path == 'firebase.json' && disabled.contains(Feature.functions)) {
-        text = _dropFunctions(text);
+        text = dropFunctions(text);
       }
 
       if (path == _appReadme) {
@@ -195,7 +195,9 @@ List<String> scanLeftovers(InitOptions options) {
   return hits;
 }
 
-String _dropFunctions(String text) {
+/// Removes the `functions` key and `emulators.functions` from the
+/// `firebase.json` [text]. Throws [InitFailure] when it is not a JSON object.
+String dropFunctions(String text) {
   final Object? json;
   try {
     json = jsonDecode(text);
@@ -208,6 +210,8 @@ String _dropFunctions(String text) {
     );
   }
   json.remove('functions');
+  final emulators = json['emulators'];
+  if (emulators is Map<String, dynamic>) emulators.remove('functions');
   return '${const JsonEncoder.withIndent('  ').convert(json)}\n';
 }
 
