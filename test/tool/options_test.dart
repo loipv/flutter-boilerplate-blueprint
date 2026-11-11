@@ -99,6 +99,10 @@ void main() {
     },
   );
 
+  test('Given --no-ads, When parsed, Then ads is disabled', () {
+    expect(parseArgs(['--no-ads']).disabled, {Feature.ads});
+  });
+
   test(
     'Given the camelCase flag, When parsed, Then it throws FormatException',
     () {

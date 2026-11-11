@@ -27,6 +27,7 @@ Run it from the repository root, before `make setup`.
   --no-google             Remove Google Sign-In
   --no-anon               Remove anonymous sign-in
   --no-remote-config      Remove Firebase Remote Config
+  --no-ads                Remove Google AdMob ads
   --shared-app-id         Staging uses the production bundle/application id
                           (one store app; see docs/release_guide.md)
   --yes                   Accept defaults for anything not passed
@@ -41,6 +42,7 @@ const _featureLabels = {
   Feature.google: 'Google Sign-In',
   Feature.anon: 'anonymous sign-in',
   Feature.remoteConfig: 'Firebase Remote Config',
+  Feature.ads: 'Google AdMob ads',
 };
 
 /// Invalid input: exit 64, nothing changed.

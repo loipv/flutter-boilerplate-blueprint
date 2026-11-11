@@ -11,6 +11,7 @@ enum Feature {
   google,
   anon,
   remoteConfig,
+  ads,
 }
 
 /// Kebab-case flag name: `remoteConfig` -> `remote-config`.

@@ -122,6 +122,9 @@ class InitPlan {
       if (path == 'firebase.json' && disabled.contains(Feature.functions)) {
         text = dropFunctions(text);
       }
+      if (path == pbxprojPath && disabled.contains(Feature.ads)) {
+        text = dropAdmobAppId(text);
+      }
 
       if (path == _appReadme) {
         readme = text;
@@ -194,6 +197,13 @@ List<String> scanLeftovers(InitOptions options) {
   }
   return hits;
 }
+
+/// Removes the `ADMOB_APP_ID = ...;` build-setting lines from the pbxproj
+/// [text]. The pbxproj cannot hold markers because Xcode rewrites it.
+String dropAdmobAppId(String text) => text.replaceAll(
+  RegExp(r'^[ \t]*ADMOB_APP_ID = .*;[ \t]*\r?\n', multiLine: true),
+  '',
+);
 
 /// Removes the `functions` key and `emulators.functions` from the
 /// `firebase.json` [text]. Throws [InitFailure] when it is not a JSON object.

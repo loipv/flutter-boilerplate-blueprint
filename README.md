@@ -138,6 +138,7 @@ Each prompt has a flag. `--yes` accepts the default for anything you do not pass
 | Google Sign-In                | `--no-google`        | on                                |
 | Anonymous sign-in             | `--no-anon`          | on                                |
 | Firebase Remote Config        | `--no-remote-config` | on                                |
+| Google AdMob ads              | `--no-ads`           | on                                |
 | One app id for both flavors   | `--shared-app-id`    | off (staging uses `<id>.staging`) |
 
 `--shared-app-id` lets staging builds go to the same TestFlight / Play Console app as production; see "One store app for both flavors" in `docs/release_guide.md` for the trade-offs.

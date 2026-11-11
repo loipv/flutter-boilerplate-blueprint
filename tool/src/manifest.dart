@@ -68,6 +68,7 @@ const Map<Feature, FeatureRule> featureRules = {
   Feature.google: FeatureRule(markers: ['GOOGLE']),
   Feature.anon: FeatureRule(markers: ['ANON']),
   Feature.remoteConfig: FeatureRule(markers: ['REMOTE_CONFIG']),
+  Feature.ads: FeatureRule(markers: ['ADS']),
 };
 
 /// Every marker name init understands: the feature markers plus

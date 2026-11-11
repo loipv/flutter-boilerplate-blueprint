@@ -5,6 +5,27 @@ import 'package:flutter_test/flutter_test.dart';
 import '../../tool/src/plan.dart';
 
 void main() {
+  group('dropAdmobAppId', () {
+    test('Given ADMOB_APP_ID lines in several configurations, When dropped, '
+        'Then only those lines are removed', () {
+      const input =
+          '\t\t\t\tINFOPLIST_FILE = Runner/Info.plist;\n'
+          '\t\t\t\tADMOB_APP_ID = "ca-app-pub-1~2";\n'
+          '\t\t\t\tPRODUCT_NAME = Runner;\n'
+          '\t\t\t\tADMOB_APP_ID = "ca-app-pub-3~4";\n';
+      expect(
+        dropAdmobAppId(input),
+        '\t\t\t\tINFOPLIST_FILE = Runner/Info.plist;\n'
+        '\t\t\t\tPRODUCT_NAME = Runner;\n',
+      );
+    });
+
+    test('Given no ADMOB_APP_ID line, When dropped, '
+        'Then text is unchanged', () {
+      expect(dropAdmobAppId('a = b;\n'), 'a = b;\n');
+    });
+  });
+
   group('dropFunctions', () {
     test('Given functions and emulators.functions, '
         'When dropped, Then both are removed and other keys stay', () {

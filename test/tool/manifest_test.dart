@@ -30,6 +30,10 @@ void main() {
     }
   });
 
+  test('Given ads, When its rule is read, Then it strips ADS', () {
+    expect(featureRules[Feature.ads]!.markers, contains('ADS'));
+  });
+
   test('Given remoteConfig, When its rule is read, '
       'Then it strips REMOTE_CONFIG only', () {
     expect(featureRules[Feature.remoteConfig]!.markers, ['REMOTE_CONFIG']);
