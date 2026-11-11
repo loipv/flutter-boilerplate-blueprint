@@ -2,7 +2,22 @@
 library;
 
 /// Optional features that can be removed from the generated app.
-enum Feature { notifications, posthog, sentry, functions, apple, google, anon }
+enum Feature {
+  notifications,
+  posthog,
+  sentry,
+  functions,
+  apple,
+  google,
+  anon,
+  remoteConfig,
+}
+
+/// Kebab-case flag name: `remoteConfig` -> `remote-config`.
+extension FeatureCli on Feature {
+  String get cliName =>
+      name.replaceAllMapped(RegExp('[A-Z]'), (m) => '-${m[0]!.toLowerCase()}');
+}
 
 /// Sign-in methods; at least one must stay on or the app cannot leave
 /// onboarding.
@@ -71,7 +86,7 @@ ParsedArgs parseArgs(List<String> args) {
   var yes = false;
   var sharedAppId = false;
   const valueFlags = {'name', 'org', 'title', 'description'};
-  final features = {for (final f in Feature.values) f.name: f};
+  final features = {for (final f in Feature.values) f.cliName: f};
 
   for (var i = 0; i < args.length; i++) {
     final arg = args[i];

@@ -26,6 +26,7 @@ Run it from the repository root, before `make setup`.
   --no-apple              Remove Apple Sign-In
   --no-google             Remove Google Sign-In
   --no-anon               Remove anonymous sign-in
+  --no-remote-config      Remove Firebase Remote Config
   --shared-app-id         Staging uses the production bundle/application id
                           (one store app; see docs/release_guide.md)
   --yes                   Accept defaults for anything not passed
@@ -39,6 +40,7 @@ const _featureLabels = {
   Feature.apple: 'Apple Sign-In',
   Feature.google: 'Google Sign-In',
   Feature.anon: 'anonymous sign-in',
+  Feature.remoteConfig: 'Firebase Remote Config',
 };
 
 /// Invalid input: exit 64, nothing changed.
@@ -226,7 +228,7 @@ bool _confirm(String question, {bool defaultYes = true}) {
 }
 
 void _printNextSteps(InitOptions options) {
-  final removed = options.disabled.map((f) => f.name).toList()..sort();
+  final removed = options.disabled.map((f) => f.cliName).toList()..sort();
   stdout
     ..writeln()
     ..writeln('Created ${options.title} (${options.org}.${options.name}).')

@@ -89,4 +89,25 @@ void main() {
   test('signInFeatures are Apple, Google and anonymous', () {
     expect(signInFeatures, {Feature.apple, Feature.google, Feature.anon});
   });
+
+  test(
+    'Given --no-remote-config, When parsed, Then remoteConfig is disabled',
+    () {
+      expect(parseArgs(['--no-remote-config']).disabled, {
+        Feature.remoteConfig,
+      });
+    },
+  );
+
+  test(
+    'Given the camelCase flag, When parsed, Then it throws FormatException',
+    () {
+      expect(() => parseArgs(['--no-remoteConfig']), throwsFormatException);
+    },
+  );
+
+  test('Given each feature, When cliName is read, Then it is kebab-case', () {
+    expect(Feature.remoteConfig.cliName, 'remote-config');
+    expect(Feature.posthog.cliName, 'posthog');
+  });
 }

@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../../tool/src/fs.dart';
 import '../../tool/src/manifest.dart';
 import '../../tool/src/markers.dart';
+import '../../tool/src/options.dart';
 
 void main() {
   test('Given every text file in the repo, When markers are scanned, '
@@ -27,5 +28,11 @@ void main() {
     for (final rule in featureRules.values) {
       expect(knownMarkers, containsAll(rule.markers));
     }
+  });
+
+  test('Given remoteConfig, When its rule is read, '
+      'Then it strips REMOTE_CONFIG only', () {
+    expect(featureRules[Feature.remoteConfig]!.markers, ['REMOTE_CONFIG']);
+    expect(featureRules[Feature.remoteConfig]!.paths, isEmpty);
   });
 }
