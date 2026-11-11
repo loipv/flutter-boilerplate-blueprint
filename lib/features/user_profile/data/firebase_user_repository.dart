@@ -42,12 +42,9 @@ class FirebaseUserRepository implements UserRepository {
   @override
   Future<void> savePreferences(String uid, UserPreferences prefs) async {
     try {
-      final json = prefs.toJson();
-      final updates = <String, dynamic>{};
-      for (final entry in json.entries) {
-        updates['preferences.${entry.key}'] = entry.value;
-      }
-      await _userDoc(uid).set(updates, SetOptions(merge: true));
+      await _userDoc(
+        uid,
+      ).set({'preferences': prefs.toJson()}, SetOptions(merge: true));
     } catch (e, st) {
       _log.error('savePreferences failed', error: e, stackTrace: st);
       throw const Failure.server();

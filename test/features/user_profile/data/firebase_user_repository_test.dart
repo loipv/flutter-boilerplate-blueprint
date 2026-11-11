@@ -101,6 +101,31 @@ void main() {
     );
 
     test(
+      'Given an unrelated field and existing preferences, When saved, Then no top-level key contains a dot and preferences hold the new values',
+      () async {
+        await userDoc.set({
+          'displayName': 'Ada',
+          'preferences': {'themeMode': 'light', 'hapticsEnabled': true},
+        });
+
+        await repository.savePreferences(
+          _uid,
+          const UserPreferences(
+            themeMode: ThemeMode.dark,
+            hapticsEnabled: false,
+          ),
+        );
+
+        final data = (await readDoc())!;
+        expect(data.keys.where((k) => k.contains('.')), isEmpty);
+        expect(data['displayName'], 'Ada');
+        final prefs = data['preferences'] as Map;
+        expect(prefs['themeMode'], 'dark');
+        expect(prefs['hapticsEnabled'], false);
+      },
+    );
+
+    test(
       'Given a set error, When saved, Then it throws Failure.server()',
       () async {
         injectError(#set);
