@@ -109,7 +109,8 @@ These paths are already wired into the Xcode project and Gradle build — the ri
 
 ### Notes
 
-- Do **not** leave the default `lib/firebase_options.dart` in the repo — delete it if it appears. The entrypoints reference the flavor-suffixed files only.
+- Do **not** leave the default `lib/firebase_options.dart` in the repo — delete it if it appears. `lib/main.dart` references the flavor-suffixed files only.
+- You can configure staging first and production later. `lib/main.dart` imports both options files, so `make setup` writes a stub for any one that is missing (both files are git-ignored, so a fresh clone has neither). A flavor whose options file is still a stub stops at startup with the `flutterfire configure` command to run.
 - If `flutterfire configure` fails parsing `ios/Runner.xcodeproj/project.pbxproj`, check that any build setting whose value contains a space (for example `APP_DISPLAY_NAME`) is wrapped in double quotes, e.g. `APP_DISPLAY_NAME = "My App Name";`.
 
 ## 5. Fill In Environment Files

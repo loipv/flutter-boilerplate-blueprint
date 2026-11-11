@@ -22,6 +22,31 @@ void main() {
     });
   });
 
+  group('ensureFirebaseConfigured', () {
+    test('accepts a real project id', () {
+      expect(
+        () => AppEnv.production.ensureFirebaseConfigured('my-app-prod'),
+        returnsNormally,
+      );
+    });
+
+    test('throws with the flutterfire command for a stub project id', () {
+      expect(
+        () => AppEnv.production.ensureFirebaseConfigured('stub'),
+        throwsA(
+          isA<StateError>().having(
+            (e) => e.message,
+            'message',
+            allOf(
+              contains('Firebase for production is not configured'),
+              contains('--out=lib/firebase_options_production.dart'),
+            ),
+          ),
+        ),
+      );
+    });
+  });
+
   group('per-environment values', () {
     test('staging', () {
       const env = AppEnv.staging;

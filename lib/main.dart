@@ -81,6 +81,7 @@ Future<void> main() async {
     AppEnv.production =>
       production_firebase.DefaultFirebaseOptions.currentPlatform,
   };
+  env.ensureFirebaseConfigured(firebaseOptions.projectId);
   await Firebase.initializeApp(
     options: _firebaseAuthDomain.isEmpty
         ? firebaseOptions

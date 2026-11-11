@@ -9,7 +9,7 @@ RELEASE_DEVICE ?=
 # Usage: $(call dart_defines,.env.staging .env)
 dart_defines = $$(for f in $(1); do if [ -f "$$f" ]; then grep -E '^[A-Za-z_][A-Za-z0-9_]*=' "$$f" | sed 's/^/--dart-define=/' | tr '\n' ' '; break; fi; done)
 
-.PHONY: help setup run-staging run-prod run-prod-release \
+.PHONY: help setup firebase-stubs run-staging run-prod run-prod-release \
         build-staging-ios build-staging-apk \
         build-prod-ios build-prod-apk build-prod-ipa build-prod-aab \
         deploy-staging deploy-prod deploy-storage-staging deploy-storage-prod \
@@ -52,7 +52,7 @@ help:
 	@echo "    make set-secret-prod    SECRET=<NAME>"
 	@echo ""
 	@echo "  Dev"
-	@echo "    make setup    (pub get + codegen + functions npm install)"
+	@echo "    make setup    (Firebase options stubs + pub get + codegen + functions npm install)"
 	@echo "    make analyze"
 	@echo "    make test"
 	@echo "    make codegen"
@@ -161,7 +161,30 @@ test:
 codegen:
 	$(FLUTTER) pub run build_runner build --delete-conflicting-outputs
 
-setup:
+# Writes a stub lib/firebase_options_<env>.dart for each flavor that has none,
+# so a fresh clone compiles before flutterfire configure. Never overwrites.
+firebase-stubs:
+	@for env in staging production; do \
+	  f="lib/firebase_options_$$env.dart"; \
+	  [ -f "$$f" ] && continue; \
+	  printf '%s\n' \
+	    '// Stub Firebase options so the project compiles before Firebase is configured.' \
+	    '// Replace it by running:' \
+	    "//   flutterfire configure --project=<$$env-project-id> --out=$$f" \
+	    "import 'package:firebase_core/firebase_core.dart';" \
+	    '' \
+	    'class DefaultFirebaseOptions {' \
+	    '  static FirebaseOptions get currentPlatform => const FirebaseOptions(' \
+	    "    apiKey: 'stub'," \
+	    "    appId: 'stub'," \
+	    "    messagingSenderId: 'stub'," \
+	    "    projectId: 'stub'," \
+	    '  );' \
+	    '}' > "$$f"; \
+	  echo "Created stub $$f (run flutterfire configure to replace it)"; \
+	done
+
+setup: firebase-stubs
 	$(FLUTTER) pub get
 	$(FLUTTER) pub run build_runner build --delete-conflicting-outputs
 	@if [ -d functions ]; then cd functions && npm install; fi

@@ -93,7 +93,7 @@ Run `make release-preflight` first. Then:
 ## FAQ
 
 **The app crashes on launch.**
-The most likely cause is an unconfigured Firebase options file. Check that `lib/firebase_options_staging.dart` no longer contains the `'stub'` placeholder values; regenerate it with `flutterfire configure --project=<your-staging-id> --out=lib/firebase_options_staging.dart`.
+The most likely cause is an unconfigured Firebase options file. The app stops at startup with `Firebase for <env> is not configured` when `lib/firebase_options_<env>.dart` still contains the `'stub'` placeholder values; regenerate it with `flutterfire configure --project=<your-staging-id> --out=lib/firebase_options_staging.dart` (or the production equivalent).
 
 **`make run-staging` has empty `--dart-define` values at runtime.**
 Run `fvm flutter clean` first. `String.fromEnvironment` is a compile-time constant, so stale build cache can hold old (empty) values.

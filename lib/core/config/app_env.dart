@@ -30,6 +30,19 @@ enum AppEnv {
   /// must never be submitted to the stores.
   final bool alwaysUseDebugAppCheck;
 
+  /// Throws [StateError] when [projectId] comes from the committed stub
+  /// options file (`projectId: 'stub'`), i.e. `flutterfire configure` has not
+  /// been run for this environment yet.
+  void ensureFirebaseConfigured(String projectId) {
+    if (projectId != 'stub') return;
+    throw StateError(
+      'Firebase for $name is not configured: '
+      'lib/firebase_options_$name.dart is still a stub. Run '
+      'flutterfire configure --project=<$name-project-id> '
+      '--out=lib/firebase_options_$name.dart (see docs/setup.md).',
+    );
+  }
+
   /// Maps the build flavor (Flutter's `appFlavor`) to an environment.
   /// Throws [StateError] when the app was started without a known flavor.
   static AppEnv fromFlavor(String? flavor) => switch (flavor) {
