@@ -12,4 +12,27 @@ void main() {
       expect(k.defaultValue, 3);
     },
   );
+
+  test('Given two runtime keys with equal key and default, When compared, '
+      'Then they are equal with equal hashCodes', () {
+    final a = ConfigKey<int>('a', int.parse('1'));
+    final b = ConfigKey<int>('a', int.parse('1'));
+
+    expect(a, b);
+    expect(a.hashCode, b.hashCode);
+  });
+
+  test('Given keys with different names, When compared, Then not equal', () {
+    final a = ConfigKey<int>('a', int.parse('1'));
+    final b = ConfigKey<int>('b', int.parse('1'));
+
+    expect(a, isNot(b));
+  });
+
+  test('Given keys with different T, When compared, Then not equal', () {
+    final a = ConfigKey<int>('a', int.parse('1'));
+    final b = ConfigKey<double>('a', double.parse('1'));
+
+    expect(a, isNot(b));
+  });
 }
