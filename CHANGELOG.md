@@ -24,6 +24,10 @@ The generated app's `pubspec.yaml` version is separate from the blueprint versio
 - Complete `ios/` and `android/` platform folders.
 - Seed tests under `test/` and CI: `ci.yml` (analyze + test) and `blueprint.yml` (runs `tool/verify_init.sh` for three init combinations).
 
+### Fixed
+
+- `scaffold.sh` honors `BLUEPRINT_REF` when run from a local clone, prints the ref it uses, and explains how to scaffold a pre-v1.0.0 tag instead of failing in init. The `curl` one-liner no longer mistakes the current directory for a local blueprint clone.
+
 ### Removed
 
 - Scaffold options: tab count, color presets, AI tool choice, and FVM choice.

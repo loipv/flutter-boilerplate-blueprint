@@ -51,7 +51,14 @@ If you need to reproduce an older blueprint version exactly, pin a tag. `BLUEPRI
 BLUEPRINT_REF=v1.0.0 bash -c "$(curl -fsSL https://raw.githubusercontent.com/loipv/flutter-boilerplate-blueprint/v1.0.0/scaffold.sh)"
 ```
 
-The `v0.x` one-liners (tags `v0.6.0` to `v0.9.0`) no longer work, because their script reads a `template/` directory that `main` no longer has. Use the `main` one-liner above or set `BLUEPRINT_REF`.
+The script prints the ref it uses. `BLUEPRINT_REF` also works with a local clone (`BLUEPRINT_REF=v1.0.0 bash scaffold.sh my_app`), picking a tag or branch from that clone instead of its `HEAD`.
+
+The `v0.x` one-liners (tags `v0.6.0` to `v0.9.0`) no longer work: their script always clones `main` and reads a `template/` directory that `main` no longer has. This script cannot scaffold those tags either, since they have no `tool/init.dart`. To reproduce a `v0.x` version, clone that tag and run its own script:
+
+```bash
+git clone --depth 1 --branch v0.9.0 https://github.com/loipv/flutter-boilerplate-blueprint.git blueprint-v0.9.0
+bash blueprint-v0.9.0/scaffold.sh
+```
 
 If you want to inspect the repo first, or skip the script, use "Use this template" on GitHub or clone it, then run the init tool:
 
@@ -228,7 +235,7 @@ Read it left to right: UI in `presentation` talks to controllers in `application
 - Preferences: theme and haptics support with local persistence and user-profile sync points
 - Error handling: data layer maps backend failures to a shared `Failure` type
 - Analytics and monitoring: abstracted analytics repository, with optional PostHog and Sentry integrations
-- Environment split: separate staging and production entrypoints and env files
+- Environment split: one entrypoint that picks staging or production config from the build flavor, plus per-flavor env files
 - Platform setup: flavor-aware iOS and Android config files, release signing hooks, privacy manifest, and auth-related plist handling
 - Notifications: optional local reminder scaffold with permission requests, scheduling, and timezone-aware resync
 - Cloud Functions: optional TypeScript scaffold when selected
