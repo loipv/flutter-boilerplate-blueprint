@@ -4,6 +4,7 @@ analyzer:
   exclude:
     - "**/*.g.dart"
     - "**/*.freezed.dart"
+    - "lib/l10n/generated/**"
     - build/**
     - android/**
     - ios/**

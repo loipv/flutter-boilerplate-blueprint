@@ -9,6 +9,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
 
   # --- State management ---
   flutter_riverpod: ^3.3.1
@@ -125,6 +127,7 @@ flutter_native_splash:
   fullscreen: false
 
 flutter:
+  generate: true
   uses-material-design: true
 
   assets:

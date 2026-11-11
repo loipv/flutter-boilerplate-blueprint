@@ -193,6 +193,16 @@ void main() {
     });
   });
 
+  group('layerOf l10n', () {
+    test('Given a core l10n file, When classified, Then it is application', () {
+      expect(layerOf('lib/core/l10n/locale_provider.dart'), Layer.application);
+    });
+
+    test('Given a generated l10n file, When classified, Then it is null', () {
+      expect(layerOf('lib/l10n/generated/app_localizations.dart'), isNull);
+    });
+  });
+
   group('formatLayerLine', () {
     test('Given 99.96% domain, When formatted, Then it never shows 100.0', () {
       final line = formatLayerLine(Layer.domain, (found: 10000, hit: 9996));

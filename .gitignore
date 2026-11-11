@@ -76,3 +76,4 @@ ios/Flutter/Generated.xcconfig
 ios/Flutter/ephemeral/
 ios/Runner/GeneratedPluginRegistrant.*
 coverage/
+lib/l10n/generated/

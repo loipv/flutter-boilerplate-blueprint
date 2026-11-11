@@ -1,0 +1,9 @@
+{
+  "@@locale": "en",
+  "appTitle": "Blueprint App",
+  "appDescription": "A Flutter + Firebase starter app",
+  "languageNativeName": "English",
+  "@appTitle": {"description": "The application name shown in the title bar and app switcher."},
+  "@appDescription": {"description": "Short description of the application."},
+  "@languageNativeName": {"description": "This language written in itself, shown in the language picker."}
+}

@@ -25,6 +25,7 @@ Layer? layerOf(String libPath) {
   if (libPath.contains('/application/') ||
       libPath.startsWith('lib/core/router/') ||
       libPath.startsWith('lib/core/config/') ||
+      libPath.startsWith('lib/core/l10n/') ||
       libPath.startsWith('lib/core/providers/')) {
     return Layer.application;
   }

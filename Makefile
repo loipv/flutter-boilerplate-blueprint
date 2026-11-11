@@ -227,6 +227,7 @@ coverage:
 	$(FLUTTER) test --coverage && $(FLUTTER:flutter=dart) scripts/coverage_gate.dart coverage/lcov.info
 
 codegen:
+	$(FLUTTER) gen-l10n
 	$(FLUTTER) pub run build_runner build --delete-conflicting-outputs
 
 # Writes a stub lib/firebase_options_<env>.dart for each flavor that has none,
@@ -254,6 +255,7 @@ firebase-stubs:
 
 setup: firebase-stubs
 	$(FLUTTER) pub get
+	$(FLUTTER) gen-l10n
 	$(FLUTTER) pub run build_runner build --delete-conflicting-outputs
 	@if [ -d functions ]; then cd functions && \
 	  if [ -f package-lock.json ]; then npm ci; else npm install; fi; fi
