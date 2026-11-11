@@ -123,7 +123,9 @@ GateResult evaluate(
   }
   final unloaded = <String>[
     for (final entry in gatedSources.entries)
-      if (!lcov.containsKey(entry.key) && hasExecutableCode(entry.value))
+      if (!lcov.containsKey(entry.key) &&
+          !entry.value.contains('coverage:ignore-file') &&
+          hasExecutableCode(entry.value))
         entry.key,
   ]..sort();
   return GateResult({

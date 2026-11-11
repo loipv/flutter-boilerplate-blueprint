@@ -149,6 +149,15 @@ void main() {
       expect(r.passed, false);
     });
 
+    test('Given a gated source with coverage:ignore-file missing from lcov, '
+        'When evaluated, Then it is not reported as unloaded', () {
+      final result = evaluate({}, {
+        'lib/features/x/data/gateway.dart':
+            '// coverage:ignore-file\nclass G { void f() {} }',
+      });
+      expect(result.unloaded, isEmpty);
+    });
+
     test(
       'Given an unloaded interface-only file, When evaluated, Then pass',
       () {
