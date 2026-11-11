@@ -80,7 +80,7 @@ void main() {
   });
 
   /// Seeds SharedPreferences, pumps [App] with [authRepo] and settles.
-  Future<void> pumpApp(
+  Future<void> pumpWholeApp(
     WidgetTester tester,
     FakeAuthRepository authRepo, {
     bool onboardingComplete = false,
@@ -110,7 +110,7 @@ void main() {
       (tester) async {
         final authRepo = FakeAuthRepository(initialUser: signedInUser);
 
-        await pumpApp(tester, authRepo, onboardingComplete: true);
+        await pumpWholeApp(tester, authRepo, onboardingComplete: true);
 
         expect(find.byType(HomeScreen), findsOneWidget);
         // An existing session is never replaced by an anonymous one.
@@ -146,7 +146,7 @@ void main() {
         );
         final authRepo = FakeAuthRepository(initialUser: signedInUser);
 
-        await pumpApp(tester, authRepo, onboardingComplete: true);
+        await pumpWholeApp(tester, authRepo, onboardingComplete: true);
         await tester.tap(find.text('Explore'));
         await tester.pumpAndSettle();
 
@@ -160,7 +160,7 @@ void main() {
       (tester) async {
         final authRepo = FakeAuthRepository();
 
-        await pumpApp(tester, authRepo);
+        await pumpWholeApp(tester, authRepo);
 
         // App._checkAuth signs in anonymously; the router lands on the intro.
         expect(authRepo.currentUser, FakeAuthRepository.anonymousUser);
