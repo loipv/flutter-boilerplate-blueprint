@@ -159,5 +159,43 @@ void main() {
         expect(r.passed, true);
       },
     );
+
+    test('Given domain at 99%, When evaluated, Then it fails', () {
+      final r = evaluate({'lib/x/domain/y.dart': (found: 100, hit: 99)}, {});
+      expect(r.passed, false);
+    });
+
+    test('Given two data files, When evaluated, Then counts are summed', () {
+      final r = evaluate({
+        'lib/a/data/x.dart': (found: 10, hit: 10),
+        'lib/b/data/y.dart': (found: 10, hit: 7),
+      }, {});
+      expect(r.totals[Layer.data], (found: 20, hit: 17));
+      expect(r.passed, false);
+    });
+  });
+
+  group('parseLcov line endings', () {
+    test('Given CRLF lcov, When parsed, Then the record is read', () {
+      expect(
+        parseLcov('SF:lib/a/data/b.dart\r\nLF:4\r\nLH:3\r\nend_of_record\r\n'),
+        {'lib/a/data/b.dart': (found: 4, hit: 3)},
+      );
+    });
+  });
+
+  group('formatLayerLine', () {
+    test('Given 99.96% domain, When formatted, Then it never shows 100.0', () {
+      final line = formatLayerLine(Layer.domain, (found: 10000, hit: 9996));
+      expect(line, contains('99.9%'));
+      expect(line, isNot(contains('100.0%')));
+      expect(line, endsWith('FAIL'));
+    });
+
+    test('Given full domain coverage, When formatted, Then it is OK', () {
+      final line = formatLayerLine(Layer.domain, (found: 6, hit: 6));
+      expect(line, contains('100.0%'));
+      expect(line, endsWith('OK'));
+    });
   });
 }

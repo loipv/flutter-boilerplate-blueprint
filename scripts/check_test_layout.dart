@@ -34,13 +34,28 @@ List<String> findOrphanTests(
   return orphans..sort();
 }
 
-void main() {
-  final testPaths = Directory('test')
+/// Forward-slash paths of every `*_test.dart` under [root], or null when
+/// [root] does not exist.
+List<String>? listTestFiles(String root) {
+  final dir = Directory(root);
+  if (!dir.existsSync()) return null;
+  return dir
       .listSync(recursive: true)
       .whereType<File>()
       .map((f) => f.path.replaceAll(r'\', '/'))
       .where((p) => p.endsWith('_test.dart'))
       .toList();
+}
+
+void main() {
+  final testPaths = listTestFiles('test');
+  if (testPaths == null) {
+    stderr.writeln(
+      'No test/ directory found. Run this from the project root '
+      '(make check-test-layout).',
+    );
+    exit(1);
+  }
   final orphans = findOrphanTests(testPaths, (p) => File(p).existsSync());
   if (orphans.isNotEmpty) {
     stderr.writeln('Test files without a matching source file:');

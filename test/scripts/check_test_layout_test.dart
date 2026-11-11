@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../scripts/check_test_layout.dart';
@@ -48,6 +50,37 @@ void main() {
         'test/foo/baz_test.dart',
       ], (p) => p == 'lib/foo/baz.dart');
       expect(orphans, ['test/foo/bar_test.dart']);
+    });
+
+    test('Given several orphans, When checked, Then they are sorted', () {
+      final orphans = findOrphanTests([
+        'test/z/z_test.dart',
+        'test/a/a_test.dart',
+        'test/m/m_test.dart',
+      ], (_) => false);
+      expect(orphans, [
+        'test/a/a_test.dart',
+        'test/m/m_test.dart',
+        'test/z/z_test.dart',
+      ]);
+    });
+  });
+
+  group('listTestFiles', () {
+    late Directory tmp;
+    setUp(() => tmp = Directory.systemTemp.createTempSync('layout_'));
+    tearDown(() => tmp.deleteSync(recursive: true));
+
+    test('Given no test directory, When listed, Then it returns null', () {
+      expect(listTestFiles('${tmp.path}/test'), isNull);
+    });
+
+    test('Given nested files, When listed, Then only *_test.dart remain', () {
+      File('${tmp.path}/test/a/x_test.dart').createSync(recursive: true);
+      File('${tmp.path}/test/a/helper.dart').createSync(recursive: true);
+      final files = listTestFiles('${tmp.path}/test')!;
+      expect(files, hasLength(1));
+      expect(files.single, endsWith('test/a/x_test.dart'));
     });
   });
 }

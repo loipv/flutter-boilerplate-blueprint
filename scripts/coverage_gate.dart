@@ -97,6 +97,17 @@ class GateResult {
 
 double _percent(Counts c) => c.found == 0 ? 100 : c.hit * 100 / c.found;
 
+/// One report line for [layer]. The percentage is floored to one decimal so
+/// a failing layer never prints as 100.0%.
+String formatLayerLine(Layer layer, Counts c) {
+  final percent = _percent(c);
+  final shown = (percent * 10).floor() / 10;
+  final status = percent >= layer.threshold ? 'OK' : 'FAIL';
+  return '${layer.name.padRight(12)}${shown.toStringAsFixed(1).padLeft(5)}% '
+      '(${c.hit}/${c.found})  >= ${layer.threshold.toStringAsFixed(0)}% '
+      '$status';
+}
+
 /// Aggregates lcov counts per layer and finds gated files missing from lcov.
 GateResult evaluate(
   Map<String, Counts> lcov,
@@ -135,13 +146,7 @@ void main(List<String> args) {
   }
   final result = evaluate(parseLcov(lcovFile.readAsStringSync()), sources);
   for (final l in Layer.values) {
-    final c = result.totals[l]!;
-    final status = _percent(c) >= l.threshold ? 'OK' : 'FAIL';
-    stdout.writeln(
-      '${l.name.padRight(12)}${_percent(c).toStringAsFixed(1).padLeft(5)}% '
-      '(${c.hit}/${c.found})  >= ${l.threshold.toStringAsFixed(0)}% '
-      '$status',
-    );
+    stdout.writeln(formatLayerLine(l, result.totals[l]!));
   }
   for (final path in result.unloaded) {
     stdout.writeln('UNLOADED (has code, never loaded by tests): $path');
