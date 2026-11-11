@@ -86,8 +86,7 @@ class _AppState extends ConsumerState<App> {
   @override
   Widget build(BuildContext context) {
     final router = ref.watch(routerProvider);
-    final themeMode =
-        ref.watch(themeProvider).value ?? ThemeMode.system;
+    final themeMode = ref.watch(themeProvider).value ?? ThemeMode.system;
 
     Widget app = MaterialApp.router(
       title: 'Blueprint App',

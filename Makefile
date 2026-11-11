@@ -54,7 +54,7 @@ help:
 	@echo "    make set-secret-prod    SECRET=<NAME>"
 	@echo ""
 	@echo "  Dev"
-	@echo "    make setup    (Firebase options stubs + pub get + codegen + functions npm install)"
+	@echo "    make setup    (Firebase options stubs + pub get + codegen + functions npm ci)"
 	@echo "    make analyze"
 	@echo "    make test"
 	@echo "    make codegen"
@@ -198,7 +198,8 @@ firebase-stubs:
 setup: firebase-stubs
 	$(FLUTTER) pub get
 	$(FLUTTER) pub run build_runner build --delete-conflicting-outputs
-	@if [ -d functions ]; then cd functions && npm install; fi
+	@if [ -d functions ]; then cd functions && \
+	  if [ -f package-lock.json ]; then npm ci; else npm install; fi; fi
 
 icons:
 	$(FLUTTER) pub run flutter_launcher_icons

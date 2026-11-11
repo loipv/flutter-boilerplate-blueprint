@@ -5,12 +5,14 @@
 #
 # Copies the working tree (tracked and untracked, not ignored) to a temporary
 # directory, runs init there with the given flags, checks the result, then runs
-# `make setup analyze test`. Prints `OK: <dir>` on success; any failed check
-# exits non-zero. The temporary directory is kept for inspection.
+# `make setup analyze test`. Prints `OK` on success and deletes the temporary
+# directory (set VERIFY_KEEP=1 to keep it); any failed check exits non-zero and
+# keeps the directory for inspection.
 set -euo pipefail
 
 fail() {
   echo "FAIL: $*" >&2
+  [ -z "${dir:-}" ] || echo "Kept for inspection: $dir" >&2
   exit 1
 }
 
@@ -59,4 +61,10 @@ fi
 
 make setup analyze test || fail "make setup analyze test"
 
-echo "OK: $dir"
+if [ -n "${VERIFY_KEEP:-}" ]; then
+  echo "OK: $dir"
+else
+  cd /
+  rm -rf "$dir"
+  echo "OK"
+fi

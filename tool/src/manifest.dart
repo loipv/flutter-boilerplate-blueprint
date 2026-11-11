@@ -24,7 +24,9 @@ const Set<String> textFileNames = {
 const Set<String> skipDirs = {
   '.git',
   '.dart_tool',
+  '.cxx',
   '.fvm',
+  '.gradle',
   '.idea',
   'build',
   'node_modules',
