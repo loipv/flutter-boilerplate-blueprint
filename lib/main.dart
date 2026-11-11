@@ -151,6 +151,7 @@ Future<void> main() async {
   } catch (_) {}
 
   // BEGIN_REMOTE_CONFIG
+  // Failures in initialize() are logged locally only: Sentry starts later.
   final remoteConfig = FirebaseRemoteConfigRepository(
     FirebaseRemoteConfig.instance,
   );

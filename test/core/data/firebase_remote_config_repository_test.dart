@@ -233,6 +233,13 @@ void main() {
       });
     }
 
+    test('Given a key typed as ConfigKey<Object> with an int default, '
+        'When the remote value is "42", Then get returns 42', () {
+      when(() => sdk.getValue('o')).thenReturn(remote('42'));
+      const ConfigKey<Object> o = ConfigKey<int>('o', 7);
+      expect(repo.get(o), 42);
+    });
+
     test(
       'Given a whitespace-padded int, When get is called, Then it parses',
       () {

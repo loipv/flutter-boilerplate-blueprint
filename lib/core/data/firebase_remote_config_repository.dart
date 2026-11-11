@@ -104,23 +104,27 @@ class FirebaseRemoteConfigRepository implements RemoteConfigRepository {
       if (raw.source == ValueSource.valueStatic) return null;
       final text = raw.asString();
       final Object? parsed;
-      if (T == String) {
-        parsed = text;
-      } else if (T == bool) {
-        parsed = switch (text) {
-          'true' => true,
-          'false' => false,
-          _ => null,
-        };
-      } else if (T == int) {
-        parsed = int.tryParse(text);
-      } else if (T == double) {
-        parsed = double.tryParse(text);
-      } else {
-        if (_warnedKeys.add(key.key)) {
-          _log.warning('Unsupported ConfigKey type for "${key.key}": $T');
-        }
-        return null;
+      switch (key.defaultValue) {
+        case String _:
+          parsed = text;
+        case bool _:
+          parsed = switch (text) {
+            'true' => true,
+            'false' => false,
+            _ => null,
+          };
+        case int _:
+          parsed = int.tryParse(text);
+        case double _:
+          parsed = double.tryParse(text);
+        default:
+          if (_warnedKeys.add(key.key)) {
+            _log.warning(
+              'Unsupported ConfigKey type for "${key.key}": '
+              '${key.defaultValue.runtimeType}',
+            );
+          }
+          return null;
       }
       return parsed as T?;
     } catch (e, st) {

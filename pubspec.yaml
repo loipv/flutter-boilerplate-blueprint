@@ -23,7 +23,7 @@ dependencies:
   cloud_firestore: ^6.2.0
   firebase_app_check: ^0.4.2
   # BEGIN_REMOTE_CONFIG
-  firebase_remote_config: ^6.2.0
+  firebase_remote_config: ^6.7.1
   # END_REMOTE_CONFIG
 
   # --- Auth providers ---
