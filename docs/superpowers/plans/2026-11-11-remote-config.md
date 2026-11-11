@@ -36,7 +36,7 @@
 1. A `fetchAndActivate()` that fails after `initialize()` has returned must not surface as an uncaught async error. The error is logged and swallowed. Covered in Task 4.
 2. Every SDK step may throw **synchronously** (not only through a failed Future). `initialize()` still completes, and the later steps still run. Covered in Task 4.
 3. New values activated before anything watches the revision. A later `watchConfig` returns the new value, not a stale one. Covered in Task 5.
-4. Numeric edge strings: `"3.0"` for an `int` key → default; `"3"` for a `double` key → `3.0`; `" 7 "` for an `int` key → default. Covered in Task 4.
+4. Numeric edge strings: `"3.0"` for an `int` key → default; `"3"` for a `double` key → `3.0`; `" 8 "` for an `int` key → `8` (Dart's tryParse trims). Covered in Task 4.
 5. A `bool` key with `"TRUE"` or `"1"` → default. Only exact `"true"`/`"false"` count. Covered in Task 4.
 
 ---
@@ -258,7 +258,7 @@ T get<T extends Object>(ConfigKey<T> key) {
 - `T? _read<T extends Object>(ConfigKey<T> key)` lives inside markers. It wraps `getValue` in a try/catch and returns null when:
   - the source is `ValueSource.valueStatic`
   - a `bool` value is not exactly `"true"`/`"false"`
-  - `int.tryParse` / `double.tryParse` on the raw string return null (no trimming)
+  - `int.tryParse` / `double.tryParse` on the raw string return null (tryParse is applied to the raw string; Dart's tryParse trims surrounding whitespace itself)
   - `T` is an unsupported type, which also logs a warning once per key
   - `String` returns `asString()` as-is, including `""`.
 
@@ -295,7 +295,7 @@ Test file layout follows `posthog_analytics_repository_test.dart`:
 **Marked group `get`, with values stubbed through `remote(...)`:**
 - String `'hello'` → `'hello'`; `''` → `''`
 - bool `'true'` → true, `'false'` → false; `'TRUE'`, `'1'` and `'yes'` → default `true`
-- int `'42'` → 42; `'abc'`, `'3.0'` and `' 7 '` → default 7
+- int `'42'` → 42; `'abc'`, `'3.0'` → default 7; `' 8 '` → 8
 - double `'2.5'` → 2.5; `'3'` → 3.0; `'x'` → default 1.5
 - `valueStatic` → default
 - `ConfigKey<DateTime>` → default, with no throw

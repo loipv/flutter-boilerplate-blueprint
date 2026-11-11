@@ -142,7 +142,7 @@ void main() {
     });
 
     test('Given fetchAndActivate fails after initialize returned, '
-        'Then there is no uncaught error', () async {
+        'When it later fails, Then there is no uncaught error', () async {
       final completer = Completer<bool>();
       when(() => sdk.fetchAndActivate()).thenAnswer((_) => completer.future);
       var count = 0;
@@ -156,15 +156,13 @@ void main() {
       await sub.cancel();
     });
 
-    test(
-      'Given initialize, Then fetchAndActivate is called exactly once',
-      () async {
-        await init();
-        await pumpEventQueue();
+    test('Given initialize, When it finishes, Then fetchAndActivate is called '
+        'exactly once', () async {
+      await init();
+      await pumpEventQueue();
 
-        verify(() => sdk.fetchAndActivate()).called(1);
-      },
-    );
+      verify(() => sdk.fetchAndActivate()).called(1);
+    });
 
     final failures = <String, void Function()>{
       'setConfigSettings': () =>
@@ -228,15 +226,27 @@ void main() {
       });
     }
 
-    for (final (raw, expected) in [
-      ('42', 42),
-      ('abc', 7),
-      ('3.0', 7),
-      (' 7 ', 7),
-    ]) {
+    for (final (raw, expected) in [('42', 42), ('abc', 7), ('3.0', 7)]) {
       test('Given int "$raw", When get is called, Then it is $expected', () {
         when(() => sdk.getValue('i')).thenReturn(remote(raw));
         expect(repo.get(i), expected);
+      });
+    }
+
+    test(
+      'Given a whitespace-padded int, When get is called, Then it parses',
+      () {
+        when(() => sdk.getValue('i')).thenReturn(remote(' 8 '));
+        expect(repo.get(i), 8);
+      },
+    );
+
+    for (final raw in ['TRUE', '1', 'True', 'yes']) {
+      test('Given bool "$raw" and default false, When get is called, '
+          'Then the default is returned', () {
+        const bf = ConfigKey<bool>('b', false);
+        when(() => sdk.getValue('b')).thenReturn(remote(raw));
+        expect(repo.get(bf), false);
       });
     }
 
