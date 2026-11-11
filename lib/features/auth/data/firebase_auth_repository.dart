@@ -16,11 +16,30 @@ import 'package:blueprint_app/features/auth/domain/user_entity.dart';
 
 part 'firebase_auth_repository.g.dart';
 
+/// Fetches a native Sign in with Apple credential. Matches
+/// [SignInWithApple.getAppleIDCredential] so tests can inject a fake.
+typedef AppleCredentialFetcher =
+    Future<AuthorizationCredentialAppleID> Function({
+      required List<AppleIDAuthorizationScopes> scopes,
+      String? nonce,
+    });
+
 class FirebaseAuthRepository implements AuthRepository {
-  FirebaseAuthRepository(this._firebaseAuth, this._analytics);
+  FirebaseAuthRepository(
+    this._firebaseAuth,
+    this._analytics, {
+    required GoogleSignIn googleSignIn,
+    required AppleCredentialFetcher fetchAppleCredential,
+    bool? isAndroid,
+  }) : _googleSignIn = googleSignIn,
+       _fetchAppleCredential = fetchAppleCredential,
+       _isAndroid = isAndroid ?? Platform.isAndroid;
 
   final FirebaseAuth _firebaseAuth;
   final AnalyticsRepository _analytics;
+  final GoogleSignIn _googleSignIn;
+  final AppleCredentialFetcher _fetchAppleCredential;
+  final bool _isAndroid;
   static const _log = AppLogger('FirebaseAuthRepository');
 
   // ---------------------------------------------------------------------------
@@ -84,7 +103,7 @@ class FirebaseAuthRepository implements AuthRepository {
   @override
   Future<UserEntity> signInWithGoogle() async {
     try {
-      final googleUser = await GoogleSignIn.instance.authenticate();
+      final googleUser = await _googleSignIn.authenticate();
       final googleAuth = googleUser.authentication;
       final credential = GoogleAuthProvider.credential(
         accessToken: null,
@@ -119,13 +138,13 @@ class FirebaseAuthRepository implements AuthRepository {
 
   @override
   Future<UserEntity> signInWithApple() async {
-    if (Platform.isAndroid) return _signInWithAppleWeb();
+    if (_isAndroid) return _signInWithAppleWeb();
 
     try {
       final rawNonce = _generateNonce();
       final nonce = _sha256ofString(rawNonce);
 
-      final appleCredential = await SignInWithApple.getAppleIDCredential(
+      final appleCredential = await _fetchAppleCredential(
         scopes: [
           AppleIDAuthorizationScopes.email,
           AppleIDAuthorizationScopes.fullName,
@@ -289,7 +308,7 @@ class FirebaseAuthRepository implements AuthRepository {
 
     try {
       if (providerIds.contains('google.com')) {
-        final googleUser = await GoogleSignIn.instance.authenticate();
+        final googleUser = await _googleSignIn.authenticate();
         final googleAuth = googleUser.authentication;
         final credential = GoogleAuthProvider.credential(
           idToken: googleAuth.idToken,
@@ -298,7 +317,7 @@ class FirebaseAuthRepository implements AuthRepository {
       } else if (providerIds.contains('apple.com')) {
         final rawNonce = _generateNonce();
         final nonce = _sha256ofString(rawNonce);
-        final apple = await SignInWithApple.getAppleIDCredential(
+        final apple = await _fetchAppleCredential(
           scopes: [
             AppleIDAuthorizationScopes.email,
             AppleIDAuthorizationScopes.fullName,
@@ -326,10 +345,7 @@ class FirebaseAuthRepository implements AuthRepository {
   @override
   Future<void> signOut() async {
     try {
-      await Future.wait([
-        _firebaseAuth.signOut(),
-        GoogleSignIn.instance.signOut(),
-      ]);
+      await Future.wait([_firebaseAuth.signOut(), _googleSignIn.signOut()]);
       await _analytics.reset();
     } on FirebaseAuthException catch (e) {
       throw Failure.auth(e.message);
@@ -386,5 +402,7 @@ FirebaseAuthRepository authRepository(Ref ref) {
   return FirebaseAuthRepository(
     FirebaseAuth.instance,
     ref.read(analyticsRepositoryProvider),
+    googleSignIn: GoogleSignIn.instance,
+    fetchAppleCredential: SignInWithApple.getAppleIDCredential,
   );
 }

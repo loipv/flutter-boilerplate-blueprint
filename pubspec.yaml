@@ -84,6 +84,9 @@ dev_dependencies:
   # END_SENTRY
   flutter_lints: ^6.0.0
   flutter_launcher_icons: ^0.14.4
+  fake_cloud_firestore: ^4.4.0
+  firebase_auth_mocks: ^0.15.2
+  mock_exceptions: ^0.8.2
 
 flutter_launcher_icons:
   android: true
