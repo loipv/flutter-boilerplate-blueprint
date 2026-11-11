@@ -140,21 +140,29 @@ GoRouter router(Ref ref) {
       // Onboarding flow
       GoRoute(
         path: '/onboarding',
-        builder: (_, _) => const OnboardingScaffold(child: IntroView()),
+        builder: (_, state) =>
+            OnboardingScaffold(path: state.uri.path, child: const IntroView()),
         routes: [
           GoRoute(
             path: 'intro',
-            builder: (_, _) => const OnboardingScaffold(child: IntroView()),
+            builder: (_, state) => OnboardingScaffold(
+              path: state.uri.path,
+              child: const IntroView(),
+            ),
           ),
           GoRoute(
             path: 'theme',
-            builder: (_, _) =>
-                const OnboardingScaffold(child: ThemeSelectionView()),
+            builder: (_, state) => OnboardingScaffold(
+              path: state.uri.path,
+              child: const ThemeSelectionView(),
+            ),
           ),
           GoRoute(
             path: 'login-prompt',
-            builder: (_, _) =>
-                const OnboardingScaffold(child: LoginPromptView()),
+            builder: (_, state) => OnboardingScaffold(
+              path: state.uri.path,
+              child: const LoginPromptView(),
+            ),
           ),
         ],
       ),
