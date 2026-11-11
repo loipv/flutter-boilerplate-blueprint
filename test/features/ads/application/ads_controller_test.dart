@@ -92,6 +92,13 @@ void main() {
 
     expect(await controller.maybeShowInterstitial(), isFalse);
 
+    verify(
+      () => repository.preload(
+        AdFormat.interstitial,
+        adUnitId: 'unit-interstitial',
+      ),
+    ).called(1);
+
     when(() => repository.showInterstitial()).thenAnswer((_) async => true);
     expect(await controller.maybeShowInterstitial(), isTrue);
   });
@@ -101,6 +108,10 @@ void main() {
     when(() => repository.showRewarded()).thenThrow(StateError('boom'));
 
     expect(await controller.showRewarded(), isA<RewardUnavailable>());
+
+    verify(
+      () => repository.preload(AdFormat.rewarded, adUnitId: 'unit-rewarded'),
+    ).called(1);
 
     when(
       () => repository.showRewarded(),

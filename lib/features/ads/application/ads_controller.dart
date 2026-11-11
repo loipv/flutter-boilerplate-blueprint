@@ -117,6 +117,7 @@ class AdsController {
       return result;
     } on Object catch (e, st) {
       _log.error('show $format failed', error: e, stackTrace: st);
+      _preload(format);
       return unavailable;
     } finally {
       _showingFullScreen = false;
