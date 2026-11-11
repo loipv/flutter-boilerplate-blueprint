@@ -40,25 +40,30 @@ class _AdBannerState extends ConsumerState<AdBanner> {
 
   Future<void> _load(double width) async {
     final unitId = ref.read(adsSettingsProvider).unitId(AdFormat.banner);
-    if (unitId == null) return;
+    if (unitId == null || !_isEnabled) return;
     _loading = true;
     final generation = _generation;
-    final handle = await ref
-        .read(adsRepositoryProvider)
-        .loadBanner(adUnitId: unitId, width: width);
-    if (handle == null) {
-      if (mounted && generation == _generation) _loading = false;
-      return;
+    var handled = false;
+    try {
+      final handle = await ref
+          .read(adsRepositoryProvider)
+          .loadBanner(adUnitId: unitId, width: width);
+      if (handle == null) return;
+      if (!mounted || generation != _generation || !_isEnabled) {
+        handle.dispose();
+        return;
+      }
+      handled = true;
+      setState(() {
+        _handle = handle;
+        _loading = false;
+      });
+    } finally {
+      if (!handled && mounted && generation == _generation) _loading = false;
     }
-    if (!mounted || generation != _generation) {
-      handle.dispose();
-      return;
-    }
-    setState(() {
-      _handle = handle;
-      _loading = false;
-    });
   }
+
+  bool get _isEnabled => ref.read(adsEnabledProvider(AdFormat.banner));
 
   @override
   Widget build(BuildContext context) {

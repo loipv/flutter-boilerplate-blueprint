@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:blueprint_app/core/theme/app_theme.dart';
@@ -144,5 +145,98 @@ void main() {
 
     expect(handle.disposed, isTrue);
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Given a load in flight, When ads turn off before it completes, '
+      'Then the returned handle is disposed and nothing renders', (
+    tester,
+  ) async {
+    final handle = FakeAdBannerHandle();
+    final completer = Completer<AdBannerHandle?>();
+    when(
+      () => repository.loadBanner(
+        adUnitId: any(named: 'adUnitId'),
+        width: any(named: 'width'),
+      ),
+    ).thenAnswer((_) => completer.future);
+    await tester.pumpWidget(app(enabled: true));
+    await tester.pump();
+
+    await tester.pumpWidget(app(enabled: false));
+    completer.complete(handle);
+    await tester.pumpAndSettle();
+
+    expect(handle.disposed, isTrue);
+    expect(find.text('fake-banner'), findsNothing);
+  });
+
+  testWidgets('Given ads turned off while loading, When they turn back on, '
+      'Then exactly one fresh load happens and the banner shows', (
+    tester,
+  ) async {
+    final stale = FakeAdBannerHandle();
+    final fresh = FakeAdBannerHandle();
+    final first = Completer<AdBannerHandle?>();
+    var calls = 0;
+    when(
+      () => repository.loadBanner(
+        adUnitId: any(named: 'adUnitId'),
+        width: any(named: 'width'),
+      ),
+    ).thenAnswer((_) {
+      calls++;
+      return calls == 1 ? first.future : Future.value(fresh);
+    });
+    await tester.pumpWidget(app(enabled: true));
+    await tester.pump();
+    await tester.pumpWidget(app(enabled: false));
+    first.complete(stale);
+    await tester.pumpAndSettle();
+
+    await tester.pumpWidget(app(enabled: true));
+    await tester.pumpAndSettle();
+
+    expect(calls, 2);
+    expect(stale.disposed, isTrue);
+    expect(fresh.disposed, isFalse);
+    expect(find.text('fake-banner'), findsOneWidget);
+  });
+
+  testWidgets('Given ads turn off between scheduling and the post-frame '
+      'callback, When it runs, Then no banner is requested', (tester) async {
+    stubLoad(FakeAdBannerHandle());
+    final flag = StateProvider<bool>((ref) => true);
+    final container = ProviderContainer(
+      overrides: [
+        adsRepositoryProvider.overrideWithValue(repository),
+        adsSettingsProvider.overrideWithValue(_settings),
+        adsEnabledProvider(
+          AdFormat.banner,
+        ).overrideWith((ref) => ref.watch(flag)),
+      ],
+    );
+    addTearDown(container.dispose);
+    // Registered before the banner's own callback, so it runs first.
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => container.read(flag.notifier).state = false,
+    );
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: MaterialApp(
+          theme: AppTheme.lightTheme,
+          home: const Scaffold(body: AdBanner()),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    verifyNever(
+      () => repository.loadBanner(
+        adUnitId: any(named: 'adUnitId'),
+        width: any(named: 'width'),
+      ),
+    );
   });
 }
