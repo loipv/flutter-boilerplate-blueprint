@@ -53,7 +53,7 @@ For blueprint release work:
 git update-index --skip-worktree lib/firebase_options_staging.dart lib/firebase_options_production.dart
 ```
 
-Optional features are wrapped in marker lines that init strips when the feature is turned off: `// BEGIN_<NAME>` / `// END_<NAME>` (`# ...` in YAML and other `#`-comment files, `<!-- ... -->` in Markdown). Each marker must sit on its own line. Known names live in `featureRules` in `tool/src/manifest.dart`; a new name must be added there, or `make test` fails (`test/tool/repo_markers_test.dart`) and init refuses to run.
+Optional features are wrapped in marker lines that init strips when the feature is turned off: `// BEGIN_<NAME>` / `// END_<NAME>` (`# ...` in YAML and other `#`-comment files, `<!-- ... -->` in Markdown). Each marker must sit on its own line. Known names live in `featureRules` in `tool/src/manifest.dart`; a new name must be added there, or `make test` fails (`test/tool/manifest_test.dart`) and init refuses to run.
 
 <!-- END_BLUEPRINT -->
 

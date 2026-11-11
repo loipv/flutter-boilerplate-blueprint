@@ -17,10 +17,12 @@ make run-staging          # Run the staging flavor
 make run-prod             # Run the production flavor
 make analyze              # Static analysis
 make test                 # Unit + widget tests
+make check-test-layout    # Every test file mirrors a source file
+make coverage             # Tests + per-layer coverage gate
 make codegen              # Run build_runner (freezed + riverpod)
 make deploy-staging       # Deploy Firestore rules to staging
 make deploy-prod          # Deploy Firestore rules to production
-make release-preflight    # analyze + test gate before a release
+make release-preflight    # Format, analyze, layout check and coverage gate before a release
 make build-prod-ipa       # Build production IPA
 make build-prod-aab       # Build production AAB
 ```

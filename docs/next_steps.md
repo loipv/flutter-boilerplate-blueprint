@@ -41,7 +41,7 @@ Scaffolded from `flutter-boilerplate-blueprint`. See `BLUEPRINT_VERSION.md` in t
 - [ ] **Profile screen**: add any app-specific fields
 - [ ] **User model**: add domain-specific fields to `UserEntity` and `UserPreferences`
 - [ ] **Firestore collection names**: define them in `core/constants/app_constants.dart`
-- [ ] **Run preflight**: `make release-preflight` (analyze + test gate must pass with zero errors)
+- [ ] **Run preflight**: `make release-preflight` (format, analyze, test layout check and coverage gate must pass with zero errors)
 - [ ] **Privacy manifest** (iOS): review `ios/Runner/PrivacyInfo.xcprivacy` and add any app-specific API reasons
 - [ ] **Store listing assets**: screenshots, app description, keywords, privacy policy URL
 - [ ] **Tag your first release**: `make bump-version VERSION=1.0.0 BUILD=1 && make tag-release VERSION=1.0.0`

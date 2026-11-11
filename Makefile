@@ -36,7 +36,7 @@ help:
 	@echo "    make build-prod-aab    (AAB + symbols for Play Store)"
 	@echo ""
 	@echo "  Release"
-	@echo "    make release-preflight            (analyze + test gate)"
+	@echo "    make release-preflight            (format + analyze + layout check + coverage gate)"
 	@echo "    make bump-version VERSION=1.0.0 BUILD=2"
 	@echo "    make changelog"
 	@echo "    make tag-release VERSION=1.0.0"
@@ -111,8 +111,10 @@ build-prod-aab:
 	  $(call dart_defines,.env.production .env) \
 	  --obfuscate --split-debug-info=build/app/outputs/symbols
 
+# Formats the Dart source folders only; `format .` would also walk build/.
 release-preflight:
-	$(FLUTTER:flutter=dart) format . && $(FLUTTER) analyze && $(FLUTTER) test
+	$(FLUTTER:flutter=dart) format $(wildcard lib test scripts tool integration_test) && \
+	  $(FLUTTER) analyze && $(MAKE) check-test-layout coverage
 
 bump-version:
 	@if [ -z "$(VERSION)" ] || [ -z "$(BUILD)" ]; then \

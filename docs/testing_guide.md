@@ -245,16 +245,26 @@ expect(
 
 ## Failure Mapping
 
-Every data layer method should map exceptions to `Failure`. Test the mapping directly:
+Every data layer method should map exceptions to `Failure`. Test the mapping in the repository test with a Firebase fake and `mock_exceptions`, as in [Repository Tests](#repository-tests):
 
 ```dart
-test('maps FirebaseException to AuthFailure', () async {
-  when(() => mockFirebaseAuth.signInAnonymously())
-      .thenThrow(FirebaseAuthException(code: 'network-request-failed'));
+test(
+  'Given an unexpected error, When signing in anonymously, Then it throws Failure.unknown',
+  () async {
+    final auth = MockFirebaseAuth();
+    whenCalling(Invocation.method(#signInAnonymously, null))
+        .on(auth)
+        .thenThrow(Exception('boom'));
 
-  expect(() => repo.signInAnonymously(), throwsA(isA<Failure>()));
-});
+    await expectLater(
+      buildRepo(auth).signInAnonymously(),
+      throwsA(isA<UnknownFailure>()),
+    );
+  },
+);
 ```
+
+`buildRepo` constructs `FirebaseAuthRepository` around the fake; see `test/features/auth/data/firebase_auth_repository_test.dart`.
 
 ## Coverage
 
@@ -275,9 +285,7 @@ Do not lower a threshold to get a change through. Add the missing test to the so
 ## Linting Before PR
 
 ```sh
-dart format .
-make analyze
-make test
+make release-preflight
 ```
 
-All three must pass with zero errors before merging.
+It formats the Dart source folders with `fvm dart format`, then runs `make analyze`, `make check-test-layout` and `make coverage`, the same checks CI runs (`.github/workflows/ci.yml`). Each must pass with zero errors, and formatting changes must be committed, before merging.

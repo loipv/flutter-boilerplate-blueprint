@@ -36,10 +36,12 @@ make run-staging          # Run staging flavor
 make run-prod             # Run production flavor
 make analyze              # fvm flutter analyze
 make test                 # fvm flutter test
+make check-test-layout    # every test file mirrors a source file
+make coverage             # tests + per-layer coverage gate
 make codegen              # build_runner (freezed + riverpod)
 make deploy-staging       # Deploy Firestore rules to staging
 make deploy-prod          # Deploy Firestore rules to production
-make release-preflight    # analyze + test gate
+make release-preflight    # format + analyze + layout check + coverage gate
 make bump-version VERSION=1.0.0 BUILD=1
 make build-prod-ipa       # IPA for App Store / TestFlight
 make build-prod-aab       # AAB for Play Store

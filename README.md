@@ -298,6 +298,8 @@ This repo is a runnable app. Clone it and work on it directly:
 make setup            # pub get, code generation, functions deps
 make analyze          # static analysis
 make test             # unit tests, including tool/ tests
+make check-test-layout # every test file mirrors a source file
+make coverage          # tests + per-layer coverage gate
 tool/verify_init.sh   # run the init tool on a copy and check the result
 ```
 

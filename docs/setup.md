@@ -236,5 +236,6 @@ Before you start building features:
 
 ```sh
 make analyze
-make test
+make check-test-layout
+make coverage
 ```

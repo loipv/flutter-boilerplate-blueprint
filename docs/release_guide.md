@@ -99,11 +99,10 @@ Run these steps in order at the start of every release cycle.
 ### Step 1: Pre-Flight Gate
 
 ```bash
-dart format .
 make release-preflight
 ```
 
-`make release-preflight` runs `make analyze` and `make test`. Do not proceed if formatting would change files or if either command fails.
+`make release-preflight` formats the Dart source folders with `fvm dart format`, then runs `make analyze`, `make check-test-layout` and `make coverage`. Do not proceed if formatting changed files you have not reviewed and committed, or if any command fails.
 
 ### Step 2: Bump Version
 
@@ -511,8 +510,7 @@ Short version for updates: **bump version → preflight → build → upload →
 ### Release Kickoff
 
 ```
-[ ] dart format . with no pending changes
-[ ] make release-preflight, analyze and tests pass
+[ ] make release-preflight passes (format, analyze, layout check, coverage gate) with no pending format changes
 [ ] make bump-version VERSION=x.y.z BUILD=n
 [ ] git commit version bump
 [ ] make changelog, then edit output and commit CHANGELOG.md
