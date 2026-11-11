@@ -12,7 +12,7 @@ The blueprint ships Google AdMob as an optional feature. A new app gets banner, 
 1. Ads can be turned off at four levels, and each one works without the others:
    1. **Init:** `dart tool/init.dart --no-ads` removes the feature, the package and its platform config.
    2. **Build:** `ADS_ENABLED=false` in `.env.<flavor>` stops the SDK from initializing and the consent form from showing.
-   3. **Remote Config:** `ConfigKeys.adsEnabled` (master) and one key per format turn ads off from the Firebase Console in the running session.
+   3. **Remote Config:** `ConfigKeys.adsEnabled` (master) and one key per format turn ads off from the Firebase Console. The per-format keys apply in the running session. The master is read once per launch (`adsMasterSwitchProvider`) and a change applies on the next launch, so consent and ATT never start or stop mid-session.
    4. **User:** overriding `adFreeProvider` to `true` (e.g. after a "remove ads" purchase) hides every ad.
 2. No ad loads until UMP reports `canRequestAds`. EEA/UK users see the GDPR form; iOS users see the IDFA explainer and ATT prompt when it is set up in AdMob. Settings shows "Privacy options" when UMP requires it.
 3. Cold start never waits on ads, and an ads failure never stops the app or throws past the data layer.
@@ -158,7 +158,7 @@ These are the only two files that import `google_mobile_ads`.
 **`ads_enabled_provider.dart`**: `@riverpod bool adsEnabled(Ref ref, AdFormat format)` is true only when all of these hold:
 
 - `bool.fromEnvironment('ADS_ENABLED')` is true;
-- `ref.watchConfig(ConfigKeys.adsEnabled)` is true;
+- `ref.watch(adsMasterSwitchProvider)` (Remote Config `ads_enabled`, read once per launch) is true;
 - `ref.watchConfig(<per-format key>)` is true;
 - `ref.watch(adFreeProvider)` is false;
 - `ref.watch(adsConsentControllerProvider).value == true`;

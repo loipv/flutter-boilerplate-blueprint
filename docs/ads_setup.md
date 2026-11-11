@@ -100,12 +100,14 @@ These answers are your responsibility and depend on how you configure AdMob.
 
 | Key                                  | Effect                                                |
 | ------------------------------------ | ----------------------------------------------------- |
-| `ads_enabled`                        | Master switch for every format                        |
+| `ads_enabled`                        | Master switch for every format, read once per launch  |
 | `ads_banner_enabled`                 | Banners                                               |
 | `ads_interstitial_enabled`           | Interstitials                                         |
 | `ads_rewarded_enabled`               | Rewarded ads                                          |
 | `ads_app_open_enabled`               | App open ads                                          |
 | `ads_full_screen_min_interval_seconds` | Minimum seconds between full-screen ads (default 90) |
+
+`ads_enabled` is read once, the first time ads start in a launch, and kept for the whole session. A value published while the app is running takes effect on the next launch, so ads never switch on or off mid-session and the consent form and ATT prompt never appear mid-session. Remote Config fetches in the background, so a change can need one extra launch to arrive. The per-format keys and the interval apply as soon as a fetch activates.
 
 The minimum interval applies to interstitial and app open ads. A rewarded ad ignores it, because the user asked for it, but its close starts the interval for the next interstitial or app open ad. An app open ad is also blocked for a 5 second quiet period after any full-screen ad closes, which matters when the interval is set below 5.
 
@@ -176,7 +178,7 @@ App open ads: `AppOpenAdObserver` calls `maybeShowAppOpen()` only on a real retu
 [ ] App open: shows on return from background, not on cold start, not within 5 s of another full-screen ad
 [ ] ADS_ENABLED=false: no ads, no consent form
 [ ] adFreeProvider true: no ads, no consent form
-[ ] Remote Config ads_enabled=false hides every format
+[ ] Remote Config ads_enabled=false hides every format after a relaunch, not mid-session
 [ ] Production release build: real ads load (use your own device as a test device)
 [ ] No ad covers navigation or content
 ```

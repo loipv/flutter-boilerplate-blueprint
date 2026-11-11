@@ -8,7 +8,7 @@ The generated app's `pubspec.yaml` version is separate from the blueprint versio
 
 ### Added
 
-- Google AdMob ads (optional init feature `--no-ads`, marker `ADS`): adaptive banner on Home, interstitial, rewarded and app open formats through `AdsController`, UMP consent (GDPR message, IDFA explainer, Settings privacy options tile), Remote Config kill switches, a frequency cap, and the `adFreeProvider` hook for "remove ads" purchases. Env vars `ADS_ENABLED`, `ADMOB_*` and `ADS_DEBUG_GEOGRAPHY`; staging and non-release builds always use Google test IDs.
+- Google AdMob ads (optional init feature `--no-ads`, marker `ADS`): adaptive banner on Home, interstitial, rewarded and app open formats through `AdsController`, UMP consent (GDPR message, IDFA explainer, Settings privacy options tile), Remote Config kill switches (the `ads_enabled` master is read once per launch), a frequency cap, and the `adFreeProvider` hook for "remove ads" purchases. Env vars `ADS_ENABLED`, `ADMOB_*` and `ADS_DEBUG_GEOGRAPHY`; staging and non-release builds always use Google test IDs.
 - `make check-ads-config` (`scripts/check_ads_config.dart`): runs before `release-preflight`, `build-prod-ipa` and `build-prod-aab`; fails on sample App IDs, Google test unit IDs and a missing production App ID.
 - `docs/ads_setup.md`. `tool/verify_init.sh` checks the ads result, and `blueprint.yml` scaffolds a `--no-ads` variant.
 

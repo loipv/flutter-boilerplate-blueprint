@@ -185,6 +185,24 @@ void main() {
     expect(container.read(adsEnabledProvider(AdFormat.interstitial)), isTrue);
   });
 
+  test(
+    'Given every level on, When ads_enabled updates to false '
+    'mid-session, Then every format stays true until the next launch',
+    () async {
+      final container = makeContainer();
+      for (final format in AdFormat.values) {
+        expect(await read(container, format), isTrue);
+      }
+
+      config.update({'ads_enabled': false});
+      await pumpEventQueue();
+
+      for (final format in AdFormat.values) {
+        expect(container.read(adsEnabledProvider(format)), isTrue);
+      }
+    },
+  );
+
   test('Given consent changes to canRequestAds false via '
       'showPrivacyOptions, Then every format is false', () async {
     when(

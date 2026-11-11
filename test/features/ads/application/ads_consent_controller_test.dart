@@ -93,54 +93,99 @@ void main() {
     );
   });
 
-  test('Given the master key off, When it flips back on, Then the controller '
-      'rebuilds and initialize is called once', () async {
+  test(
+    'Given the master key off at launch, When it flips on mid-session, '
+    'Then consent stays noAdsConsent and initialize is never called',
+    () async {
+      config.values = {ConfigKeys.adsEnabled.key: false};
+      final container = makeContainer();
+      container.listen(adsConsentControllerProvider, (_, _) {});
+      await container.read(adsConsentControllerProvider.future);
+
+      config.update({ConfigKeys.adsEnabled.key: true});
+      await pumpEventQueue();
+      final consent = await container.read(adsConsentControllerProvider.future);
+
+      expect(consent, noAdsConsent);
+      verifyNever(
+        () => repository.initialize(
+          debugGeographyEea: any(named: 'debugGeographyEea'),
+        ),
+      );
+    },
+  );
+
+  test('Given the master key on at launch, When it flips off mid-session, '
+      'Then consent is kept and initialize ran once', () async {
     when(
       () => repository.initialize(debugGeographyEea: true),
     ).thenAnswer((_) async => _granted);
-    config.values = {ConfigKeys.adsEnabled.key: false};
     final container = makeContainer();
     container.listen(adsConsentControllerProvider, (_, _) {});
     await container.read(adsConsentControllerProvider.future);
 
-    config.update({ConfigKeys.adsEnabled.key: true});
-    await Future<void>.delayed(Duration.zero);
+    config.update({ConfigKeys.adsEnabled.key: false});
+    await pumpEventQueue();
     final consent = await container.read(adsConsentControllerProvider.future);
 
     expect(consent, _granted);
     verify(() => repository.initialize(debugGeographyEea: true)).called(1);
   });
 
-  test('Given adFree flips false to true to false, When rebuilt, Then '
-      'noAdsConsent while true and initialize runs again on the way back',
-      () async {
+  test('Given initialize throws, When built, Then noAdsConsent and the flow '
+      'is not retried', () async {
     when(
       () => repository.initialize(debugGeographyEea: true),
-    ).thenAnswer((_) async => _granted);
-    final adFree = StateProvider<bool>((ref) => false);
-    final container = ProviderContainer(
-      overrides: [
-        adsSettingsProvider.overrideWithValue(_enabled),
-        adFreeProvider.overrideWith((ref) => ref.watch(adFree)),
-        adsRepositoryProvider.overrideWithValue(repository),
-        remoteConfigRepositoryProvider.overrideWithValue(config),
-      ],
-    );
-    addTearDown(container.dispose);
+    ).thenThrow(StateError('consent failed'));
+    final container = makeContainer();
     container.listen(adsConsentControllerProvider, (_, _) {});
-    expect(await container.read(adsConsentControllerProvider.future), _granted);
 
-    container.read(adFree.notifier).state = true;
-    expect(
-      await container.read(adsConsentControllerProvider.future),
-      noAdsConsent,
-    );
-    verify(() => repository.initialize(debugGeographyEea: true)).called(1);
+    final consent = await container.read(adsConsentControllerProvider.future);
+    await pumpEventQueue();
 
-    container.read(adFree.notifier).state = false;
-    expect(await container.read(adsConsentControllerProvider.future), _granted);
+    expect(consent, noAdsConsent);
+    expect(container.read(adsConsentControllerProvider).hasError, isFalse);
     verify(() => repository.initialize(debugGeographyEea: true)).called(1);
   });
+
+  test(
+    'Given adFree flips false to true to false, When rebuilt, Then '
+    'noAdsConsent while true and initialize runs again on the way back',
+    () async {
+      when(
+        () => repository.initialize(debugGeographyEea: true),
+      ).thenAnswer((_) async => _granted);
+      final adFree = StateProvider<bool>((ref) => false);
+      final container = ProviderContainer(
+        overrides: [
+          adsSettingsProvider.overrideWithValue(_enabled),
+          adFreeProvider.overrideWith((ref) => ref.watch(adFree)),
+          adsRepositoryProvider.overrideWithValue(repository),
+          remoteConfigRepositoryProvider.overrideWithValue(config),
+        ],
+      );
+      addTearDown(container.dispose);
+      container.listen(adsConsentControllerProvider, (_, _) {});
+      expect(
+        await container.read(adsConsentControllerProvider.future),
+        _granted,
+      );
+
+      container.read(adFree.notifier).state = true;
+      expect(
+        await container.read(adsConsentControllerProvider.future),
+        noAdsConsent,
+      );
+      verify(() => repository.initialize(debugGeographyEea: true)).called(1);
+
+      container.read(adFree.notifier).state = false;
+      expect(
+        await container.read(adsConsentControllerProvider.future),
+        _granted,
+      );
+      verify(() => repository.initialize(debugGeographyEea: true)).called(1);
+    },
+  );
 
   test('Given enabled, When built, Then returns repository consent and '
       'forwards debugGeographyEea', () async {
