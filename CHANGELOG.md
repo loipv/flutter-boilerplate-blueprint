@@ -27,6 +27,8 @@ The generated app's `pubspec.yaml` version is separate from the blueprint versio
 - `make check-test-layout` (`scripts/check_test_layout.dart`): fails on a test file whose source file does not exist.
 - `make coverage` (`scripts/coverage_gate.dart`): runs the tests with coverage and fails below domain 100%, data 90%, application 80%, or on a gated file no test loads. `ci.yml` and `tool/verify_init.sh` run both.
 - `make test-firebase`: runs the Firestore and Storage rules tests (`firebase_tests/`) and the Cloud Functions tests (`functions/test/`, calling each v2 function's `.run()`) with `vitest` on the Firebase Emulator under the `demo-test` project. Needs the Firebase CLI and Java 21+, not Flutter. After `--no-functions` only the rules tests run. `ci.yml` runs it in a `firebase` job in parallel with `test`.
+- `make test-integration DEVICE=<id>`: runs `integration_test/` (returning-user settings, sign-out and guest onboarding flows) on an iOS simulator or Android emulator against the Firebase Auth and Firestore emulators under `demo-test`. It writes gitignored placeholder staging Firebase configs only where none exist (`scripts/integration_stubs.sh`). The debug Android manifest allows cleartext traffic so the emulator can reach `http://10.0.2.2`; release builds are unchanged.
+- `integration.yml`: a manual (`workflow_dispatch`) workflow that runs `make test-integration` on an API 34 Android emulator. It ships in generated apps. Setup, troubleshooting and what stays manual (Google and Apple Sign-In) are in `docs/testing_guide.md`.
 
 ### Fixed
 

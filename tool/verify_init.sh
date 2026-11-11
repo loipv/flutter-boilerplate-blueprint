@@ -35,7 +35,7 @@ echo "Running: ${DART[*]} tool/init.dart $*"
 for path in tool scaffold.sh CHANGELOG.md LICENSE docs/superpowers docs/repo-assets test/tool .github/workflows/blueprint.yml; do
   [ ! -e "$path" ] || fail "$path still exists"
 done
-for path in .git .env.staging .env.production BLUEPRINT_VERSION.md .github/workflows/ci.yml; do
+for path in .git .env.staging .env.production BLUEPRINT_VERSION.md .github/workflows/ci.yml .github/workflows/integration.yml; do
   [ -e "$path" ] || fail "$path is missing"
 done
 

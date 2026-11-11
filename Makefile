@@ -206,7 +206,7 @@ test-integration:
 	  fi
 	scripts/integration_stubs.sh
 	firebase emulators:exec --project demo-test --only auth,firestore \
-	  "$(FLUTTER) test integration_test --flavor staging -d $(DEVICE) --dart-define=EMULATOR_HOST=$(HOST)"
+	  "$(FLUTTER) test integration_test --flavor staging -d '$(DEVICE)' --dart-define=EMULATOR_HOST=$(HOST)"
 
 check-test-layout:
 	$(FLUTTER:flutter=dart) scripts/check_test_layout.dart

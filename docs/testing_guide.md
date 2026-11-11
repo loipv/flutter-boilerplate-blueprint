@@ -51,9 +51,10 @@ make test               # all tests under test/
 make check-test-layout  # every test file mirrors a source file
 make coverage           # tests with coverage, then the per-layer coverage gate
 make test-firebase      # rules and Cloud Functions tests on the Firebase Emulator
+make test-integration DEVICE=<id>  # app flow on a simulator/emulator against the Firebase Emulator
 ```
 
-CI (`.github/workflows/ci.yml`) runs two jobs in parallel: `test` runs `make analyze`, then `make check-test-layout coverage`; `firebase` runs `make test-firebase` (see [Firebase Rules & Functions Tests](#firebase-rules--functions-tests)).
+CI (`.github/workflows/ci.yml`) runs two jobs in parallel: `test` runs `make analyze`, then `make check-test-layout coverage`; `firebase` runs `make test-firebase` (see [Firebase Rules & Functions Tests](#firebase-rules--functions-tests)). The integration tests run only on demand, through `.github/workflows/integration.yml` (see [Integration Tests](#integration-tests)).
 
 Run a single file:
 
@@ -354,6 +355,72 @@ Every v2 function (`onCall`, `onDocumentCreated`, ...) exposes its handler as `.
 - No functions or auth emulator: only Firestore and Storage start.
 - No `firebase-functions-test`: it has a `jest` peer dependency, and these tests use `vitest`.
 - `.run()` skips the trigger wiring. For `onCall` it skips the HTTP layer, so `request.auth` is whatever the test passes; for a Firestore trigger the test builds the event (`params`, `data`). The document path, region and App Check settings are not exercised, so keep those declarative and check them in review.
+
+## Integration Tests
+
+`integration_test/app_flow_test.dart` runs the real app on an iOS simulator or Android emulator, against the local Firebase Auth and Firestore emulators under the offline `demo-test` project. It covers the flows that unit and widget tests cannot: a returning user changing a setting (and the nested `preferences` map Firestore stores), signing out from Settings and, in apps with anonymous sign-in, a guest completing onboarding. Shared setup lives in `integration_test/helpers/emulator_harness.dart`.
+
+### Requirements
+
+- Everything `make test-firebase` needs: Node 22, Java 21+ and the Firebase CLI.
+- Xcode and CocoaPods for iOS, or the Android SDK for Android.
+- A booted iOS simulator or Android emulator. A physical device cannot reach the emulators at `localhost` / `10.0.2.2`.
+
+No simulator yet? Create and boot one:
+
+```sh
+xcrun simctl list runtimes                       # pick an installed iOS runtime
+xcrun simctl create "Test iPhone" "iPhone 17" <runtime-id>
+xcrun simctl boot "Test iPhone" && open -a Simulator
+```
+
+No Android emulator yet? Install a system image that matches the machine (`arm64-v8a` on Apple silicon, `x86_64` on Intel and Linux), then create and boot an AVD:
+
+```sh
+sdkmanager "system-images;android-34;google_apis;arm64-v8a"
+avdmanager create avd -n test_api_34 -k "system-images;android-34;google_apis;arm64-v8a"
+emulator -avd test_api_34
+```
+
+`fvm flutter devices` lists the device ids.
+
+### Running
+
+```sh
+make test-integration DEVICE=emulator-5554                         # Android emulator
+make test-integration DEVICE=<simulator-udid>                      # iOS simulator
+make test-integration DEVICE=<id> EMULATOR_HOST=<host>             # override the host
+```
+
+It checks for the Firebase CLI and Java 21+, runs `scripts/integration_stubs.sh`, then runs `fvm flutter test integration_test --flavor staging` on the device inside `firebase emulators:exec --project demo-test --only auth,firestore`. Without `DEVICE` it prints the usage and stops.
+
+The device reaches the emulators through `--dart-define=EMULATOR_HOST`:
+
+- An Android emulator (`DEVICE=emulator-*`) gets `10.0.2.2`, its alias for the host machine. The native SDKs talk to the emulators over plain http, so `android/app/src/debug/AndroidManifest.xml` allows cleartext traffic. That file only applies to debug builds, which is what `flutter test` builds; the main and release manifests never allow it.
+- Any other device id (an iOS simulator) gets `localhost`, which the simulator shares with the host.
+- Set `EMULATOR_HOST` to override either.
+
+The first iOS build runs `pod install` and can fail with `CocoaPods could not find compatible versions for pod "Firebase/..."` and "specs repository is too out-of-date". Run `pod repo update` once, then run the target again. An iOS build also writes `ios/Podfile.lock`.
+
+### Stub Config Files
+
+The staging flavor does not build without its native Firebase config: the Android Google Services plugin needs `android/app/src/staging/google-services.json`, and the iOS build phase copies `ios/config/Staging/GoogleService-Info.plist`. `scripts/integration_stubs.sh` writes a placeholder for each one, pointing at `demo-test` with the staging package / bundle id, **only when the file is missing**. A real `flutterfire configure` output is never overwritten. Both files are gitignored, so a stub is never committed. When you set up the real staging project, replace any stub with the real file (or delete the stub first).
+
+### Why a Secondary Firebase App
+
+The tests never call `main()` and never touch the default Firebase app, which the native SDKs configure from the staging config files. `setUpEmulators()` initializes a named app (`integration`) with `demo-test` options and points its Auth and Firestore at the emulators before anything uses them. `pumpTestApp()` then overrides the auth, user, analytics and notification providers so the app runs on that named app. This means:
+
+- Every call stays on the local emulators, whatever config the staging files hold, so no credentials are needed.
+- App Check, analytics, Sentry and background work, which `main()` starts, are not started.
+- `resetEmulators()` clears all Auth accounts and Firestore documents before each test through the emulators' REST API.
+
+### Not Automated
+
+Google Sign-In and Sign in with Apple open system or browser sheets that a widget test cannot drive, so the integration tests do not cover them. Test them by hand on a device with a real staging project (see `docs/auth_setup.md`). The integration tests use anonymous accounts on the Auth emulator instead.
+
+### Manual Workflow
+
+`.github/workflows/integration.yml` runs the suite on an Android emulator (API 34, x86_64, with KVM) on `ubuntu-latest`. It never runs on push or pull request; start it from the repository's **Actions** tab → **Integration** → **Run workflow**. It runs `make setup test-integration DEVICE=emulator-5554`, so it uses the same stubs and emulators as a local run and needs no secrets.
 
 ## Linting Before PR
 

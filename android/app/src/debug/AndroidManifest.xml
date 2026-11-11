@@ -4,4 +4,11 @@
          to allow setting breakpoints, to provide hot reload, etc.
     -->
     <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- Debug builds only: the native Firebase SDKs reach the local Firebase
+         Emulator over plain http (http://10.0.2.2 from an Android emulator),
+         and Android 9+ blocks cleartext traffic by default. `make
+         test-integration` runs this debug variant. Never set this in the main
+         or release manifest.
+    -->
+    <application android:usesCleartextTraffic="true"/>
 </manifest>
