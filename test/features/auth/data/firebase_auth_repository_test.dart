@@ -326,11 +326,8 @@ void main() {
     );
 
     test(
-      'Given an anonymous user whose link hits email-already-in-use, When signing in, Then it throws Failure.unknown wrapping the auth failure',
+      'Given an anonymous user whose link hits email-already-in-use, When signing in, Then it throws Failure.auth(email-already-in-use)',
       () async {
-        // Current source: signInWithGoogle's catch-all has no
-        // `if (e is Failure) rethrow`, so the Failure.auth thrown by
-        // _signInWithCredential is wrapped in Failure.unknown.
         final auth = await anonymousAuth();
         whenCalling(
           Invocation.method(#linkWithCredential, null),
@@ -338,13 +335,22 @@ void main() {
 
         await expectLater(
           buildRepo(auth).signInWithGoogle(),
-          throwsA(
-            isA<UnknownFailure>().having(
-              (f) => f.message,
-              'message',
-              contains('email-already-in-use'),
-            ),
-          ),
+          throwsA(const Failure.auth('email-already-in-use')),
+        );
+      },
+    );
+
+    test(
+      'Given an anonymous user whose link hits another error, When signing in, Then it throws Failure.auth with that code',
+      () async {
+        final auth = await anonymousAuth();
+        whenCalling(
+          Invocation.method(#linkWithCredential, null),
+        ).on(auth.currentUser!).thenThrow(_authError('network-request-failed'));
+
+        await expectLater(
+          buildRepo(auth).signInWithGoogle(),
+          throwsA(const Failure.auth('network-request-failed')),
         );
       },
     );

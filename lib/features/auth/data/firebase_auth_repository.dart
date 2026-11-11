@@ -131,6 +131,7 @@ class FirebaseAuthRepository implements AuthRepository {
       _log.warning('Google sign-in unavailable: $e');
       throw Failure.unknown(e.toString());
     } catch (e, st) {
+      if (e is Failure) rethrow;
       _log.error('Google sign-in unexpected error', error: e, stackTrace: st);
       throw Failure.unknown(e.toString());
     }
