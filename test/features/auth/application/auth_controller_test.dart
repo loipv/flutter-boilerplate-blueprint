@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:blueprint_app/core/constants/app_constants.dart';
 import 'package:blueprint_app/core/errors/failure.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:blueprint_app/features/auth/application/auth_controller.dart';
@@ -157,8 +158,12 @@ void main() {
     );
 
     test(
-      'Given a signed-in user, When deleteAccount succeeds, Then it deletes user data then the auth account and returns null',
+      'Given a signed-in user, When deleteAccount succeeds, Then it deletes user data then the auth account, resets local state and returns null',
       () async {
+        SharedPreferences.setMockInitialValues({
+          AppConstants.onboardingCompleteKey: true,
+          'theme_mode': 'dark',
+        });
         await startSignedInAsAnon();
 
         final result = await container
@@ -171,6 +176,9 @@ void main() {
           () => authRepo.deleteAuthAccount(),
         ]);
         verifyNever(() => authRepo.reauthenticateForDeletion());
+        final prefs = await SharedPreferences.getInstance();
+        expect(prefs.containsKey(AppConstants.onboardingCompleteKey), isFalse);
+        expect(prefs.containsKey('theme_mode'), isFalse);
       },
     );
 
@@ -305,15 +313,21 @@ void main() {
 
   group('signOut', () {
     test(
-      'Given a signed-in user, When signOut is called, Then it signs out of the auth repository',
+      'Given a signed-in user, When signOut is called, Then it resets local onboarding and theme and signs out of the auth repository',
       () async {
-        SharedPreferences.setMockInitialValues({});
+        SharedPreferences.setMockInitialValues({
+          AppConstants.onboardingCompleteKey: true,
+          'theme_mode': 'dark',
+        });
         when(() => authRepo.signOut()).thenAnswer((_) async {});
         await startSignedInAsAnon();
 
         await container.read(authControllerProvider.notifier).signOut();
 
         verify(() => authRepo.signOut()).called(1);
+        final prefs = await SharedPreferences.getInstance();
+        expect(prefs.containsKey(AppConstants.onboardingCompleteKey), isFalse);
+        expect(prefs.containsKey('theme_mode'), isFalse);
       },
     );
   });
