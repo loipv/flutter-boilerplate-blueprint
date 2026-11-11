@@ -13,13 +13,14 @@ part 'locale_provider.g.dart';
 /// follows the device language.
 @Riverpod(keepAlive: true)
 class LocaleNotifier extends _$LocaleNotifier {
-  static const _storageKey = 'locale_code';
+  /// SharedPreferences key holding the chosen language code.
+  static const storageKey = 'locale_code';
   static const _log = AppLogger('LocaleNotifier');
 
   @override
   Future<Locale?> build() async {
     final prefs = await ref.watch(sharedPreferencesProvider.future);
-    final stored = prefs.getString(_storageKey);
+    final stored = prefs.getString(storageKey);
     if (stored == null) return null;
 
     final isSupported = AppLocalizations.supportedLocales.any(
@@ -37,9 +38,9 @@ class LocaleNotifier extends _$LocaleNotifier {
     state = AsyncValue.data(locale);
     final prefs = await ref.read(sharedPreferencesProvider.future);
     if (locale == null) {
-      await prefs.remove(_storageKey);
+      await prefs.remove(storageKey);
     } else {
-      await prefs.setString(_storageKey, locale.languageCode);
+      await prefs.setString(storageKey, locale.languageCode);
     }
   }
 }

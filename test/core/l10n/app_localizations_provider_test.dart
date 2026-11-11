@@ -18,6 +18,32 @@ void main() {
     SharedPreferences.setMockInitialValues({});
   });
 
+  group('appLocalizationsFor', () {
+    test(
+      'Given no stored code and system [vi_VN], When resolved, Then Vietnamese',
+      () {
+        final l10n = appLocalizationsFor(null, const [Locale('vi', 'VN')]);
+
+        expect(l10n.localeName, 'vi');
+      },
+    );
+
+    test('Given stored vi and system [en], When resolved, Then Vietnamese', () {
+      final l10n = appLocalizationsFor('vi', const [Locale('en')]);
+
+      expect(l10n.localeName, 'vi');
+    });
+
+    test(
+      'Given unsupported stored fr and system [en], When resolved, Then English',
+      () {
+        final l10n = appLocalizationsFor('fr', const [Locale('en')]);
+
+        expect(l10n.localeName, 'en');
+      },
+    );
+  });
+
   group('appLocalizationsProvider', () {
     test(
       "Given stored 'vi', When read, Then languageNativeName is 'Tiếng Việt'",
