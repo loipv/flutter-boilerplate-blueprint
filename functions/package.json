@@ -11,7 +11,8 @@
     "build:watch": "tsc --watch",
     "serve": "npm run build && firebase emulators:start --only functions",
     "deploy:staging": "npm run build && firebase use staging && firebase deploy --only functions",
-    "deploy:prod": "npm run build && firebase use production && firebase deploy --only functions"
+    "deploy:prod": "npm run build && firebase use production && firebase deploy --only functions",
+    "test": "vitest run"
   },
   "dependencies": {
     "firebase-admin": "^13.0.0",
@@ -19,7 +20,8 @@
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
-    "typescript": "^5.0.0"
+    "typescript": "^5.0.0",
+    "vitest": "^5.1.0"
   },
   "private": true
 }

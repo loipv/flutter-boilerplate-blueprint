@@ -26,6 +26,7 @@ The generated app's `pubspec.yaml` version is separate from the blueprint versio
 - Test suite: one test file per `lib/` source file (`lib/a/b/foo.dart` ↔ `test/a/b/foo_test.dart`), with repository tests on `fake_cloud_firestore` / `firebase_auth_mocks` / `mock_exceptions`, router, widget and app flow tests, and shared helpers in `test/helpers/` (`fakes.dart`, `mocks.dart`, `pump_app.dart`).
 - `make check-test-layout` (`scripts/check_test_layout.dart`): fails on a test file whose source file does not exist.
 - `make coverage` (`scripts/coverage_gate.dart`): runs the tests with coverage and fails below domain 100%, data 90%, application 80%, or on a gated file no test loads. `ci.yml` and `tool/verify_init.sh` run both.
+- `make test-firebase`: runs the Firestore and Storage rules tests (`firebase_tests/`) and the Cloud Functions tests (`functions/test/`, calling each v2 function's `.run()`) with `vitest` on the Firebase Emulator under the `demo-test` project. Needs the Firebase CLI and Java 21+, not Flutter. After `--no-functions` only the rules tests run. `ci.yml` runs it in a `firebase` job in parallel with `test`.
 
 ### Fixed
 

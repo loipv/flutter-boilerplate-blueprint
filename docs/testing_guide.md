@@ -50,9 +50,10 @@ Test descriptions use Given-When-Then: `'Given <state>, When <action>, Then <out
 make test               # all tests under test/
 make check-test-layout  # every test file mirrors a source file
 make coverage           # tests with coverage, then the per-layer coverage gate
+make test-firebase      # rules and Cloud Functions tests on the Firebase Emulator
 ```
 
-CI (`.github/workflows/ci.yml`) runs `make analyze`, then `make check-test-layout coverage`.
+CI (`.github/workflows/ci.yml`) runs two jobs in parallel: `test` runs `make analyze`, then `make check-test-layout coverage`; `firebase` runs `make test-firebase` (see [Firebase Rules & Functions Tests](#firebase-rules--functions-tests)).
 
 Run a single file:
 
@@ -281,6 +282,78 @@ Generated files (`*.g.dart`, `*.freezed.dart`) are excluded. A gated file with e
 Everything else is not gated, including presentation widgets, `lib/core/services/**`, `lib/core/theme/**`, `lib/core/utils/**`, `lib/app.dart`, the `lib/main.dart` entry point and the `lib/firebase_options_*.dart` files. Cover their critical paths with widget and app flow tests instead.
 
 Do not lower a threshold to get a change through. Add the missing test to the source file's mirrored test file.
+
+## Firebase Rules & Functions Tests
+
+The security rules and Cloud Functions are tested in Node with `vitest`, against the local Firebase Emulator. They are separate from `flutter test` and need no Flutter.
+
+| Source               | Test                                     |
+| -------------------- | ---------------------------------------- |
+| `firestore.rules`    | `firebase_tests/firestore.rules.test.ts` |
+| `storage.rules`      | `firebase_tests/storage.rules.test.ts`   |
+| `functions/src/*.ts` | `functions/test/*.test.ts`               |
+
+### Requirements
+
+- Node 22
+- Java 21+ (the emulators run on the JVM)
+- Firebase CLI (`npm i -g firebase-tools`; CI pins `firebase-tools@15.13.0`)
+
+The first run downloads the emulator jars to `~/.cache/firebase/emulators`.
+
+### Running
+
+```sh
+make test-firebase
+```
+
+It checks for the Firebase CLI and Java 21+, runs `npm ci` in `firebase_tests/` (and in `functions/` when `functions/test/` exists), then runs `firebase emulators:exec --project demo-test --only firestore,storage` with `npm test` in each package. A `demo-` project id has no real Firebase project behind it: every call stays on the local emulators, and no credentials are needed.
+
+The functions tests run after the rules tests on the same emulators. An app generated with `--no-functions` has no `functions/`, so only the rules tests run.
+
+`npm test` on its own fails fast in the functions package (no `FIRESTORE_EMULATOR_HOST`); always go through `make test-firebase`.
+
+### Adding a Rule Test
+
+Every change to `firestore.rules` or `storage.rules` updates the matching file in `firebase_tests/`. Each file loads the rules with `initializeTestEnvironment`, clears the emulator in `beforeEach`, and asserts with `assertSucceeds` / `assertFails` from `@firebase/rules-unit-testing`:
+
+```ts
+it('Given bob, When he reads users/alice, Then it fails', async () => {
+  await testEnv.withSecurityRulesDisabled(async (ctx) => {
+    await setDoc(doc(ctx.firestore(), 'users/alice'), { name: 'Alice' });
+  });
+  const db = testEnv.authenticatedContext('bob').firestore();
+
+  await assertFails(getDoc(doc(db, 'users/alice')));
+});
+```
+
+Seed data with `withSecurityRulesDisabled`, then act as `authenticatedContext(uid)` or `unauthenticatedContext()`. Cover both the allowed and the denied case for each rule.
+
+### Adding a Function Test
+
+Add the cases to `functions/test/index.test.ts` (or a `functions/test/<name>.test.ts` next to a new `functions/src/<name>.ts`). Import the function from `../src/index` and call its `.run(...)` with the request or event the handler expects. The Admin SDK in `src/index.ts` already points at the Firestore emulator, so seed and check data with `admin.firestore()`:
+
+```ts
+it('Given a user without createdAt, When triggered, Then it stamps createdAt', async () => {
+  const ref = db.doc('users/u1');
+  await ref.set({ name: 'x' });
+
+  await onUserCreate.run({ params: { userId: 'u1' }, data: await ref.get() } as any);
+
+  expect((await ref.get()).data()?.createdAt).toBeInstanceOf(admin.firestore.Timestamp);
+});
+```
+
+Clear the collections you touch in `beforeEach` (`db.recursiveDelete(db.collection('users'))`). The tests live outside `tsconfig.json`'s `include: ["src"]`, so `npm run build` never compiles them into `lib/`.
+
+### Why Functions Tests Use `.run()`
+
+Every v2 function (`onCall`, `onDocumentCreated`, ...) exposes its handler as `.run()`. Calling it directly tests the function's own logic with a plain request or event object:
+
+- No functions or auth emulator: only Firestore and Storage start.
+- No `firebase-functions-test`: it has a `jest` peer dependency, and these tests use `vitest`.
+- `.run()` skips the trigger wiring. For `onCall` it skips the HTTP layer, so `request.auth` is whatever the test passes; for a Firestore trigger the test builds the event (`params`, `data`). The document path, region and App Check settings are not exercised, so keep those declarative and check them in review.
 
 ## Linting Before PR
 

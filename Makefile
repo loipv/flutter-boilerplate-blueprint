@@ -57,7 +57,7 @@ help:
 	@echo "    make setup    (Firebase options stubs + pub get + codegen + functions and firebase_tests npm ci)"
 	@echo "    make analyze"
 	@echo "    make test"
-	@echo "    make test-firebase  (Firestore/Storage rules tests on the emulator; needs Firebase CLI + Java 21+)"
+	@echo "    make test-firebase  (rules + Cloud Functions tests on the emulator; needs Firebase CLI + Java 21+)"
 	@echo "    make codegen"
 	@echo "    make check-test-layout  (every test file mirrors a source file)"
 	@echo "    make coverage  (tests + per-layer coverage gate)"
