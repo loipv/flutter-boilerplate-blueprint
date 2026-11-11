@@ -119,6 +119,8 @@ class NotificationService {
                 channelDescription: channelDescription,
                 importance: Importance.max,
                 priority: Priority.high,
+                // Re-apply name/description when the language changes.
+                channelAction: AndroidNotificationChannelAction.update,
               ),
               iOS: const DarwinNotificationDetails(
                 presentAlert: true,

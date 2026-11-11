@@ -27,9 +27,16 @@ Naming: `<area><Thing>` in lowerCamelCase.
 | `notifications*`, `ads*`, `apple*`, `google*`, `anon*` | Used only inside that optional feature's marker blocks |
 | other areas (`settings*`, `onboarding*`, `home*`, ...) | One screen or feature |
 
-A feature prefix is the feature name followed by an uppercase letter. `tool/init.dart --no-<feature>` removes every key (and its `@key`) with that feature's prefix from all ARB files, because JSON cannot hold `BEGIN_<NAME>` / `END_<NAME>` markers. Keep the string read inside the same marker block it was in, so stripped builds still analyze.
+A feature prefix is the feature name followed by an uppercase letter.
+<!-- BEGIN_BLUEPRINT -->
+`tool/init.dart --no-<feature>` removes every key (and its `@key`) with that feature's prefix from all ARB files, because JSON cannot hold `BEGIN_<NAME>` / `END_<NAME>` markers.
+<!-- END_BLUEPRINT -->
+Keep the string read inside the same marker block it was in, so stripped builds still analyze.
 
-`appTitle` (`Blueprint App`) and `appDescription` (`A Flutter + Firebase starter app`) are untranslated in every ARB. `init --title` / `--description` rename them in all `.arb` files. After `init --description`, translate `appDescription` in the non-English ARBs.
+`appTitle` (`Blueprint App`) and `appDescription` (`A Flutter + Firebase starter app`) are untranslated in every ARB.
+<!-- BEGIN_BLUEPRINT -->
+`init --title` / `--description` rename them in all `.arb` files. After `init --description`, translate `appDescription` in the non-English ARBs.
+<!-- END_BLUEPRINT -->
 
 ## Adding a language
 

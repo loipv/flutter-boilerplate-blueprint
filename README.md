@@ -9,7 +9,7 @@
 
 ![flutter-boilerplate-blueprint repo preview](docs/repo-assets/social-preview.svg)
 
-Production-ready Flutter + Firebase starter template for teams that want a modern base: Riverpod 3.x, feature-first clean architecture, onboarding, anonymous-to-OAuth auth upgrades, staging/production flavors, optional notifications, analytics, and release tooling.
+Production-ready Flutter + Firebase starter template for teams that want a modern base: Riverpod 3.x, feature-first clean architecture, onboarding, anonymous-to-OAuth auth upgrades, staging/production flavors, localization (English and Vietnamese, with a language picker in Settings), optional notifications, analytics, and release tooling.
 
 This repo is designed for teams who want to scaffold a real app foundation quickly, not clone a demo project and spend the next week removing outdated patterns.
 

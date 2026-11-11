@@ -24,7 +24,6 @@ import 'package:blueprint_app/features/ads/presentation/ad_privacy_options_tile.
 // END_ADS
 // BEGIN_NOTIFICATIONS_IMPORTS
 import 'package:blueprint_app/core/services/notification_service.dart';
-
 // END_NOTIFICATIONS_IMPORTS
 
 class SettingsScreen extends ConsumerStatefulWidget {
@@ -478,7 +477,7 @@ class _AccountSummaryTile extends StatelessWidget {
     return ListTile(
       leading: CircleAvatar(
         child: Text(
-          (user.displayName ?? user.email ?? guest.substring(0, 1))
+          (user.displayName ?? user.email ?? guest)
               .substring(0, 1)
               .toUpperCase(),
         ),

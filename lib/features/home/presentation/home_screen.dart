@@ -6,7 +6,6 @@ import 'package:blueprint_app/core/theme/app_spacing.dart';
 import 'package:blueprint_app/core/theme/app_typography.dart';
 // BEGIN_ADS
 import 'package:blueprint_app/features/ads/presentation/ad_banner.dart';
-
 // END_ADS
 
 class HomeScreen extends ConsumerWidget {

@@ -45,10 +45,10 @@ make check-l10n           # every locale ARB matches the template keys and place
 make coverage             # tests + per-layer coverage gate
 make test-firebase        # rules + Cloud Functions tests on the Firebase Emulator
 make test-integration DEVICE=<id>  # app flow on a simulator/emulator against the Firebase Emulator
-make codegen              # build_runner (freezed + riverpod)
+make codegen              # gen-l10n + build_runner (freezed + riverpod)
 make deploy-staging       # Deploy Firestore rules to staging
 make deploy-prod          # Deploy Firestore rules to production
-make release-preflight    # format + analyze + layout check + coverage gate
+make release-preflight    # format + analyze + l10n check + layout check + coverage gate
 make bump-version VERSION=1.0.0 BUILD=1
 make build-prod-ipa       # IPA for App Store / TestFlight
 make build-prod-aab       # AAB for Play Store

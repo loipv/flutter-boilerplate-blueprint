@@ -181,7 +181,7 @@ make codegen
 fvm flutter pub run build_runner build --delete-conflicting-outputs
 ```
 
-Generated files (`*.g.dart`, `*.freezed.dart`) are created by running `make codegen`. Run code generation after changing annotated files and before committing those changes in your app project.
+Generated files (`*.g.dart`, `*.freezed.dart`, `lib/l10n/generated/`) are created by running `make codegen`. Run code generation after changing annotated files and before committing those changes in your app project.
 
 ## Logging
 

@@ -7,7 +7,6 @@ import 'package:blueprint_app/core/utils/app_haptics.dart';
 // BEGIN_ADS
 import 'package:blueprint_app/features/ads/application/ads_controller.dart';
 import 'package:blueprint_app/features/ads/application/app_open_ad_observer.dart';
-
 // END_ADS
 
 class MainScaffold extends ConsumerStatefulWidget {
