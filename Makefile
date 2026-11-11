@@ -16,6 +16,10 @@ dart_defines = $$(for f in $(1); do if [ -f "$$f" ]; then grep -E '^[A-Za-z_][A-
 
 # Pre-release checks that the build-prod-* targets and release-preflight run first.
 RELEASE_CHECKS :=
+RELEASE_CHECKS += check-l10n
+.PHONY: check-l10n
+check-l10n:
+	$(FLUTTER:flutter=dart) scripts/check_l10n.dart
 # BEGIN_ADS
 RELEASE_CHECKS += check-ads-config
 .PHONY: check-ads-config
@@ -74,6 +78,7 @@ help:
 	@echo "    make test-firebase  (rules + Cloud Functions tests on the emulator; needs Firebase CLI + Java 21+)"
 	@echo "    make test-integration DEVICE=<id> [EMULATOR_HOST=<host>]  (app flow on a device against the emulator)"
 	@echo "    make codegen"
+	@echo "    make check-l10n  (every locale ARB matches the template keys and placeholders)"
 	@echo "    make check-test-layout  (every test file mirrors a source file)"
 	@echo "    make coverage  (tests + per-layer coverage gate)"
 # BEGIN_ADS

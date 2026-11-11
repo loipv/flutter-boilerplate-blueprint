@@ -23,7 +23,7 @@ jobs:
       - name: Analyze
         run: make analyze
       - name: Test layout and coverage gate
-        run: make check-test-layout coverage
+        run: make check-l10n check-test-layout coverage
 
   firebase:
     runs-on: ubuntu-latest
