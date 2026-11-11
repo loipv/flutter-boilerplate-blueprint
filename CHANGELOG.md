@@ -33,6 +33,12 @@ The generated app's `pubspec.yaml` version is separate from the blueprint versio
 ### Fixed
 
 - `scaffold.sh` honors `BLUEPRINT_REF` when run from a local clone, prints the ref it uses, and explains how to scaffold a pre-v1.0.0 tag instead of failing in init. The `curl` one-liner no longer mistakes the current directory for a local blueprint clone.
+- Google sign-in rethrows a `Failure` from the repository as is, instead of wrapping it as an unknown failure.
+- `savePreferences` writes a nested `preferences` map. It used dotted keys in `set()`, which real Firestore stored as literal top-level field names.
+- `SettingsController` stays alive across async preference writes, so a write no longer throws `UnmountedRefException`.
+- `OnboardingScaffold` no longer reads `GoRouterState` during redirects.
+- User documents with Firestore `Timestamp` fields now parse. Before, the profile was `null` for real users, so their preferences never loaded.
+- The haptics preference is respected when nothing else listens to the profile (for example in apps built with `--no-notifications`). `hapticsEnabled` is now kept alive and `App` listens to it, so `AppHaptics` reads see the stored setting instead of the default `true`.
 
 ### Removed
 
@@ -43,6 +49,7 @@ The generated app's `pubspec.yaml` version is separate from the blueprint versio
 
 - The `scaffold.sh` shipped in tags `v0.6.0` to `v0.9.0` clones `main` and reads `template/`, so those `v0.x` one-liners no longer work. Use the `main` one-liner or set `BLUEPRINT_REF`.
 - Generated apps no longer get a `CODEX.md` / `GEMINI.md` choice; `CLAUDE.md` and `AGENTS.md` are the only AI instruction files.
+- Documents written by apps generated from older blueprint versions may carry literal top-level `preferences.<field>` keys from the old `savePreferences`. They are no longer written; apps can migrate them into the nested `preferences` map or ignore them.
 
 ## v0.9.0 - 2026-05-20
 
