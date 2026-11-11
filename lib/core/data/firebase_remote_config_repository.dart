@@ -77,7 +77,7 @@ class FirebaseRemoteConfigRepository implements RemoteConfigRepository {
   Future<void> _fetchInBackground() async {
     try {
       final activated = await _remoteConfig.fetchAndActivate();
-      if (activated) _updates.add(null);
+      if (activated && !_updates.isClosed) _updates.add(null);
     } catch (e, st) {
       _log.warning('fetchAndActivate failed', error: e, stackTrace: st);
     }
@@ -96,6 +96,10 @@ class FirebaseRemoteConfigRepository implements RemoteConfigRepository {
 
   @override
   Stream<void> get onUpdated => _updates.stream;
+
+  /// Closes [onUpdated]. Not part of [RemoteConfigRepository]; called by the
+  /// provider when it is disposed.
+  Future<void> dispose() => _updates.close();
 
   // BEGIN_REMOTE_CONFIG
   T? _read<T extends Object>(ConfigKey<T> key) {
@@ -116,7 +120,8 @@ class FirebaseRemoteConfigRepository implements RemoteConfigRepository {
         case int _:
           parsed = int.tryParse(text);
         case double _:
-          parsed = double.tryParse(text);
+          final number = double.tryParse(text);
+          parsed = (number != null && number.isFinite) ? number : null;
         default:
           if (_warnedKeys.add(key.key)) {
             _log.warning(
@@ -128,7 +133,9 @@ class FirebaseRemoteConfigRepository implements RemoteConfigRepository {
       }
       return parsed as T?;
     } catch (e, st) {
-      _log.warning('get failed for "${key.key}"', error: e, stackTrace: st);
+      if (_warnedKeys.add(key.key)) {
+        _log.warning('get failed for "${key.key}"', error: e, stackTrace: st);
+      }
       return null;
     }
   }
@@ -139,9 +146,11 @@ class FirebaseRemoteConfigRepository implements RemoteConfigRepository {
 /// Exposes the ABSTRACT type so consumers never depend on Firebase directly.
 @Riverpod(keepAlive: true)
 RemoteConfigRepository remoteConfigRepository(Ref ref) {
-  return FirebaseRemoteConfigRepository(
+  final repo = FirebaseRemoteConfigRepository(
     // BEGIN_REMOTE_CONFIG
     FirebaseRemoteConfig.instance,
     // END_REMOTE_CONFIG
   );
+  ref.onDispose(repo.dispose);
+  return repo;
 }

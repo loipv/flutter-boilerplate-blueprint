@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart' show WidgetRef;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:blueprint_app/core/data/firebase_remote_config_repository.dart';
 import 'package:blueprint_app/core/domain/config_key.dart';
+import 'package:blueprint_app/core/utils/app_logger.dart';
 
 part 'remote_config_revision_provider.g.dart';
 
@@ -12,12 +13,21 @@ part 'remote_config_revision_provider.g.dart';
 /// repository never emits and the revision stays 0.
 @Riverpod(keepAlive: true)
 class RemoteConfigRevision extends _$RemoteConfigRevision {
+  static const _log = AppLogger('RemoteConfigRevision');
+
   @override
   int build() {
     final sub = ref
         .watch(remoteConfigRepositoryProvider)
         .onUpdated
-        .listen((_) => state++);
+        .listen(
+          (_) => state++,
+          onError: (Object e, StackTrace st) => _log.warning(
+            'onUpdated emitted an error',
+            error: e,
+            stackTrace: st,
+          ),
+        );
     ref.onDispose(sub.cancel);
     return 0;
   }

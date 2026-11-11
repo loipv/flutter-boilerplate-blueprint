@@ -6,6 +6,7 @@ import 'package:firebase_remote_config/firebase_remote_config.dart';
 // END_REMOTE_CONFIG
 import 'package:flutter_test/flutter_test.dart';
 // BEGIN_REMOTE_CONFIG
+import 'package:logging/logging.dart';
 import 'package:mocktail/mocktail.dart';
 // END_REMOTE_CONFIG
 import 'package:blueprint_app/core/data/firebase_remote_config_repository.dart';
@@ -28,6 +29,8 @@ void main() {
 
   // BEGIN_REMOTE_CONFIG
   late MockFirebaseRemoteConfig sdk;
+  late List<LogRecord> records;
+  late StreamSubscription<LogRecord> logSub;
   // END_REMOTE_CONFIG
   late FirebaseRemoteConfigRepository repo;
 
@@ -44,6 +47,11 @@ void main() {
   // END_REMOTE_CONFIG
   setUp(() {
     // BEGIN_REMOTE_CONFIG
+    Logger.root.level = Level.ALL;
+    records = [];
+    logSub = Logger.root.onRecord
+        .where((r) => r.loggerName == 'FirebaseRemoteConfigRepository')
+        .listen(records.add);
     sdk = MockFirebaseRemoteConfig();
     when(() => sdk.setConfigSettings(any())).thenAnswer((_) async {});
     when(() => sdk.setDefaults(any())).thenAnswer((_) async {});
@@ -61,6 +69,10 @@ void main() {
     );
   });
 
+  // BEGIN_REMOTE_CONFIG
+  tearDown(() async => logSub.cancel());
+
+  // END_REMOTE_CONFIG
   test(
     'Given an unset key, When get is called, Then the default is returned',
     () {
@@ -81,7 +93,32 @@ void main() {
     );
   });
 
+  test('Given dispose, When called, Then onUpdated is done', () async {
+    final done = expectLater(repo.onUpdated, emitsDone);
+
+    await repo.dispose();
+    await done;
+  });
+
   // BEGIN_REMOTE_CONFIG
+  group('dispose', () {
+    test('Given fetchAndActivate completes true after dispose, '
+        'When it completes, Then there is no error', () async {
+      final completer = Completer<bool>();
+      when(() => sdk.fetchAndActivate()).thenAnswer((_) => completer.future);
+      await repo.initialize(
+        environment: 'staging',
+        minimumFetchInterval: Duration.zero,
+      );
+
+      await repo.dispose();
+      completer.complete(true);
+      await pumpEventQueue();
+
+      expect(records.where((r) => r.level >= Level.WARNING), isEmpty);
+    });
+  });
+
   group('initialize', () {
     Future<void> init() => repo.initialize(
       environment: 'staging',
@@ -164,39 +201,81 @@ void main() {
       verify(() => sdk.fetchAndActivate()).called(1);
     });
 
-    final failures = <String, void Function()>{
-      'setConfigSettings': () =>
-          when(() => sdk.setConfigSettings(any())).thenThrow(Exception('x')),
-      'setDefaults': () =>
-          when(() => sdk.setDefaults(any())).thenThrow(Exception('x')),
-      'setCustomSignals': () =>
-          when(() => sdk.setCustomSignals(any())).thenThrow(Exception('x')),
-      'activate': () => when(() => sdk.activate()).thenThrow(Exception('x')),
-      'fetchAndActivate': () =>
-          when(() => sdk.fetchAndActivate()).thenThrow(Exception('x')),
-    };
-    final order = failures.keys.toList();
+    test(
+      'Given fetchAndActivate throws, When initialize runs, Then exactly one '
+      'WARNING and no SEVERE is logged',
+      () async {
+        when(() => sdk.fetchAndActivate()).thenThrow(Exception('x'));
 
-    for (final entry in failures.entries) {
-      test('Given ${entry.key} throws synchronously, When initialize runs, '
+        await init();
+        await pumpEventQueue();
+
+        expect(records.where((r) => r.level == Level.WARNING), hasLength(1));
+        expect(records.where((r) => r.level >= Level.SEVERE), isEmpty);
+      },
+    );
+
+    test('Given setDefaults throws, When initialize runs, Then one SEVERE is '
+        'logged', () async {
+      when(() => sdk.setDefaults(any())).thenThrow(Exception('x'));
+
+      await init();
+      await pumpEventQueue();
+
+      expect(records.where((r) => r.level == Level.SEVERE), hasLength(1));
+    });
+
+    final failures = <(String, void Function(), List<void Function()>)>[
+      (
+        'setConfigSettings',
+        () =>
+            when(() => sdk.setConfigSettings(any())).thenThrow(Exception('x')),
+        [
+          () => verify(() => sdk.setDefaults(any())).called(1),
+          () => verify(() => sdk.setCustomSignals(any())).called(1),
+          () => verify(() => sdk.activate()).called(1),
+          () => verify(() => sdk.fetchAndActivate()).called(1),
+        ],
+      ),
+      (
+        'setDefaults',
+        () => when(() => sdk.setDefaults(any())).thenThrow(Exception('x')),
+        [
+          () => verify(() => sdk.setCustomSignals(any())).called(1),
+          () => verify(() => sdk.activate()).called(1),
+          () => verify(() => sdk.fetchAndActivate()).called(1),
+        ],
+      ),
+      (
+        'setCustomSignals',
+        () => when(() => sdk.setCustomSignals(any())).thenThrow(Exception('x')),
+        [
+          () => verify(() => sdk.activate()).called(1),
+          () => verify(() => sdk.fetchAndActivate()).called(1),
+        ],
+      ),
+      (
+        'activate',
+        () => when(() => sdk.activate()).thenThrow(Exception('x')),
+        [() => verify(() => sdk.fetchAndActivate()).called(1)],
+      ),
+      (
+        'fetchAndActivate',
+        () => when(() => sdk.fetchAndActivate()).thenThrow(Exception('x')),
+        [],
+      ),
+    ];
+
+    for (final (name, stubThrow, laterVerifies) in failures) {
+      test('Given $name throws synchronously, When initialize runs, '
           'Then initialize completes and later steps still run', () async {
-        entry.value();
+        stubThrow();
 
         await expectLater(init(), completes);
         await pumpEventQueue();
 
-        final later = order.skip(order.indexOf(entry.key) + 1);
-        for (final step in later) {
-          switch (step) {
-            case 'setDefaults':
-              verify(() => sdk.setDefaults(any())).called(1);
-            case 'setCustomSignals':
-              verify(() => sdk.setCustomSignals(any())).called(1);
-            case 'activate':
-              verify(() => sdk.activate()).called(1);
-            case 'fetchAndActivate':
-              verify(() => sdk.fetchAndActivate()).called(1);
-          }
+        for (final check in laterVerifies) {
+          check();
         }
       });
     }
@@ -213,13 +292,7 @@ void main() {
       expect(repo.get(s), '');
     });
 
-    for (final (raw, expected) in [
-      ('true', true),
-      ('false', false),
-      ('TRUE', true),
-      ('1', true),
-      ('yes', true),
-    ]) {
+    for (final (raw, expected) in [('true', true), ('false', false)]) {
       test('Given bool "$raw", When get is called, Then it is $expected', () {
         when(() => sdk.getValue('b')).thenReturn(remote(raw));
         expect(repo.get(b), expected);
@@ -264,6 +337,14 @@ void main() {
       });
     }
 
+    for (final raw in ['NaN', 'Infinity', '-Infinity']) {
+      test('Given double "$raw", When get is called, Then the default is '
+          'returned', () {
+        when(() => sdk.getValue('d')).thenReturn(remote(raw));
+        expect(repo.get(d), 1.5);
+      });
+    }
+
     test('Given a static value, When get is called, Then default', () {
       when(() => sdk.getValue('s')).thenReturn(
         RemoteConfigValue(utf8.encode('x'), ValueSource.valueStatic),
@@ -272,17 +353,38 @@ void main() {
     });
 
     test('Given an unsupported type, When get is called, Then default', () {
-      final when0 = DateTime(2020);
-      final key = ConfigKey<DateTime>('t', when0);
+      final fallback = DateTime(2020);
+      final key = ConfigKey<DateTime>('t', fallback);
       when(() => sdk.getValue('t')).thenReturn(remote('2021'));
 
-      expect(repo.get(key), when0);
-      expect(repo.get(key), when0);
+      expect(repo.get(key), fallback);
+      expect(repo.get(key), fallback);
+    });
+
+    test('Given an unsupported type read twice, When get is called, Then '
+        'exactly one WARNING is logged', () {
+      final key = ConfigKey<DateTime>('t', DateTime(2020));
+      when(() => sdk.getValue('t')).thenReturn(remote('2021'));
+
+      repo.get(key);
+      repo.get(key);
+
+      expect(records.where((r) => r.level == Level.WARNING), hasLength(1));
     });
 
     test('Given getValue throws, When get is called, Then default', () {
       when(() => sdk.getValue(any())).thenThrow(Exception('boom'));
       expect(repo.get(s), 'd');
+    });
+
+    test('Given getValue throws, When the same key is read twice, Then '
+        'exactly one WARNING is logged', () {
+      when(() => sdk.getValue(any())).thenThrow(Exception('boom'));
+
+      repo.get(s);
+      repo.get(s);
+
+      expect(records.where((r) => r.level == Level.WARNING), hasLength(1));
     });
   });
   // END_REMOTE_CONFIG

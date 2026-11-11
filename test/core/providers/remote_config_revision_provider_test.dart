@@ -27,6 +27,7 @@ void main() {
 
   setUp(() {
     fake = FakeRemoteConfigRepository();
+    addTearDown(fake.dispose);
     container = ProviderContainer(
       overrides: [remoteConfigRepositoryProvider.overrideWithValue(fake)],
     );
@@ -63,17 +64,24 @@ void main() {
     expect(container.read(probe), isTrue);
   });
 
-  test(
-    'Given values changed before anything watched, When watchConfig is first '
-    'read, Then it returns the new value',
-    () {
-      fake.update({'flag': true});
+  test('Given values were updated before the first read, When watchConfig is '
+      'first read, Then it returns the current value', () {
+    fake.update({'flag': true});
 
-      container.listen(probe, (_, _) {});
+    container.listen(probe, (_, _) {});
 
-      expect(container.read(probe), isTrue);
-    },
-  );
+    expect(container.read(probe), isTrue);
+  });
+
+  test('Given onUpdated emits an error, When read, Then the revision stays 0 '
+      'and nothing is thrown', () async {
+    container.listen(remoteConfigRevisionProvider, (_, _) {});
+
+    fake.emitError(Exception('boom'));
+    await pumpEventQueue();
+
+    expect(container.read(remoteConfigRevisionProvider), 0);
+  });
 
   testWidgets(
     'Given a ConsumerWidget showing ref.watchConfig, When the fake updates, '

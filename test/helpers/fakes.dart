@@ -153,6 +153,10 @@ class FakeRemoteConfigRepository implements RemoteConfigRepository {
     _updates.add(null);
   }
 
+  void emitError(Object error) => _updates.addError(error);
+
+  Future<void> dispose() => _updates.close();
+
   @override
   Future<void> initialize({
     required String environment,

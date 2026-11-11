@@ -12,7 +12,8 @@ abstract class RemoteConfigRepository {
   });
 
   /// The active value for [key], or [ConfigKey.defaultValue] when the key is
-  /// unset or its value has the wrong type. Never throws.
+  /// unset or its value has the wrong type. Never throws. Numbers are parsed
+  /// with Dart's `tryParse` (whitespace trimmed; non-finite doubles rejected).
   T get<T extends Object>(ConfigKey<T> key);
 
   /// Emits after the background fetch activates new values. Broadcast; never
