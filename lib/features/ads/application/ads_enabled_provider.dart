@@ -18,8 +18,10 @@ ConfigKey<bool> _formatKey(AdFormat format) => switch (format) {
 
 /// Whether ads of [format] may be shown.
 ///
-/// Checks run in order and stop at the first that fails, so the consent form
-/// is never triggered while the build flag, Remote Config or ad-free says no.
+/// Checks run in order and stop at the first that fails. The consent flow
+/// itself is gated separately in [AdsConsentController] on the build flag, the
+/// Remote Config master switch and ad-free, so the consent form and ATT prompt
+/// never run while any of those say no.
 @riverpod
 bool adsEnabled(Ref ref, AdFormat format) {
   final settings = ref.watch(adsSettingsProvider);

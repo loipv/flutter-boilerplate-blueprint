@@ -280,6 +280,65 @@ void main() {
       }
     });
 
+    test('Given the master key off, When the controller is read, Then '
+        'initialize is never called, and flipping it on initializes once',
+        () async {
+      final config = FakeRemoteConfigRepository(
+        values: {ConfigKeys.adsEnabled.key: false},
+      );
+      addTearDown(config.dispose);
+      final container = makeContainer(config, (
+        canRequestAds: true,
+        privacyOptionsRequired: false,
+      ));
+
+      container.listen(adsControllerProvider, (_, _) {});
+      await pumpEventQueue();
+      verifyNever(
+        () => repository.initialize(
+          debugGeographyEea: any(named: 'debugGeographyEea'),
+        ),
+      );
+
+      config.update({ConfigKeys.adsEnabled.key: true});
+      await pumpEventQueue();
+      verify(
+        () => repository.initialize(
+          debugGeographyEea: any(named: 'debugGeographyEea'),
+        ),
+      ).called(1);
+    });
+
+    test('Given consent first denied, When it becomes granted, Then each '
+        'enabled format is preloaded exactly once', () async {
+      final config = FakeRemoteConfigRepository(
+        values: {ConfigKeys.adsEnabled.key: false},
+      );
+      addTearDown(config.dispose);
+      final container = makeContainer(config, (
+        canRequestAds: true,
+        privacyOptionsRequired: false,
+      ));
+      container.listen(adsControllerProvider, (_, _) {});
+      await pumpEventQueue();
+      verifyNever(
+        () => repository.preload(any(), adUnitId: any(named: 'adUnitId')),
+      );
+
+      config.update({ConfigKeys.adsEnabled.key: true});
+      await pumpEventQueue();
+
+      for (final format in [
+        AdFormat.interstitial,
+        AdFormat.rewarded,
+        AdFormat.appOpen,
+      ]) {
+        verify(
+          () => repository.preload(format, adUnitId: any(named: 'adUnitId')),
+        ).called(1);
+      }
+    });
+
     test('Given consent denied, When the controller is read, Then nothing is '
         'preloaded', () async {
       final config = FakeRemoteConfigRepository();
