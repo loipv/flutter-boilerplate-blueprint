@@ -13,10 +13,11 @@ Staging and production may share one Firebase project. Remote Config values must
 
 1. A feature reads a typed value with one call: `ref.read(remoteConfigRepositoryProvider).get(ConfigKeys.someKey)`. Adding a key means adding one line to `ConfigKeys`.
 2. Cold start never waits on the network for Remote Config, and a Remote Config failure never stops the app from starting.
-3. One parameter in the Console, plus a condition on the `environment` custom signal, gives staging and production different values inside one Firebase project.
-4. On first install or offline, `apiBaseUrl` falls back to the per-flavor `API_BASE_URL` from `.env`, so a staging build never defaults to the production API.
-5. `tool/init.dart` can turn Remote Config off. Code that reads `ConfigKeys` still compiles and gets the defaults.
-6. `make analyze`, `make check-test-layout` and `make coverage` pass. `tool/verify_init.sh` passes with Remote Config both on and off.
+3. When the background fetch at startup brings values that differ from the active ones, they apply in the same session. Widgets and providers that use `ref.watchConfig(key)` rebuild.
+4. One parameter in the Console, plus a condition on the `environment` custom signal, gives staging and production different values inside one Firebase project.
+5. On first install or offline, `apiBaseUrl` falls back to the per-flavor `API_BASE_URL` from `.env`, so a staging build never defaults to the production API.
+6. `tool/init.dart` can turn Remote Config off. Code that reads `ConfigKeys` still compiles and gets the defaults.
+7. `make analyze`, `make check-test-layout` and `make coverage` pass. `tool/verify_init.sh` passes with Remote Config both on and off.
 
 ## 2. Decisions
 
@@ -25,7 +26,8 @@ Staging and production may share one Firebase project. Remote Config values must
 | D1 | Place in the blueprint | Optional init feature `remoteConfig`, marker `REMOTE_CONFIG`, following the PostHog pattern: with the feature off, the repository class stays and its SDK code is stripped. |
 | D2 | Per-environment values in one project | Custom signal `environment`, set on the client. The value comes from `REMOTE_CONFIG_ENV` in `.env`, or `AppEnv.name` when blank. The Console uses conditions on this signal. This works even with `--shared-app-id`. |
 | D3 | Base API endpoint | Only exposed as a typed value (`ConfigKeys.apiBaseUrl`). No HTTP client is added. |
-| D4 | Loading strategy | Activate cached values at startup, fetch in the background, use the new values on the next launch. Values do not change within a session. No real-time updates. |
+| D4 | Loading strategy | At startup, activate cached values (falling back to code/`.env` defaults), then run one background `fetchAndActivate()`. If it activates new values, they apply in the same session and `onUpdated` fires. There is one fetch per launch and no real-time updates. |
+| D7 | Reacting to updates | `remoteConfigRevisionProvider` counts `onUpdated` events. `ref.watchConfig(key)` watches it and returns `get(key)`, so callers rebuild. `ref.read(repo).get(key)` does not rebuild and sees the new value on its next read. |
 | D5 | Key declaration | A central registry of `ConfigKey<T>` constants in `ConfigKeys`. Defaults sent to the SDK come from `ConfigKeys.all`. |
 | D6 | Supported types | `String`, `bool`, `int`, `double`. No JSON values. |
 
@@ -68,8 +70,7 @@ The doc comment shows how to add a feature flag, for example `static const newHo
 ```dart
 abstract class RemoteConfigRepository {
   /// Applies settings, defaults and the environment signal, activates cached
-  /// values and starts a background fetch for the next launch.
-  /// Never throws.
+  /// values and starts one background fetchAndActivate. Never throws.
   Future<void> initialize({
     required String environment,
     required Duration minimumFetchInterval,
@@ -78,8 +79,45 @@ abstract class RemoteConfigRepository {
   /// The active value for [key], or [ConfigKey.defaultValue] when the key is
   /// unset or its value has the wrong type. Never throws.
   T get<T extends Object>(ConfigKey<T> key);
+
+  /// Emits after the background fetch activates new values. Broadcast; never
+  /// emits an error.
+  Stream<void> get onUpdated;
 }
 ```
+
+### 3.1a Application: reacting to updates
+
+**`lib/core/providers/remote_config_revision_provider.dart`**
+
+```dart
+/// Increments each time Remote Config activates new values.
+@Riverpod(keepAlive: true)
+class RemoteConfigRevision extends _$RemoteConfigRevision {
+  @override
+  int build() {
+    final sub = ref
+        .watch(remoteConfigRepositoryProvider)
+        .onUpdated
+        .listen((_) => state++);
+    ref.onDispose(sub.cancel);
+    return 0;
+  }
+}
+
+extension RemoteConfigRef on Ref {
+  T watchConfig<T extends Object>(ConfigKey<T> key) {
+    watch(remoteConfigRevisionProvider);
+    return read(remoteConfigRepositoryProvider).get(key);
+  }
+}
+
+extension RemoteConfigWidgetRef on WidgetRef { /* same body */ }
+```
+
+`watchConfig` watches the revision before it reads the value. The subscription therefore exists before the value is read. If the fetch activated new values before any subscription existed, the event is lost, but nothing is stale, because `get()` already returns the new values.
+
+**`apiBaseUrl` convention**: the value can change once, a few seconds after startup. HTTP clients must read `apiBaseUrl` per request, or use `watchConfig` so they are rebuilt. A client that caches the URL when it is created keeps the old URL until the next launch. `docs/setup.md` and the `ConfigKeys.apiBaseUrl` doc comment both say this.
 
 ### 3.2 Data
 
@@ -87,8 +125,9 @@ abstract class RemoteConfigRepository {
 
 - `FirebaseRemoteConfigRepository implements RemoteConfigRepository` takes a `FirebaseRemoteConfig` through its constructor, so tests can pass a mock.
 - `@Riverpod(keepAlive: true) RemoteConfigRepository remoteConfigRepository(Ref ref)` returns `FirebaseRemoteConfigRepository(FirebaseRemoteConfig.instance)`.
-- `FirebaseRemoteConfig.instance` is a singleton. The instance that `main.dart` initializes and the one the provider returns share the activated values. `main.dart` therefore does not override the provider, and `ProviderScope` stays `const`.
-- SDK code is wrapped in `// BEGIN_REMOTE_CONFIG` / `// END_REMOTE_CONFIG`. With the feature off, `initialize()` does nothing and `get()` returns `key.defaultValue`. The provider then builds the class without an SDK instance, the same way `PostHogAnalyticsRepository` drops its `Posthog` field.
+- `main.dart` must call `initialize()` on the same repository instance the provider returns, because `onUpdated` belongs to that instance. `main.dart` creates the repository, awaits `initialize()`, and passes it to `ProviderScope(overrides: [remoteConfigRepositoryProvider.overrideWithValue(repo)])`. The provider's own body only runs in tests or when nothing overrides it.
+- It owns a `StreamController<void>.broadcast()` that backs `onUpdated`. The provider is keepAlive and the SDK instance is a singleton, so the controller lives for the whole app.
+- SDK code is wrapped in `// BEGIN_REMOTE_CONFIG` / `// END_REMOTE_CONFIG`. With the feature off, `initialize()` does nothing, `get()` returns `key.defaultValue`, and `onUpdated` never emits. The provider then builds the class without an SDK instance, the same way `PostHogAnalyticsRepository` drops its `Posthog` field.
 - `static const _log = AppLogger('FirebaseRemoteConfigRepository')`.
 
 ### 3.3 Config and entrypoint
@@ -97,11 +136,23 @@ abstract class RemoteConfigRepository {
 - `lib/main.dart` (inside the marker): `const _remoteConfigEnv = String.fromEnvironment('REMOTE_CONFIG_ENV');`. After App Check activation and before `runApp`:
 
 ```dart
-await FirebaseRemoteConfigRepository(FirebaseRemoteConfig.instance).initialize(
+final remoteConfig = FirebaseRemoteConfigRepository(FirebaseRemoteConfig.instance);
+await remoteConfig.initialize(
   environment: _remoteConfigEnv.isNotEmpty ? _remoteConfigEnv : env.name,
   minimumFetchInterval: env.remoteConfigMinFetchInterval,
 );
+// ...
+runApp(ProviderScope(
+  overrides: [
+    // BEGIN_REMOTE_CONFIG
+    remoteConfigRepositoryProvider.overrideWithValue(remoteConfig),
+    // END_REMOTE_CONFIG
+  ],
+  child: const App(),
+));
 ```
+
+With the feature off, the overrides list is empty and the provider builds the no-op repository.
 
 Remote Config runs after App Check, so fetches carry an App Check token if the project enforces it.
 
@@ -112,8 +163,8 @@ Remote Config runs after App Check, so fetches carry an App Check token if the p
 1. `setConfigSettings(RemoteConfigSettings(fetchTimeout: 10s, minimumFetchInterval: <param>))`
 2. `setDefaults({for k in ConfigKeys.all: k.key: k.defaultValue})`
 3. `setCustomSignals({'environment': environment})`. This must come before the fetch, because the server evaluates conditions on fetch.
-4. `await activate()`: applies the values fetched on a previous launch. This is a local read and does not wait on the network.
-5. `unawaited(fetch())`: fetches in the background. The new values are activated at step 4 of the next launch.
+4. `await activate()`: applies the values fetched on a previous launch. This is a local read and does not wait on the network. Until then, `get()` returns the defaults from step 2.
+5. `unawaited(_fetchInBackground())`: calls `fetchAndActivate()` once. If it returns `true` (new values activated), add an event to `onUpdated`. If it returns `false` (nothing new, or the fetch was skipped because of `minimumFetchInterval`), do nothing. No further fetches happen until the next launch.
 
 `get<T>(key)` reads `getValue(key.key)`:
 
@@ -127,7 +178,7 @@ Remote Config runs after App Check, so fetches carry an App Check token if the p
 ## 5. Error handling
 
 - `initialize()` never throws and never blocks startup on the network.
-  - `fetch()` failures (offline, throttled, timeout) are expected. Log them with `_log.warning`, so they do not reach Sentry.
+  - `fetchAndActivate()` failures (offline, throttled, timeout) are expected. Log them with `_log.warning`, so they do not reach Sentry. `onUpdated` does not emit.
   - `setConfigSettings`, `setDefaults`, `setCustomSignals` and `activate` failures are logged with `_log.error`. Later steps still run.
 - `get()` never throws. Bad or missing values fall back to `defaultValue`.
 - Neither method lets an exception out, so no `Failure` mapping is needed. `FirebaseException` stays in the data layer, as `AnalyticsRepository` does.
@@ -163,7 +214,8 @@ The `Makefile` `dart_defines` helper already turns every `KEY=VALUE` line of the
   - SDK code in `FirebaseRemoteConfigRepository`, and the SDK-dependent tests
   - `REMOTE_CONFIG_ENV` in the `.env.*.example` files
   - Remote Config-only sections in docs
-- Not wrapped: `ConfigKey`, `ConfigKeys`, `RemoteConfigRepository`, the provider, and `API_BASE_URL`.
+  - the provider override in `main.dart`
+- Not wrapped: `ConfigKey`, `ConfigKeys`, `RemoteConfigRepository`, the repository provider, `remoteConfigRevisionProvider`, the `watchConfig` extensions, and `API_BASE_URL`.
 - `test/tool/` tests are updated for the new feature. `tool/verify_init.sh` adds a `--no-remote-config` run.
 
 ## 8. Dependencies
@@ -176,9 +228,11 @@ The `Makefile` `dart_defines` helper already turns every `KEY=VALUE` line of the
 All tests use Mocktail. None of them need Firebase.
 
 **`test/core/data/firebase_remote_config_repository_test.dart`**
-- `initialize()` calls settings → defaults → signals → activate → fetch, in that order, with the right arguments. The defaults map matches `ConfigKeys.all`.
-- `initialize()` completes before a pending `fetch()` does. The fetch is not awaited.
-- `initialize()` completes without throwing when `fetch`, `activate`, `setCustomSignals` or `setDefaults` throws, and the later steps still run.
+- `initialize()` calls settings → defaults → signals → activate → fetchAndActivate, in that order, with the right arguments. The defaults map matches `ConfigKeys.all`.
+- `initialize()` completes before a pending `fetchAndActivate()` does. It is not awaited.
+- `fetchAndActivate()` returns `true` → `onUpdated` emits once. It returns `false` → no emit. It throws → no emit and no throw.
+- `fetchAndActivate()` is called exactly once per `initialize()`.
+- `initialize()` completes without throwing when `fetchAndActivate`, `activate`, `setCustomSignals` or `setDefaults` throws, and the later steps still run.
 - `get()` covers:
   - each of the 4 types with a valid remote value
   - `valueStatic` → default
@@ -190,6 +244,11 @@ All tests use Mocktail. None of them need Firebase.
 **`test/core/domain/config_keys_test.dart`**
 - Keys in `ConfigKeys.all` are unique.
 - `ConfigKeys.apiBaseUrl` is in `all`.
+
+**`test/core/providers/remote_config_revision_provider_test.dart`**, using a fake repository with a controllable `onUpdated`:
+- The revision starts at 0 and increments on each `onUpdated` event.
+- A provider that uses `ref.watchConfig(key)` is rebuilt and returns the new value after an update.
+- A widget that uses `ref.watchConfig(key)` (pumped with `pumpApp`) shows the new value after an update.
 
 **`test/core/config/app_env_test.dart`**: the fetch interval for each environment.
 
@@ -203,10 +262,11 @@ All tests use Mocktail. None of them need Firebase.
   - enabling Remote Config in the Console
   - creating the custom signal condition `environment == staging` (and production)
   - adding a key: one line in `ConfigKeys`, then the parameter in the Console
-  - the loading strategy: new values apply on the next launch
+  - the loading strategy: cache, then defaults, then one background fetch per launch whose new values apply in the same session
+  - `watchConfig` (rebuilds) compared with `get` (does not), and the `apiBaseUrl` per-request convention
   - a note that sharing one project for both flavors also shares Auth, Firestore and App Check
 - `AGENTS.md`:
-  - add `FirebaseRemoteConfigRepository` (as `RemoteConfigRepository`) to the keepAlive list
+  - add `FirebaseRemoteConfigRepository` (as `RemoteConfigRepository`) and `RemoteConfigRevision` to the keepAlive list
   - restrict `firebase_remote_config` imports to `core/data/` and entrypoints
   - read Remote Config only through `RemoteConfigRepository` and `ConfigKeys`
 - `docs/tech.md`: add the package and directory tree entries.
@@ -215,7 +275,8 @@ All tests use Mocktail. None of them need Firebase.
 ## 11. Out of scope
 
 - An HTTP client or API layer.
-- Real-time Remote Config updates (`onConfigUpdated`).
+- Real-time Remote Config updates (`onConfigUpdated`) and periodic re-fetching during a session.
+- Holding some keys (for example `apiBaseUrl`) fixed for a session while others update. The SDK activates all values together.
 - JSON-valued parameters.
 - Remote Config UI (debug screens, overrides).
 - Splitting staging and production into one shared Firebase project. This design only makes Remote Config work if a team does that.
