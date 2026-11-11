@@ -2,6 +2,11 @@ FLUTTER ?= $(shell command -v fvm >/dev/null 2>&1 && echo "fvm flutter" || echo 
 
 DEVICE ?=
 RELEASE_DEVICE ?=
+EMULATOR_HOST ?=
+
+# Emulator host as the device sees it: an Android emulator (emulator-*) reaches
+# the host machine at 10.0.2.2, an iOS simulator at localhost.
+HOST = $(or $(EMULATOR_HOST),$(if $(filter emulator-%,$(DEVICE)),10.0.2.2,localhost))
 
 # Convert every KEY=VALUE line in an env file into --dart-define=KEY=VALUE flags.
 # Accepts a space-separated list of candidate files; first existing wins.
@@ -16,7 +21,7 @@ dart_defines = $$(for f in $(1); do if [ -f "$$f" ]; then grep -E '^[A-Za-z_][A-
         deploy-functions-staging deploy-functions-prod \
         set-secret-staging set-secret-prod \
         release-preflight bump-version changelog tag-release \
-        analyze test test-firebase codegen icons splash check-test-layout coverage
+        analyze test test-firebase test-integration codegen icons splash check-test-layout coverage
 
 help:
 	@echo ""
@@ -58,6 +63,7 @@ help:
 	@echo "    make analyze"
 	@echo "    make test"
 	@echo "    make test-firebase  (rules + Cloud Functions tests on the emulator; needs Firebase CLI + Java 21+)"
+	@echo "    make test-integration DEVICE=<id> [EMULATOR_HOST=<host>]  (app flow on a device against the emulator)"
 	@echo "    make codegen"
 	@echo "    make check-test-layout  (every test file mirrors a source file)"
 	@echo "    make coverage  (tests + per-layer coverage gate)"
@@ -186,6 +192,21 @@ test-firebase:
 	@cmd="npm --prefix firebase_tests test"; \
 	  if [ -d functions/test ]; then cmd="$$cmd && npm --prefix functions test"; fi; \
 	  firebase emulators:exec --project demo-test --only firestore,storage "$$cmd"
+
+# On-device app flow tests (integration_test/) against the local Auth and
+# Firestore emulators under the offline demo-test project: no real Firebase.
+# The stub script writes placeholder staging configs only where none exist.
+test-integration:
+	@if [ -z "$(DEVICE)" ]; then \
+	  echo "Usage: make test-integration DEVICE=<device-id> [EMULATOR_HOST=<host>]"; exit 1; \
+	fi
+	@java_major=$$(java -version 2>&1 | sed -nE 's/.*version "([0-9]+).*/\1/p' | head -n 1); \
+	  if ! command -v firebase >/dev/null 2>&1 || [ -z "$$java_major" ] || [ "$$java_major" -lt 21 ]; then \
+	    echo "test-integration needs the Firebase CLI and Java 21+ (see docs/testing_guide.md)"; exit 1; \
+	  fi
+	scripts/integration_stubs.sh
+	firebase emulators:exec --project demo-test --only auth,firestore \
+	  "$(FLUTTER) test integration_test --flavor staging -d $(DEVICE) --dart-define=EMULATOR_HOST=$(HOST)"
 
 check-test-layout:
 	$(FLUTTER:flutter=dart) scripts/check_test_layout.dart
