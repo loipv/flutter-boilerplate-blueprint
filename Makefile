@@ -14,6 +14,15 @@ HOST = $(or $(EMULATOR_HOST),$(if $(filter emulator-%,$(DEVICE)),10.0.2.2,localh
 # Usage: $(call dart_defines,.env.staging .env)
 dart_defines = $$(for f in $(1); do if [ -f "$$f" ]; then grep -E '^[A-Za-z_][A-Za-z0-9_]*=' "$$f" | sed 's/^/--dart-define=/' | tr '\n' ' '; break; fi; done)
 
+# Pre-release checks that the build-prod-* targets and release-preflight run first.
+RELEASE_CHECKS :=
+# BEGIN_ADS
+RELEASE_CHECKS += check-ads-config
+.PHONY: check-ads-config
+check-ads-config:
+	$(FLUTTER:flutter=dart) scripts/check_ads_config.dart
+# END_ADS
+
 .PHONY: help setup firebase-stubs run-staging run-prod run-prod-release \
         build-staging-ios build-staging-apk build-staging-ipa build-staging-aab \
         build-prod-ios build-prod-apk build-prod-ipa build-prod-aab \
@@ -67,6 +76,9 @@ help:
 	@echo "    make codegen"
 	@echo "    make check-test-layout  (every test file mirrors a source file)"
 	@echo "    make coverage  (tests + per-layer coverage gate)"
+# BEGIN_ADS
+	@echo "    make check-ads-config  (fail on sample AdMob IDs in a production build)"
+# END_ADS
 	@echo "    make icons    (regenerate launcher icons from assets/icons/app_logo.png)"
 	@echo "    make splash   (regenerate native splash from pubspec.yaml config)"
 	@echo ""
@@ -109,17 +121,17 @@ build-prod-apk:
 	@$(FLUTTER) build apk --flavor production \
 	  $(call dart_defines,.env.production .env)
 
-build-prod-ipa:
+build-prod-ipa: $(RELEASE_CHECKS)
 	@$(FLUTTER) build ipa --flavor production \
 	  $(call dart_defines,.env.production .env)
 
-build-prod-aab:
+build-prod-aab: $(RELEASE_CHECKS)
 	@$(FLUTTER) build appbundle --flavor production \
 	  $(call dart_defines,.env.production .env) \
 	  --obfuscate --split-debug-info=build/app/outputs/symbols
 
 # Formats the Dart source folders only; `format .` would also walk build/.
-release-preflight:
+release-preflight: $(RELEASE_CHECKS)
 	$(FLUTTER:flutter=dart) format $(wildcard lib test scripts tool integration_test) && \
 	  $(FLUTTER) analyze && $(MAKE) check-test-layout coverage
 
