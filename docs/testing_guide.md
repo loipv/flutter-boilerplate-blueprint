@@ -374,7 +374,7 @@ xcrun simctl create "Test iPhone" "iPhone 17" <runtime-id>
 xcrun simctl boot "Test iPhone" && open -a Simulator
 ```
 
-No Android emulator yet? Install a system image that matches the machine (`arm64-v8a` on Apple silicon, `x86_64` on Intel and Linux), then create and boot an AVD:
+No Android emulator yet? Install a `google_apis` system image that matches the machine (`arm64-v8a` on Apple silicon, `x86_64` on Intel and Linux), then create and boot an AVD:
 
 ```sh
 sdkmanager "system-images;android-34;google_apis;arm64-v8a"
@@ -420,7 +420,7 @@ Google Sign-In and Sign in with Apple open system or browser sheets that a widge
 
 ### Manual Workflow
 
-`.github/workflows/integration.yml` runs the suite on an Android emulator (API 34, x86_64, with KVM) on `ubuntu-latest`. It never runs on push or pull request; start it from the repository's **Actions** tab → **Integration** → **Run workflow**. It runs `make setup test-integration DEVICE=emulator-5554`, so it uses the same stubs and emulators as a local run and needs no secrets.
+`.github/workflows/integration.yml` runs the suite on an Android emulator (API 34, `google_apis`, x86_64, with KVM) on `ubuntu-latest`. It never runs on push or pull request; start it from the repository's **Actions** tab → **Integration** → **Run workflow**. It runs `make setup`, then `make test-integration DEVICE=emulator-5554` inside the emulator runner, so it uses the same stubs and emulators as a local run and needs no secrets.
 
 ## Linting Before PR
 

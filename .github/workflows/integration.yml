@@ -31,9 +31,12 @@ jobs:
           flutter-version: 3.41.4
           channel: stable
           cache: true
+      - name: Setup
+        run: make setup
       - name: Integration tests on an Android emulator
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 34
+          target: google_apis
           arch: x86_64
-          script: make setup test-integration DEVICE=emulator-5554
+          script: make test-integration DEVICE=emulator-5554
