@@ -1,7 +1,12 @@
 import 'dart:async';
 
+import 'package:flutter/widgets.dart';
+
 import 'package:blueprint_app/core/domain/config_key.dart';
 import 'package:blueprint_app/core/domain/remote_config_repository.dart';
+// BEGIN_ADS
+import 'package:blueprint_app/features/ads/domain/ad_banner_handle.dart';
+// END_ADS
 import 'package:blueprint_app/features/auth/data/firebase_auth_repository.dart';
 import 'package:blueprint_app/features/auth/domain/user_entity.dart';
 import 'package:blueprint_app/features/auth/domain/user_preferences.dart';
@@ -170,3 +175,20 @@ class FakeRemoteConfigRepository implements RemoteConfigRepository {
   @override
   Stream<void> get onUpdated => _updates.stream;
 }
+
+// BEGIN_ADS
+/// Banner handle that records whether it was disposed.
+class FakeAdBannerHandle implements AdBannerHandle {
+  bool disposed = false;
+
+  @override
+  Widget get widget => const Text('fake-banner');
+
+  @override
+  Size get size => const Size(320, 50);
+
+  @override
+  void dispose() => disposed = true;
+}
+
+// END_ADS
