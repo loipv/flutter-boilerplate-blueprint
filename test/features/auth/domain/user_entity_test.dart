@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:blueprint_app/features/auth/domain/user_entity.dart';
 import 'package:blueprint_app/features/auth/domain/user_preferences.dart';
@@ -35,6 +36,25 @@ void main() {
 
       expect(UserEntity.fromJson(json), user);
     });
+
+    test(
+      'Given non-default preferences, When toJson is read directly, Then '
+      'preferences is a plain map and fromJson restores it',
+      () {
+        const user = UserEntity(
+          id: 'u1',
+          preferences: UserPreferences(
+            themeMode: ThemeMode.dark,
+            hapticsEnabled: false,
+          ),
+        );
+
+        final json = user.toJson();
+
+        expect(json['preferences'], isA<Map<String, dynamic>>());
+        expect(UserEntity.fromJson(json), user);
+      },
+    );
   });
 
   group('isSignedIn', () {

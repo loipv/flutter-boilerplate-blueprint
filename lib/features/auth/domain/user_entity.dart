@@ -8,6 +8,9 @@ part 'user_entity.g.dart';
 abstract class UserEntity with _$UserEntity {
   const UserEntity._();
 
+  // explicitToJson serializes the nested preferences as a map, so toJson()
+  // output can be written as-is or round-tripped without jsonEncode.
+  @JsonSerializable(explicitToJson: true)
   const factory UserEntity({
     required String id,
     String? email,
