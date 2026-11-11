@@ -8,7 +8,9 @@ import 'package:blueprint_app/features/user_profile/data/firebase_user_repositor
 
 part 'settings_controller.g.dart';
 
-@riverpod
+// keepAlive: SettingsScreen only ref.reads the notifier, so an auto-dispose
+// provider would be disposed while a Firestore write is still in flight.
+@Riverpod(keepAlive: true)
 class SettingsController extends _$SettingsController {
   static const _log = AppLogger('SettingsController');
 

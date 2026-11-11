@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -153,6 +155,34 @@ void main() {
             .updateHaptics(false);
 
         verifyNever(() => userRepo.savePreferences(any(), any()));
+      },
+    );
+
+    // Regression: SettingsScreen only ref.reads the notifier, so nothing
+    // listens to it while a real Firestore write is in flight.
+    test(
+      'Given a signed-in user and a slow savePreferences, When updateHaptics(false) is called with nothing listening to the controller, Then it completes without throwing and the preferences are saved',
+      () async {
+        await signIn(user);
+        final write = Completer<void>();
+        when(
+          () => userRepo.savePreferences(any(), any()),
+        ).thenAnswer((_) => write.future);
+
+        final pending = container
+            .read(settingsControllerProvider.notifier)
+            .updateHaptics(false);
+        // Give Riverpod time to dispose an unlistened provider mid-write.
+        await Future<void>.delayed(const Duration(milliseconds: 50));
+        write.complete();
+
+        await expectLater(pending, completes);
+        verify(
+          () => userRepo.savePreferences(
+            'u1',
+            const UserPreferences(hapticsEnabled: false),
+          ),
+        ).called(1);
       },
     );
   });
