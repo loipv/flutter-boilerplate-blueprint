@@ -71,6 +71,10 @@
   "notificationsScheduledFor": "Đã hẹn lúc {time}",
   "notificationsReminderTime": "Giờ nhắc",
   "notificationsPermissionDenied": "Thông báo đang bị tắt cho ứng dụng này. Hãy bật trong phần cài đặt hệ thống rồi thử lại.",
+  "notificationsDailyTitle": "Nhắc nhở",
+  "notificationsDailyBody": "Lời nhắc hằng ngày của bạn đã sẵn sàng.",
+  "notificationsChannelName": "Lời nhắc hằng ngày",
+  "notificationsChannelDescription": "Lời nhắc định kỳ từ ứng dụng",
   "adsPrivacySection": "Quyền riêng tư",
   "adsPrivacyOptions": "Tùy chọn quyền riêng tư",
   "adsManageConsent": "Quản lý đồng ý quảng cáo"

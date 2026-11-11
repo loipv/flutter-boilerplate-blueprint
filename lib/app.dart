@@ -7,6 +7,7 @@ import 'package:blueprint_app/core/services/notification_service.dart';
 import 'package:blueprint_app/core/services/timezone_lifecycle_observer.dart';
 import 'package:blueprint_app/features/notifications/application/notification_scheduler.dart';
 // END_NOTIFICATIONS
+import 'package:blueprint_app/core/l10n/app_localizations_provider.dart';
 import 'package:blueprint_app/core/l10n/l10n_extension.dart';
 import 'package:blueprint_app/core/l10n/locale_provider.dart';
 import 'package:blueprint_app/core/l10n/resolve_app_locale.dart';
@@ -29,7 +30,7 @@ class App extends ConsumerStatefulWidget {
   ConsumerState<App> createState() => _AppState();
 }
 
-class _AppState extends ConsumerState<App> {
+class _AppState extends ConsumerState<App> with WidgetsBindingObserver {
   // BEGIN_NOTIFICATIONS
   TimezoneLifecycleObserver? _timezoneObserver;
   // END_NOTIFICATIONS
@@ -38,6 +39,7 @@ class _AppState extends ConsumerState<App> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
 
     // BEGIN_NOTIFICATIONS
     ref.read(notificationServiceProvider).init();
@@ -45,6 +47,7 @@ class _AppState extends ConsumerState<App> {
     _timezoneObserver = TimezoneLifecycleObserver(
       notificationService: ref.read(notificationServiceProvider),
       getPrefs: () => ref.read(sharedPreferencesProvider.future),
+      getL10n: () => ref.read(appLocalizationsProvider),
     );
     WidgetsBinding.instance.addObserver(_timezoneObserver!);
     // END_NOTIFICATIONS
@@ -65,6 +68,7 @@ class _AppState extends ConsumerState<App> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     // BEGIN_NOTIFICATIONS
     if (_timezoneObserver != null) {
       WidgetsBinding.instance.removeObserver(_timezoneObserver!);
@@ -74,6 +78,12 @@ class _AppState extends ConsumerState<App> {
       WidgetsBinding.instance.removeObserver(_sessionObserver!);
     }
     super.dispose();
+  }
+
+  @override
+  void didChangeLocales(List<Locale>? locales) {
+    // appLocalizationsProvider reads platform locales without watching them.
+    ref.invalidate(appLocalizationsProvider);
   }
 
   void _checkAuth() {

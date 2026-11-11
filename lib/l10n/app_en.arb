@@ -205,6 +205,10 @@
   "notificationsScheduledFor": "Scheduled for {time}",
   "notificationsReminderTime": "Reminder time",
   "notificationsPermissionDenied": "Notifications are disabled for this app. Enable them in system settings and try again.",
+  "notificationsDailyTitle": "Reminder",
+  "notificationsDailyBody": "Your daily reminder is ready.",
+  "notificationsChannelName": "Daily reminders",
+  "notificationsChannelDescription": "Recurring reminders for your app",
   "adsPrivacySection": "Privacy",
   "adsPrivacyOptions": "Privacy options",
   "adsManageConsent": "Manage ad consent",
@@ -296,6 +300,18 @@
   },
   "@notificationsPermissionDenied": {
     "description": "Error when notification permission is denied."
+  },
+  "@notificationsDailyTitle": {
+    "description": "Title of the daily reminder notification."
+  },
+  "@notificationsDailyBody": {
+    "description": "Body of the daily reminder notification."
+  },
+  "@notificationsChannelName": {
+    "description": "Android notification channel name for daily reminders."
+  },
+  "@notificationsChannelDescription": {
+    "description": "Android notification channel description for daily reminders."
   },
   "@adsPrivacySection": {
     "description": "Section header for privacy settings."

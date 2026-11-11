@@ -11,6 +11,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:blueprint_app/app.dart';
 import 'package:blueprint_app/core/constants/app_constants.dart';
+import 'package:blueprint_app/core/l10n/app_localizations_provider.dart';
 import 'package:blueprint_app/core/data/posthog_analytics_repository.dart';
 // BEGIN_NOTIFICATIONS
 import 'package:blueprint_app/core/services/notification_service.dart';
@@ -20,6 +21,9 @@ import 'package:blueprint_app/features/auth/domain/user_entity.dart';
 import 'package:blueprint_app/features/auth/domain/user_preferences.dart';
 import 'package:blueprint_app/features/home/presentation/home_screen.dart';
 import 'package:blueprint_app/features/user_profile/data/firebase_user_repository.dart';
+// BEGIN_NOTIFICATIONS
+import 'package:blueprint_app/l10n/generated/app_localizations.dart';
+// END_NOTIFICATIONS
 
 import 'helpers/fakes.dart';
 
@@ -32,6 +36,8 @@ class _MockAnalyticsRepository extends Mock
 class _MockNotificationService extends Mock implements NotificationService {}
 
 class _FakeSharedPreferences extends Fake implements SharedPreferences {}
+
+class _FakeAppLocalizations extends Fake implements AppLocalizations {}
 // END_NOTIFICATIONS
 
 void main() {
@@ -45,6 +51,7 @@ void main() {
   setUpAll(() {
     registerFallbackValue(const TimeOfDay(hour: 0, minute: 0));
     registerFallbackValue(_FakeSharedPreferences());
+    registerFallbackValue(_FakeAppLocalizations());
   });
   // END_NOTIFICATIONS
 
@@ -71,10 +78,16 @@ void main() {
       () => notifications.onNotificationTap,
     ).thenAnswer((_) => const Stream<String?>.empty());
     when(
-      () => notifications.rescheduleIfTimezoneChanged(any()),
+      () => notifications.rescheduleIfTimezoneChanged(any(), any()),
     ).thenAnswer((_) async {});
     when(
-      () => notifications.scheduleDailyNotification(time: any(named: 'time')),
+      () => notifications.scheduleDailyNotification(
+        time: any(named: 'time'),
+        title: any(named: 'title'),
+        body: any(named: 'body'),
+        channelName: any(named: 'channelName'),
+        channelDescription: any(named: 'channelDescription'),
+      ),
     ).thenAnswer((_) async {});
     when(
       () => notifications.cancelDailyNotification(),
@@ -187,6 +200,29 @@ void main() {
 
         final context = tester.element(find.byType(HomeScreen));
         expect(Localizations.localeOf(context).languageCode, 'en');
+      },
+    );
+
+    testWidgets(
+      'Given the app is running with no saved language, When the device locales change to [vi], Then appLocalizationsProvider returns Vietnamese',
+      (tester) async {
+        tester.platformDispatcher.localesTestValue = [const Locale('en')];
+        addTearDown(tester.platformDispatcher.clearLocalesTestValue);
+        final authRepo = FakeAuthRepository(initialUser: signedInUser);
+        await pumpWholeApp(tester, authRepo, onboardingComplete: true);
+        final container = ProviderScope.containerOf(
+          tester.element(find.byType(HomeScreen)),
+        );
+        // Keep the autoDispose provider alive so invalidation is observable.
+        final sub = container.listen(appLocalizationsProvider, (_, _) {});
+        addTearDown(sub.close);
+        expect(container.read(appLocalizationsProvider).localeName, 'en');
+
+        tester.platformDispatcher.localesTestValue = [const Locale('vi')];
+        tester.binding.handleLocaleChanged();
+        await tester.pumpAndSettle();
+
+        expect(container.read(appLocalizationsProvider).localeName, 'vi');
       },
     );
 

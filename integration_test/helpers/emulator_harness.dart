@@ -20,6 +20,9 @@ import 'package:blueprint_app/core/services/notification_service.dart';
 // END_NOTIFICATIONS
 import 'package:blueprint_app/features/auth/data/firebase_auth_repository.dart';
 import 'package:blueprint_app/features/user_profile/data/firebase_user_repository.dart';
+// BEGIN_NOTIFICATIONS
+import 'package:blueprint_app/l10n/generated/app_localizations.dart';
+// END_NOTIFICATIONS
 
 /// Host of the Firebase Emulator as seen from the device: `localhost` for an
 /// iOS simulator, `10.0.2.2` for an Android emulator.
@@ -158,13 +161,18 @@ class _NoopNotificationService implements NotificationService {
   @override
   Future<void> scheduleDailyNotification({
     required TimeOfDay time,
-    String title = 'Reminder',
-    String body = 'Your daily reminder is ready.',
+    required String title,
+    required String body,
+    required String channelName,
+    required String channelDescription,
     String payload = 'daily_reminder',
   }) async {}
 
   @override
-  Future<void> rescheduleIfTimezoneChanged(SharedPreferences prefs) async {}
+  Future<void> rescheduleIfTimezoneChanged(
+    SharedPreferences prefs,
+    AppLocalizations l10n,
+  ) async {}
 
   @override
   Future<void> cancelDailyNotification() async {}

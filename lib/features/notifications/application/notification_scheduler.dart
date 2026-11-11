@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:blueprint_app/core/l10n/app_localizations_provider.dart';
 import 'package:blueprint_app/core/providers/shared_preferences_provider.dart';
 import 'package:blueprint_app/core/services/notification_service.dart';
 import 'package:blueprint_app/core/utils/app_logger.dart';
@@ -46,6 +47,36 @@ class _NotificationSchedulerState extends ConsumerState<NotificationScheduler> {
     // TODO: Add app-specific navigation based on the notification payload.
   }
 
+  Future<void> _schedule(String time) async {
+    final parts = time.split(':');
+    if (parts.length != 2) {
+      _log.warning('Ignoring invalid notification time: $time');
+      return;
+    }
+
+    final hour = int.tryParse(parts[0]);
+    final minute = int.tryParse(parts[1]);
+    if (hour == null || minute == null) {
+      _log.warning('Ignoring invalid notification time: $time');
+      return;
+    }
+
+    final l10n = ref.read(appLocalizationsProvider);
+    await ref
+        .read(notificationServiceProvider)
+        .scheduleDailyNotification(
+          time: TimeOfDay(hour: hour, minute: minute),
+          title: l10n.notificationsDailyTitle,
+          body: l10n.notificationsDailyBody,
+          channelName: l10n.notificationsChannelName,
+          channelDescription: l10n.notificationsChannelDescription,
+        );
+
+    final prefs = await ref.read(sharedPreferencesProvider.future);
+    await prefs.setInt(NotificationService.kNotificationHour, hour);
+    await prefs.setInt(NotificationService.kNotificationMinute, minute);
+  }
+
   @override
   Widget build(BuildContext context) {
     ref.listen(userProfileStreamProvider, (previous, next) {
@@ -64,26 +95,7 @@ class _NotificationSchedulerState extends ConsumerState<NotificationScheduler> {
             return;
           }
 
-          final parts = nextTime.split(':');
-          if (parts.length != 2) {
-            _log.warning('Ignoring invalid notification time: $nextTime');
-            return;
-          }
-
-          final hour = int.tryParse(parts[0]);
-          final minute = int.tryParse(parts[1]);
-          if (hour == null || minute == null) {
-            _log.warning('Ignoring invalid notification time: $nextTime');
-            return;
-          }
-
-          await service.scheduleDailyNotification(
-            time: TimeOfDay(hour: hour, minute: minute),
-          );
-
-          final prefs = await ref.read(sharedPreferencesProvider.future);
-          await prefs.setInt(NotificationService.kNotificationHour, hour);
-          await prefs.setInt(NotificationService.kNotificationMinute, minute);
+          await _schedule(nextTime);
         },
         error: (error, stackTrace) => _log.error(
           'Notification sync failed',
@@ -92,6 +104,17 @@ class _NotificationSchedulerState extends ConsumerState<NotificationScheduler> {
         ),
         loading: () {},
       );
+    });
+
+    // Re-schedule with translated text when the app language changes.
+    ref.listen(appLocalizationsProvider, (previous, next) {
+      final time = ref
+          .read(userProfileStreamProvider)
+          .value
+          ?.preferences
+          .notificationTime;
+      if (time == null || time.isEmpty) return;
+      _schedule(time);
     });
 
     return widget.child;

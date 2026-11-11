@@ -10,6 +10,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 import 'package:blueprint_app/core/utils/app_logger.dart';
+import 'package:blueprint_app/l10n/generated/app_localizations.dart';
 
 final notificationServiceProvider = Provider<NotificationService>((ref) {
   return NotificationService();
@@ -82,8 +83,10 @@ class NotificationService {
 
   Future<void> scheduleDailyNotification({
     required TimeOfDay time,
-    String title = 'Reminder',
-    String body = 'Your daily reminder is ready.',
+    required String title,
+    required String body,
+    required String channelName,
+    required String channelDescription,
     String payload = 'daily_reminder',
   }) async {
     try {
@@ -109,15 +112,15 @@ class NotificationService {
             title: title,
             body: body,
             scheduledDate: scheduledDate,
-            notificationDetails: const NotificationDetails(
+            notificationDetails: NotificationDetails(
               android: AndroidNotificationDetails(
                 'daily_reminder_channel',
-                'Daily reminders',
-                channelDescription: 'Recurring reminders for your app',
+                channelName,
+                channelDescription: channelDescription,
                 importance: Importance.max,
                 priority: Priority.high,
               ),
-              iOS: DarwinNotificationDetails(
+              iOS: const DarwinNotificationDetails(
                 presentAlert: true,
                 presentBadge: true,
                 presentSound: true,
@@ -148,7 +151,10 @@ class NotificationService {
     }
   }
 
-  Future<void> rescheduleIfTimezoneChanged(SharedPreferences prefs) async {
+  Future<void> rescheduleIfTimezoneChanged(
+    SharedPreferences prefs,
+    AppLocalizations l10n,
+  ) async {
     tz.initializeTimeZones();
 
     if (!_isInitialized) {
@@ -183,6 +189,10 @@ class NotificationService {
 
     await scheduleDailyNotification(
       time: TimeOfDay(hour: hour, minute: minute),
+      title: l10n.notificationsDailyTitle,
+      body: l10n.notificationsDailyBody,
+      channelName: l10n.notificationsChannelName,
+      channelDescription: l10n.notificationsChannelDescription,
     );
   }
 

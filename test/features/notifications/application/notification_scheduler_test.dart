@@ -1,9 +1,11 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:blueprint_app/core/l10n/locale_provider.dart';
 import 'package:blueprint_app/core/services/notification_service.dart';
 import 'package:blueprint_app/features/auth/domain/user_entity.dart';
 import 'package:blueprint_app/features/auth/domain/user_preferences.dart';
@@ -20,6 +22,7 @@ void main() {
   late MockNotificationService service;
   late StreamController<String?> taps;
   late StreamController<UserEntity?> profile;
+  late ProviderContainer container;
 
   UserEntity userWith(String? time) => UserEntity(
     id: 'u1',
@@ -28,7 +31,12 @@ void main() {
 
   Future<void> pumpScheduler(WidgetTester tester) => pumpApp(
     tester,
-    const NotificationScheduler(child: Text('child')),
+    Consumer(
+      builder: (context, ref, _) {
+        container = ProviderScope.containerOf(context);
+        return const NotificationScheduler(child: Text('child'));
+      },
+    ),
     overrides: [
       notificationServiceProvider.overrideWithValue(service),
       userProfileStreamProvider.overrideWith((ref) => profile.stream),
@@ -48,7 +56,13 @@ void main() {
     profile = StreamController<UserEntity?>();
     when(() => service.onNotificationTap).thenAnswer((_) => taps.stream);
     when(
-      () => service.scheduleDailyNotification(time: any(named: 'time')),
+      () => service.scheduleDailyNotification(
+        time: any(named: 'time'),
+        title: any(named: 'title'),
+        body: any(named: 'body'),
+        channelName: any(named: 'channelName'),
+        channelDescription: any(named: 'channelDescription'),
+      ),
     ).thenAnswer((_) async {});
     when(() => service.cancelDailyNotification()).thenAnswer((_) async {});
     addTearDown(() async {
@@ -73,7 +87,13 @@ void main() {
         await emit(tester, userWith(null));
 
         verifyNever(
-          () => service.scheduleDailyNotification(time: any(named: 'time')),
+          () => service.scheduleDailyNotification(
+            time: any(named: 'time'),
+            title: any(named: 'title'),
+            body: any(named: 'body'),
+            channelName: any(named: 'channelName'),
+            channelDescription: any(named: 'channelDescription'),
+          ),
         );
         verifyNever(() => service.cancelDailyNotification());
       },
@@ -89,11 +109,82 @@ void main() {
         verify(
           () => service.scheduleDailyNotification(
             time: const TimeOfDay(hour: 8, minute: 30),
+            title: any(named: 'title'),
+            body: any(named: 'body'),
+            channelName: any(named: 'channelName'),
+            channelDescription: any(named: 'channelDescription'),
           ),
         ).called(1);
         final prefs = await tester.runAsync(SharedPreferences.getInstance);
         expect(prefs!.getInt(NotificationService.kNotificationHour), 8);
         expect(prefs.getInt(NotificationService.kNotificationMinute), 30);
+      },
+    );
+
+    testWidgets(
+      'Given a reminder at 08:00, When the profile emits it, Then scheduleDailyNotification gets title Reminder and body Your daily reminder is ready.',
+      (tester) async {
+        await pumpScheduler(tester);
+
+        await emit(tester, userWith('08:00'));
+
+        verify(
+          () => service.scheduleDailyNotification(
+            time: const TimeOfDay(hour: 8, minute: 0),
+            title: 'Reminder',
+            body: 'Your daily reminder is ready.',
+            channelName: 'Daily reminders',
+            channelDescription: 'Recurring reminders for your app',
+          ),
+        ).called(1);
+      },
+    );
+
+    testWidgets(
+      'Given a reminder at 08:00 is set, When localeProvider.setLocale(vi) is called, Then scheduleDailyNotification is called again with title Nhắc nhở',
+      (tester) async {
+        await pumpScheduler(tester);
+        await emit(tester, userWith('08:00'));
+
+        await container
+            .read(localeProvider.notifier)
+            .setLocale(const Locale('vi'));
+        await tester.runAsync(() => Future<void>.delayed(Duration.zero));
+        await tester.pumpAndSettle();
+
+        verify(
+          () => service.scheduleDailyNotification(
+            time: const TimeOfDay(hour: 8, minute: 0),
+            title: 'Nhắc nhở',
+            body: 'Lời nhắc hằng ngày của bạn đã sẵn sàng.',
+            channelName: 'Lời nhắc hằng ngày',
+            channelDescription: 'Lời nhắc định kỳ từ ứng dụng',
+          ),
+        ).called(1);
+      },
+    );
+
+    testWidgets(
+      'Given no reminder, When localeProvider.setLocale(vi) is called, Then nothing is scheduled',
+      (tester) async {
+        await pumpScheduler(tester);
+        await emit(tester, userWith(null));
+
+        await container
+            .read(localeProvider.notifier)
+            .setLocale(const Locale('vi'));
+        await tester.runAsync(() => Future<void>.delayed(Duration.zero));
+        await tester.pumpAndSettle();
+
+        verifyNever(
+          () => service.scheduleDailyNotification(
+            time: any(named: 'time'),
+            title: any(named: 'title'),
+            body: any(named: 'body'),
+            channelName: any(named: 'channelName'),
+            channelDescription: any(named: 'channelDescription'),
+          ),
+        );
       },
     );
 
@@ -139,7 +230,13 @@ void main() {
         await emit(tester, userWith('08:30'));
 
         verify(
-          () => service.scheduleDailyNotification(time: any(named: 'time')),
+          () => service.scheduleDailyNotification(
+            time: any(named: 'time'),
+            title: any(named: 'title'),
+            body: any(named: 'body'),
+            channelName: any(named: 'channelName'),
+            channelDescription: any(named: 'channelDescription'),
+          ),
         ).called(1);
       },
     );
@@ -153,7 +250,13 @@ void main() {
           await emit(tester, userWith(invalid));
 
           verifyNever(
-            () => service.scheduleDailyNotification(time: any(named: 'time')),
+            () => service.scheduleDailyNotification(
+              time: any(named: 'time'),
+              title: any(named: 'title'),
+              body: any(named: 'body'),
+              channelName: any(named: 'channelName'),
+              channelDescription: any(named: 'channelDescription'),
+            ),
           );
           verifyNever(() => service.cancelDailyNotification());
           final prefs = await tester.runAsync(SharedPreferences.getInstance);
@@ -176,7 +279,13 @@ void main() {
 
         expect(find.text('child'), findsOneWidget);
         verifyNever(
-          () => service.scheduleDailyNotification(time: any(named: 'time')),
+          () => service.scheduleDailyNotification(
+            time: any(named: 'time'),
+            title: any(named: 'title'),
+            body: any(named: 'body'),
+            channelName: any(named: 'channelName'),
+            channelDescription: any(named: 'channelDescription'),
+          ),
         );
       },
     );
