@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 // BEGIN_APPLE
@@ -162,5 +163,31 @@ void main() {
       },
     );
     // END_ANON
+
+    testWidgets(
+      'Given locale vi, an anonymous user and a 320x640 surface, When pumped, Then no overflow is reported',
+      (tester) async {
+        tester.view.physicalSize = const Size(320, 640);
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+
+        await pumpApp(
+          tester,
+          const LoginPromptView(),
+          locale: const Locale('vi'),
+          overrides: [
+            authRepositoryProvider.overrideWithValue(
+              FakeAuthRepository(initialUser: anonUser),
+            ),
+            userRepositoryProvider.overrideWithValue(userRepo),
+          ],
+        );
+        containerOf(tester).read(onboardingControllerProvider);
+        await tester.pumpAndSettle();
+
+        expect(tester.takeException(), isNull);
+      },
+    );
   });
 }

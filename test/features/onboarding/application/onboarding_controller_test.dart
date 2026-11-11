@@ -126,9 +126,9 @@ void main() {
           .completeOnboarding();
 
       final saved =
-          verify(() => userRepo.savePreferences('u1', captureAny()))
-                  .captured
-                  .single
+          verify(
+                () => userRepo.savePreferences('u1', captureAny()),
+              ).captured.single
               as UserPreferences;
       expect(saved.languageCode, 'vi');
     },

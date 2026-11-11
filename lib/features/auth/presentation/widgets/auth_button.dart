@@ -110,9 +110,14 @@ class AuthButton extends StatelessWidget {
                         colorFilter: colorFilter,
                       ),
                       const Gap(AppSpacing.p2),
-                      Text(
-                        label,
-                        style: AppTypography.labelLarge.copyWith(color: fg),
+                      Flexible(
+                        child: Text(
+                          label,
+                          textAlign: TextAlign.center,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTypography.labelLarge.copyWith(color: fg),
+                        ),
                       ),
                     ],
                   ),
