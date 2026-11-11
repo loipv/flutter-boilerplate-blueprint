@@ -80,8 +80,7 @@ class GoogleMobileAdsGateway {
     required String adUnitId,
     required double width,
   }) async {
-    // ignore: deprecated_member_use
-    final size = await AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(
+    final size = await AdSize.getLargeAnchoredAdaptiveBannerAdSize(
       width.truncate(),
     );
     if (size == null) {
