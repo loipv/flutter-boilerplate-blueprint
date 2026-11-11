@@ -25,5 +25,22 @@
   "onboardingThemeAutoSubtitle": "Theo hệ thống",
   "onboardingThemeDusk": "Hoàng hôn",
   "onboardingThemeDuskSubtitle": "Chế độ tối",
-  "commonConfirm": "Xác nhận"
+  "commonConfirm": "Xác nhận",
+  "authSignInFailed": "Đăng nhập thất bại. Vui lòng thử lại.",
+  "authContinueWithApple": "Tiếp tục với Apple",
+  "authContinueWithGoogle": "Tiếp tục với Google",
+  "authAppleUnavailable": "Đăng nhập bằng Apple không khả dụng trên thiết bị này. Hãy thử Google, hoặc tiếp tục với tư cách khách.",
+  "authAppleNonceError": "Đăng nhập bằng Apple gặp sự cố. Hãy thử lại hoặc dùng Google.",
+  "authEmailInUseTryApple": "Đã có tài khoản dùng email này. Hãy thử đăng nhập bằng Apple.",
+  "authEmailInUseTryGoogle": "Đã có tài khoản dùng email này. Hãy thử đăng nhập bằng Google.",
+  "authDeleteNoUser": "Không có người dùng nào đang đăng nhập.",
+  "authErrorRetry": "Lỗi xác thực. Vui lòng thử lại.",
+  "commonErrorRetry": "Đã xảy ra lỗi. Vui lòng thử lại.",
+  "commonCancel": "Hủy",
+  "onboardingLoginHeadline": "Tạo tài khoản của bạn",
+  "onboardingLoginBody": "Đăng nhập để đồng bộ dữ liệu giữa các thiết bị. Bạn luôn có thể bỏ qua và đăng nhập sau.",
+  "anonContinueAsGuest": "Tiếp tục với tư cách khách",
+  "anonConfirmTitle": "Tiếp tục với tư cách khách?",
+  "anonConfirmBody": "Dữ liệu của bạn sẽ không được đồng bộ giữa các thiết bị. Bạn có thể đăng nhập sau trong Cài đặt.",
+  "anonConfirmContinue": "Tiếp tục"
 }

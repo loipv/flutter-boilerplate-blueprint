@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:blueprint_app/core/errors/failure.dart';
+import 'package:blueprint_app/core/l10n/l10n_extension.dart';
 import 'package:blueprint_app/core/theme/app_colors.dart';
 import 'package:blueprint_app/core/theme/app_spacing.dart';
 import 'package:blueprint_app/core/theme/app_typography.dart';
@@ -44,19 +45,17 @@ class _LoginPromptViewState extends ConsumerState<LoginPromptView> {
       await method();
       await _completeOnboarding();
     } on Failure catch (e) {
-      final message = authFailureMessage(e, method: signInMethod);
       final isCanceled = e.maybeWhen(
         auth: (code) => code == 'canceled',
         orElse: () => false,
       );
       if (!mounted || isCanceled) return;
-      AppSnackBar.error(
-        context,
-        message ?? 'Sign-in failed. Please try again.',
-      );
+      final l10n = context.l10n;
+      final message = authFailureMessage(e, method: signInMethod, l10n: l10n);
+      AppSnackBar.error(context, message ?? l10n.authSignInFailed);
     } catch (e) {
       if (mounted) {
-        AppSnackBar.error(context, 'Sign-in failed. Please try again.');
+        AppSnackBar.error(context, context.l10n.authSignInFailed);
       }
     } finally {
       if (mounted) setLoading(false);
@@ -68,19 +67,16 @@ class _LoginPromptViewState extends ConsumerState<LoginPromptView> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Continue as Guest?'),
-        content: const Text(
-          'Your data won\'t sync across devices. '
-          'You can sign in later from Settings.',
-        ),
+        title: Text(context.l10n.anonConfirmTitle),
+        content: Text(context.l10n.anonConfirmBody),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
+            child: Text(context.l10n.commonCancel),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Continue'),
+            child: Text(context.l10n.anonConfirmContinue),
           ),
         ],
       ),
@@ -108,15 +104,14 @@ class _LoginPromptViewState extends ConsumerState<LoginPromptView> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Create your account',
+            context.l10n.onboardingLoginHeadline,
             style: AppTypography.displayMedium.copyWith(
               color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
           const Gap(AppSpacing.p2),
           Text(
-            'Sign in to sync your data across devices. '
-            'You can always skip this and sign in later.',
+            context.l10n.onboardingLoginBody,
             style: AppTypography.bodyLarge.copyWith(
               color: AppColors.textSecondary(context),
             ),
@@ -171,13 +166,13 @@ class _LoginPromptViewState extends ConsumerState<LoginPromptView> {
     if (isAnon) {
       return OutlinedButton(
         onPressed: _continueAsGuest,
-        child: const Text('Continue as Guest'),
+        child: Text(context.l10n.anonContinueAsGuest),
       );
     }
     // END_ANON
     return FilledButton(
       onPressed: _completeOnboarding,
-      child: const Text('Get Started'),
+      child: Text(context.l10n.onboardingGetStarted),
     );
   }
 }

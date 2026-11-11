@@ -1,21 +1,26 @@
 import 'package:blueprint_app/core/errors/failure.dart';
+import 'package:blueprint_app/l10n/generated/app_localizations.dart';
 
 enum SignInMethod { apple, google }
 
-String? authFailureMessage(Failure failure, {required SignInMethod method}) {
+String? authFailureMessage(
+  Failure failure, {
+  required SignInMethod method,
+  required AppLocalizations l10n,
+}) {
   return failure.maybeWhen(
     auth: (code) {
       if (code == 'canceled') return null;
       if (code == 'apple-unavailable') {
-        return "Sign in with Apple isn't available on this device. Try Google instead, or continue as a guest.";
+        return l10n.authAppleUnavailable;
       }
       if (code == 'missing-or-invalid-nonce') {
-        return 'Apple sign-in ran into a problem. Try again, or use Google instead.';
+        return l10n.authAppleNonceError;
       }
       if (code == 'email-already-in-use') {
         return method == SignInMethod.google
-            ? 'An account with this email already exists. Try Apple instead.'
-            : 'An account with this email already exists. Try Google instead.';
+            ? l10n.authEmailInUseTryApple
+            : l10n.authEmailInUseTryGoogle;
       }
       return null;
     },

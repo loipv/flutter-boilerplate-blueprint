@@ -1,5 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:blueprint_app/core/errors/failure.dart';
+import 'package:blueprint_app/core/l10n/app_localizations_provider.dart';
 import 'package:blueprint_app/core/utils/app_logger.dart';
 import 'package:blueprint_app/core/theme/theme_provider.dart';
 import 'package:blueprint_app/features/auth/data/firebase_auth_repository.dart';
@@ -102,8 +103,9 @@ class AuthController extends _$AuthController {
   /// Permanently deletes the account and all associated Firestore data.
   /// Returns `null` on success, or a user-facing error message on failure.
   Future<String?> deleteAccount() async {
+    final l10n = ref.read(appLocalizationsProvider);
     final user = state.value;
-    if (user == null) return 'No signed-in user.';
+    if (user == null) return l10n.authDeleteNoUser;
 
     try {
       await ref.read(userRepositoryProvider).deleteUserData(user.id);
@@ -133,11 +135,11 @@ class AuthController extends _$AuthController {
     } catch (e) {
       if (e is Failure) {
         return e.maybeWhen(
-          auth: (_) => 'Authentication error. Please try again.',
-          orElse: () => 'Something went wrong. Please try again.',
+          auth: (_) => l10n.authErrorRetry,
+          orElse: () => l10n.commonErrorRetry,
         );
       }
-      return 'Something went wrong. Please try again.';
+      return l10n.commonErrorRetry;
     }
   }
 

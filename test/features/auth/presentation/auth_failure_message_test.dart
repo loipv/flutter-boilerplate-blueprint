@@ -1,8 +1,13 @@
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:blueprint_app/core/errors/failure.dart';
 import 'package:blueprint_app/features/auth/presentation/auth_failure_message.dart';
+import 'package:blueprint_app/l10n/generated/app_localizations.dart';
 
 void main() {
+  final en = lookupAppLocalizations(const Locale('en'));
+  final vi = lookupAppLocalizations(const Locale('vi'));
+
   group('authFailureMessage', () {
     test(
       'Given a canceled auth failure, When the message is built, Then it is null',
@@ -11,6 +16,7 @@ void main() {
           authFailureMessage(
             const Failure.auth('canceled'),
             method: SignInMethod.apple,
+            l10n: en,
           ),
           isNull,
         );
@@ -24,6 +30,7 @@ void main() {
           authFailureMessage(
             const Failure.auth('apple-unavailable'),
             method: SignInMethod.apple,
+            l10n: en,
           ),
           "Sign in with Apple isn't available on this device. Try Google instead, or continue as a guest.",
         );
@@ -37,6 +44,7 @@ void main() {
           authFailureMessage(
             const Failure.auth('missing-or-invalid-nonce'),
             method: SignInMethod.apple,
+            l10n: en,
           ),
           'Apple sign-in ran into a problem. Try again, or use Google instead.',
         );
@@ -50,6 +58,7 @@ void main() {
           authFailureMessage(
             const Failure.auth('email-already-in-use'),
             method: SignInMethod.google,
+            l10n: en,
           ),
           'An account with this email already exists. Try Apple instead.',
         );
@@ -63,6 +72,7 @@ void main() {
           authFailureMessage(
             const Failure.auth('email-already-in-use'),
             method: SignInMethod.apple,
+            l10n: en,
           ),
           'An account with this email already exists. Try Google instead.',
         );
@@ -76,6 +86,7 @@ void main() {
           authFailureMessage(
             const Failure.auth('network-request-failed'),
             method: SignInMethod.google,
+            l10n: en,
           ),
           isNull,
         );
@@ -89,9 +100,26 @@ void main() {
           authFailureMessage(
             const Failure.server(),
             method: SignInMethod.google,
+            l10n: en,
           ),
           isNull,
         );
+      },
+    );
+
+    test(
+      'Given l10n vi and code apple-unavailable, When mapped, Then the Vietnamese authAppleUnavailable text',
+      () {
+        expect(
+          authFailureMessage(
+            const Failure.auth('apple-unavailable'),
+            method: SignInMethod.apple,
+            l10n: vi,
+          ),
+          vi.authAppleUnavailable,
+        );
+        expect(vi.authAppleUnavailable, contains('Apple'));
+        expect(vi.authAppleUnavailable, isNot(en.authAppleUnavailable));
       },
     );
   });

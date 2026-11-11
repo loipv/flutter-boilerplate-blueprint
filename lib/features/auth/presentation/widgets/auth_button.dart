@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gap/gap.dart';
+import 'package:blueprint_app/core/l10n/l10n_extension.dart';
 import 'package:blueprint_app/core/theme/app_spacing.dart';
 import 'package:blueprint_app/core/theme/app_typography.dart';
 
@@ -36,7 +37,7 @@ class AuthButton extends StatelessWidget {
 
     final (label, iconAsset, bg, fg, colorFilter) = switch (provider) {
       AuthProvider.apple => (
-        'Continue with Apple',
+        context.l10n.authContinueWithApple,
         'assets/icons/ic_apple.svg',
         isDark ? Colors.white : Colors.black,
         isDark ? Colors.black : Colors.white,
@@ -67,7 +68,7 @@ class AuthButton extends StatelessWidget {
             : null,
       ),
       AuthProvider.google => (
-        'Continue with Google',
+        context.l10n.authContinueWithGoogle,
         'assets/icons/ic_google.svg',
         isDark ? const Color(0xFF2D2D2D) : const Color(0xFFF8F8F8),
         isDark ? Colors.white : Colors.black87,

@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:blueprint_app/core/constants/app_constants.dart';
 import 'package:blueprint_app/core/errors/failure.dart';
+import 'package:blueprint_app/core/l10n/locale_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:blueprint_app/features/auth/application/auth_controller.dart';
 import 'package:blueprint_app/features/auth/data/firebase_auth_repository.dart';
@@ -154,6 +155,26 @@ void main() {
         expect(result, 'No signed-in user.');
         verifyNever(() => userRepo.deleteUserData(any()));
         verifyNever(() => authRepo.deleteAuthAccount());
+      },
+    );
+
+    test(
+      'Given stored locale_code vi and no user, When deleteAccount is called, Then it returns the Vietnamese message',
+      () async {
+        SharedPreferences.setMockInitialValues({'locale_code': 'vi'});
+        when(
+          () => authRepo.authStateChanges(),
+        ).thenAnswer((_) => Stream.value(null));
+        container.listen(authControllerProvider, (_, _) {});
+        await container.read(authControllerProvider.future);
+        // The app keeps the locale loaded; mirror that here.
+        await container.read(localeProvider.future);
+
+        final result = await container
+            .read(authControllerProvider.notifier)
+            .deleteAccount();
+
+        expect(result, 'Không có người dùng nào đang đăng nhập.');
       },
     );
 

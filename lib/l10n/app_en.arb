@@ -108,5 +108,73 @@
   },
   "@commonConfirm": {
     "description": "Generic confirm button label."
+  },
+  "authSignInFailed": "Sign-in failed. Please try again.",
+  "authContinueWithApple": "Continue with Apple",
+  "authContinueWithGoogle": "Continue with Google",
+  "authAppleUnavailable": "Sign in with Apple isn't available on this device. Try Google instead, or continue as a guest.",
+  "authAppleNonceError": "Apple sign-in ran into a problem. Try again, or use Google instead.",
+  "authEmailInUseTryApple": "An account with this email already exists. Try Apple instead.",
+  "authEmailInUseTryGoogle": "An account with this email already exists. Try Google instead.",
+  "authDeleteNoUser": "No signed-in user.",
+  "authErrorRetry": "Authentication error. Please try again.",
+  "commonErrorRetry": "Something went wrong. Please try again.",
+  "commonCancel": "Cancel",
+  "onboardingLoginHeadline": "Create your account",
+  "onboardingLoginBody": "Sign in to sync your data across devices. You can always skip this and sign in later.",
+  "anonContinueAsGuest": "Continue as Guest",
+  "anonConfirmTitle": "Continue as Guest?",
+  "anonConfirmBody": "Your data won't sync across devices. You can sign in later from Settings.",
+  "anonConfirmContinue": "Continue",
+  "@authSignInFailed": {
+    "description": "Snackbar shown when sign-in fails without a more specific message."
+  },
+  "@authContinueWithApple": {
+    "description": "Label of the Apple sign-in button."
+  },
+  "@authContinueWithGoogle": {
+    "description": "Label of the Google sign-in button."
+  },
+  "@authAppleUnavailable": {
+    "description": "Error shown when Sign in with Apple is unavailable."
+  },
+  "@authAppleNonceError": {
+    "description": "Error shown when Apple sign-in fails because of a nonce problem."
+  },
+  "@authEmailInUseTryApple": {
+    "description": "Error shown when Google sign-in hits an email already used with Apple."
+  },
+  "@authEmailInUseTryGoogle": {
+    "description": "Error shown when Apple sign-in hits an email already used with Google."
+  },
+  "@authDeleteNoUser": {
+    "description": "Error returned when deleting an account with no signed-in user."
+  },
+  "@authErrorRetry": {
+    "description": "Generic authentication error message."
+  },
+  "@commonErrorRetry": {
+    "description": "Generic error message."
+  },
+  "@commonCancel": {
+    "description": "Generic cancel button label."
+  },
+  "@onboardingLoginHeadline": {
+    "description": "Headline of the onboarding login step."
+  },
+  "@onboardingLoginBody": {
+    "description": "Body text of the onboarding login step."
+  },
+  "@anonContinueAsGuest": {
+    "description": "Button that continues onboarding as an anonymous guest."
+  },
+  "@anonConfirmTitle": {
+    "description": "Title of the guest confirmation dialog."
+  },
+  "@anonConfirmBody": {
+    "description": "Body of the guest confirmation dialog."
+  },
+  "@anonConfirmContinue": {
+    "description": "Confirm button of the guest confirmation dialog."
   }
 }

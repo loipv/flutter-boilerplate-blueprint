@@ -230,15 +230,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         orElse: () => false,
       );
       if (mounted && !isCanceled) {
-        final message = authFailureMessage(e, method: method);
-        AppSnackBar.error(
-          context,
-          message ?? 'Sign-in failed. Please try again.',
+        final message = authFailureMessage(
+          e,
+          method: method,
+          l10n: context.l10n,
         );
+        AppSnackBar.error(context, message ?? context.l10n.authSignInFailed);
       }
     } catch (_) {
       if (mounted) {
-        AppSnackBar.error(context, 'Sign-in failed. Please try again.');
+        AppSnackBar.error(context, context.l10n.authSignInFailed);
       }
     } finally {
       update(false);
