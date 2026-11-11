@@ -16,7 +16,7 @@ dart_defines = $$(for f in $(1); do if [ -f "$$f" ]; then grep -E '^[A-Za-z_][A-
         deploy-functions-staging deploy-functions-prod \
         set-secret-staging set-secret-prod \
         release-preflight bump-version changelog tag-release \
-        analyze test codegen icons splash
+        analyze test codegen icons splash check-test-layout
 
 help:
 	@echo ""
@@ -58,6 +58,7 @@ help:
 	@echo "    make analyze"
 	@echo "    make test"
 	@echo "    make codegen"
+	@echo "    make check-test-layout  (every test file mirrors a source file)"
 	@echo "    make icons    (regenerate launcher icons from assets/icons/app_logo.png)"
 	@echo "    make splash   (regenerate native splash from pubspec.yaml config)"
 	@echo ""
@@ -168,6 +169,9 @@ analyze:
 
 test:
 	$(FLUTTER) test
+
+check-test-layout:
+	$(FLUTTER:flutter=dart) scripts/check_test_layout.dart
 
 codegen:
 	$(FLUTTER) pub run build_runner build --delete-conflicting-outputs

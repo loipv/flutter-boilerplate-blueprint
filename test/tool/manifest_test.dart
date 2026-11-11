@@ -5,7 +5,8 @@ import '../../tool/src/manifest.dart';
 import '../../tool/src/markers.dart';
 
 void main() {
-  test('every marker in the repo has a known name', () {
+  test('Given every text file in the repo, When markers are scanned, '
+      'Then each has a known name', () {
     final unknown = <String>[];
     for (final path in listFiles(skipDirs)) {
       if (!isTextFile(path)) continue;
@@ -20,7 +21,8 @@ void main() {
     expect(unknown, isEmpty);
   });
 
-  test('knownMarkers holds every feature marker plus BLUEPRINT', () {
+  test('Given the feature rules, When knownMarkers is read, '
+      'Then it holds every feature marker plus BLUEPRINT', () {
     expect(knownMarkers, containsAll(['BLUEPRINT', 'SENTRY', 'ANON']));
     for (final rule in featureRules.values) {
       expect(knownMarkers, containsAll(rule.markers));
