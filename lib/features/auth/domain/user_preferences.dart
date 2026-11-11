@@ -15,8 +15,8 @@ abstract class UserPreferences with _$UserPreferences {
     // BEGIN_NOTIFICATIONS_PREF
     String? notificationTime,
     // END_NOTIFICATIONS_PREF
-    // TODO: add your app-specific preferences here, e.g.:
-    // @Default('en') String language,
+    String? languageCode,
+    // TODO: add your app-specific preferences here.
   }) = _UserPreferences;
 
   factory UserPreferences.fromJson(Map<String, dynamic> json) =>

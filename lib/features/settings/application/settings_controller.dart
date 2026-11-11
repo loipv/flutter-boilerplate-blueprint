@@ -50,6 +50,24 @@ class SettingsController extends _$SettingsController {
     });
   }
 
+  /// Saves the language preference. `null` means follow the device language.
+  Future<void> updateLanguage(String? languageCode) async {
+    final user = ref.read(currentUserProvider).value;
+    if (user == null) return;
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() async {
+      final existing = await ref
+          .read(userRepositoryProvider)
+          .getUserStream(user.id)
+          .first;
+      final prefs = (existing?.preferences ?? const UserPreferences()).copyWith(
+        languageCode: languageCode,
+      );
+      await ref.read(userRepositoryProvider).savePreferences(user.id, prefs);
+      _log.info('Language updated to ${languageCode ?? 'system'}');
+    });
+  }
+
   // BEGIN_NOTIFICATIONS
   Future<void> updateNotificationTime(String? time) async {
     final user = ref.read(currentUserProvider).value;

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:blueprint_app/core/l10n/l10n_extension.dart';
+import 'package:blueprint_app/core/l10n/locale_provider.dart';
 import 'package:blueprint_app/core/presentation/utils/app_snack_bar.dart';
 import 'package:blueprint_app/core/providers/haptics_provider.dart';
 import 'package:blueprint_app/core/theme/app_spacing.dart';
@@ -16,11 +18,13 @@ import 'package:blueprint_app/features/auth/presentation/auth_failure_message.da
 import 'package:blueprint_app/features/auth/presentation/widgets/auth_button.dart';
 import 'package:blueprint_app/features/settings/application/settings_controller.dart';
 import 'package:blueprint_app/features/user_profile/application/user_profile_providers.dart';
+import 'package:blueprint_app/l10n/generated/app_localizations.dart';
 // BEGIN_ADS
 import 'package:blueprint_app/features/ads/presentation/ad_privacy_options_tile.dart';
 // END_ADS
 // BEGIN_NOTIFICATIONS_IMPORTS
 import 'package:blueprint_app/core/services/notification_service.dart';
+
 // END_NOTIFICATIONS_IMPORTS
 
 class SettingsScreen extends ConsumerStatefulWidget {
@@ -65,6 +69,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             _SectionHeader('Appearance'),
             const Gap(AppSpacing.p2),
             _ThemeTile(currentMode: themeMode),
+            const Gap(AppSpacing.p2),
+            const _LanguageTile(),
             const Gap(AppSpacing.p4),
             _SectionHeader('Accessibility'),
             const Gap(AppSpacing.p2),
@@ -409,6 +415,41 @@ class _ThemeTile extends ConsumerWidget {
     ThemeMode.dark => LucideIcons.moon,
     ThemeMode.system => LucideIcons.monitor,
   };
+}
+
+class _LanguageTile extends ConsumerWidget {
+  const _LanguageTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final current = ref.watch(localeProvider).value;
+    return ListTile(
+      leading: const Icon(LucideIcons.languages),
+      title: Text(context.l10n.settingsLanguage),
+      trailing: DropdownButton<Locale?>(
+        value: current,
+        underline: const SizedBox.shrink(),
+        items: [
+          DropdownMenuItem<Locale?>(
+            child: Text(context.l10n.settingsLanguageSystem),
+          ),
+          for (final locale in AppLocalizations.supportedLocales)
+            DropdownMenuItem<Locale?>(
+              value: locale,
+              child: Text(lookupAppLocalizations(locale).languageNativeName),
+            ),
+        ],
+        onChanged: (locale) {
+          // Local switch first so the UI updates even if the save fails.
+          ref.read(localeProvider.notifier).setLocale(locale);
+          ref
+              .read(settingsControllerProvider.notifier)
+              .updateLanguage(locale?.languageCode);
+        },
+      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+    );
+  }
 }
 
 class _AccountSummaryTile extends StatelessWidget {

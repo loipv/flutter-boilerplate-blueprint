@@ -2,5 +2,7 @@
   "@@locale": "vi",
   "appTitle": "Blueprint App",
   "appDescription": "A Flutter + Firebase starter app",
-  "languageNativeName": "Tiếng Việt"
+  "languageNativeName": "Tiếng Việt",
+  "settingsLanguage": "Ngôn ngữ",
+  "settingsLanguageSystem": "Theo hệ thống"
 }

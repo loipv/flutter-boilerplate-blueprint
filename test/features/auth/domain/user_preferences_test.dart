@@ -22,6 +22,22 @@ void main() {
       expect(UserPreferences.fromJson(prefs.toJson()), prefs);
     });
 
+    test(
+      'Given languageCode vi, When round-tripped through JSON, Then it is preserved',
+      () {
+        const prefs = UserPreferences(languageCode: 'vi');
+
+        expect(UserPreferences.fromJson(prefs.toJson()).languageCode, 'vi');
+      },
+    );
+
+    test(
+      'Given JSON without languageCode, When parsed, Then languageCode is null',
+      () {
+        expect(UserPreferences.fromJson(const {}).languageCode, isNull);
+      },
+    );
+
     test('Given an empty map, When parsed, Then defaults apply', () {
       expect(UserPreferences.fromJson(const {}), const UserPreferences());
     });

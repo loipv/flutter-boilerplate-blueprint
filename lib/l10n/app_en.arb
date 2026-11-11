@@ -3,7 +3,11 @@
   "appTitle": "Blueprint App",
   "appDescription": "A Flutter + Firebase starter app",
   "languageNativeName": "English",
+  "settingsLanguage": "Language",
+  "settingsLanguageSystem": "System",
   "@appTitle": {"description": "The application name shown in the title bar and app switcher."},
   "@appDescription": {"description": "Short description of the application."},
-  "@languageNativeName": {"description": "This language written in itself, shown in the language picker."}
+  "@languageNativeName": {"description": "This language written in itself, shown in the language picker."},
+  "@settingsLanguage": {"description": "Title of the language row in Settings."},
+  "@settingsLanguageSystem": {"description": "Language picker option that follows the device language."}
 }

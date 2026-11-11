@@ -125,6 +125,72 @@ void main() {
     );
   });
 
+  group('updateLanguage', () {
+    test(
+      "Given a signed-in user, When updateLanguage('vi') is called, Then savePreferences gets UserPreferences(languageCode: 'vi')",
+      () async {
+        await signIn(user);
+
+        await container
+            .read(settingsControllerProvider.notifier)
+            .updateLanguage('vi');
+
+        verify(
+          () => userRepo.savePreferences(
+            'u1',
+            const UserPreferences(languageCode: 'vi'),
+          ),
+        ).called(1);
+        expect(container.read(settingsControllerProvider).hasError, isFalse);
+      },
+    );
+
+    test(
+      "Given stored languageCode 'vi' and hapticsEnabled false, When updateLanguage(null) is called, Then languageCode is null and hapticsEnabled stays false",
+      () async {
+        await signIn(user);
+        when(() => userRepo.getUserStream('u1')).thenAnswer(
+          (_) => Stream.value(
+            const UserEntity(
+              id: 'u1',
+              preferences: UserPreferences(
+                languageCode: 'vi',
+                hapticsEnabled: false,
+              ),
+            ),
+          ),
+        );
+
+        await container
+            .read(settingsControllerProvider.notifier)
+            .updateLanguage(null);
+
+        verify(
+          () => userRepo.savePreferences(
+            'u1',
+            const UserPreferences(hapticsEnabled: false),
+          ),
+        ).called(1);
+      },
+    );
+
+    test(
+      "Given savePreferences throws, When updateLanguage('vi') is called, Then the controller state has an error and nothing throws to the caller",
+      () async {
+        await signIn(user);
+        when(
+          () => userRepo.savePreferences(any(), any()),
+        ).thenThrow(StateError('x'));
+
+        await container
+            .read(settingsControllerProvider.notifier)
+            .updateLanguage('vi');
+
+        expect(container.read(settingsControllerProvider).hasError, isTrue);
+      },
+    );
+  });
+
   group('updateHaptics', () {
     test(
       'Given a signed-in user, When updateHaptics(false) is called, Then preferences with haptics off are saved',
