@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:blueprint_app/features/auth/application/auth_controller.dart';
 import 'package:blueprint_app/features/auth/data/firebase_auth_repository.dart';
 import 'package:blueprint_app/features/auth/domain/user_entity.dart';
@@ -221,24 +220,4 @@ void main() {
     );
   });
   // END_NOTIFICATIONS
-
-  group('deleteAccount', () {
-    test(
-      'Given a signed-in user, When deleteAccount is called, Then it delegates to the auth controller',
-      () async {
-        SharedPreferences.setMockInitialValues({});
-        await signIn(user);
-        when(() => userRepo.deleteUserData(any())).thenAnswer((_) async {});
-        when(() => authRepo.deleteAuthAccount()).thenAnswer((_) async {});
-
-        await container
-            .read(settingsControllerProvider.notifier)
-            .deleteAccount();
-
-        verify(() => userRepo.deleteUserData('u1')).called(1);
-        verify(() => authRepo.deleteAuthAccount()).called(1);
-        expect(container.read(settingsControllerProvider).hasError, isFalse);
-      },
-    );
-  });
 }

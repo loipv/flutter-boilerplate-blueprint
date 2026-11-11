@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:blueprint_app/core/utils/app_logger.dart';
-import 'package:blueprint_app/features/auth/application/auth_controller.dart';
 import 'package:blueprint_app/features/auth/domain/user_preferences.dart';
 import 'package:blueprint_app/features/user_profile/application/user_profile_providers.dart';
 import 'package:blueprint_app/features/user_profile/data/firebase_user_repository.dart';
@@ -68,12 +67,6 @@ class SettingsController extends _$SettingsController {
       _log.info('Notification time updated to $time');
     });
   }
-  // END_NOTIFICATIONS
 
-  Future<void> deleteAccount() async {
-    state = const AsyncValue.loading();
-    state = await AsyncValue.guard(() async {
-      await ref.read(authControllerProvider.notifier).deleteAccount();
-    });
-  }
+  // END_NOTIFICATIONS
 }
