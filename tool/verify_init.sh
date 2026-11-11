@@ -45,6 +45,18 @@ empty="$(find "$kotlin" -type d -empty)"
 [ -z "$empty" ] || fail "empty directories under $kotlin: $empty"
 echo "MainActivity: $activities"
 
+gradle=android/app/build.gradle.kts
+pbxproj=ios/Runner.xcodeproj/project.pbxproj
+if [[ " $* " == *" --shared-app-id "* ]]; then
+  ! grep -q 'applicationIdSuffix' "$gradle" || fail "$gradle still has applicationIdSuffix"
+  ! grep -q 'PRODUCT_BUNDLE_IDENTIFIER = .*\.staging;' "$pbxproj" || fail "$pbxproj still has a .staging bundle id"
+  echo "App id: shared by staging and production"
+else
+  grep -q 'applicationIdSuffix = ".staging"' "$gradle" || fail "$gradle lost applicationIdSuffix"
+  grep -q 'PRODUCT_BUNDLE_IDENTIFIER = .*\.staging;' "$pbxproj" || fail "$pbxproj lost the .staging bundle id"
+  echo "App id: staging uses the .staging suffix"
+fi
+
 make setup analyze test || fail "make setup analyze test"
 
 echo "OK: $dir"

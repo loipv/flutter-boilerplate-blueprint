@@ -12,6 +12,7 @@ class InitOptions {
     required this.title,
     required this.description,
     this.disabled = const {},
+    this.sharedAppId = false,
   });
 
   final String name;
@@ -19,6 +20,9 @@ class InitOptions {
   final String title;
   final String description;
   final Set<Feature> disabled;
+
+  /// Staging uses the production bundle/application id (no `.staging`).
+  final bool sharedAppId;
 }
 
 /// Raw command-line values; anything not given stays null.
@@ -29,6 +33,7 @@ class ParsedArgs {
     this.title,
     this.description,
     this.disabled = const {},
+    this.sharedAppId = false,
     this.yes = false,
   });
 
@@ -37,6 +42,9 @@ class ParsedArgs {
   final String? title;
   final String? description;
   final Set<Feature> disabled;
+
+  /// Whether `--shared-app-id` was passed.
+  final bool sharedAppId;
   final bool yes;
 }
 
@@ -45,6 +53,7 @@ ParsedArgs parseArgs(List<String> args) {
   final values = <String, String>{};
   final disabled = <Feature>{};
   var yes = false;
+  var sharedAppId = false;
   const valueFlags = {'name', 'org', 'title', 'description'};
   final features = {for (final f in Feature.values) f.name: f};
 
@@ -68,6 +77,8 @@ ParsedArgs parseArgs(List<String> args) {
       values[flag] = value;
     } else if (eq == -1 && flag == 'yes') {
       yes = true;
+    } else if (eq == -1 && flag == 'shared-app-id') {
+      sharedAppId = true;
     } else if (eq == -1 &&
         flag.startsWith('no-') &&
         features.containsKey(flag.substring(3))) {
@@ -83,6 +94,7 @@ ParsedArgs parseArgs(List<String> args) {
     title: values['title'],
     description: values['description'],
     disabled: disabled,
+    sharedAppId: sharedAppId,
     yes: yes,
   );
 }

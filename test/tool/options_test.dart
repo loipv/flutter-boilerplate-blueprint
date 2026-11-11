@@ -63,6 +63,12 @@ void main() {
     expect(p.disabled, {Feature.sentry, Feature.anon});
   });
 
+  test('parseArgs reads --shared-app-id, off by default', () {
+    expect(parseArgs([]).sharedAppId, isFalse);
+    expect(parseArgs(['--shared-app-id']).sharedAppId, isTrue);
+    expect(() => parseArgs(['--shared-app-id=yes']), throwsFormatException);
+  });
+
   test('parseArgs rejects unknown flags and missing values', () {
     expect(() => parseArgs(['--nope']), throwsFormatException);
     expect(() => parseArgs(['--name']), throwsFormatException);

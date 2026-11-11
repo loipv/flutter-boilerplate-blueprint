@@ -6,6 +6,7 @@ library;
 import 'dart:convert';
 import 'dart:io';
 
+import 'app_id.dart';
 import 'fs.dart';
 import 'manifest.dart';
 import 'markers.dart';
@@ -53,6 +54,7 @@ class InitPlan {
       for (final env in _envFiles) '$env.example',
       '${kotlinDir('com.example', fixedName)}/MainActivity.kt',
       if (disabled.contains(Feature.functions)) 'firebase.json',
+      if (options.sharedAppId) ...[gradlePath, pbxprojPath],
     ];
     final missing = required.where((p) => !pathExists(p)).toList();
     if (missing.isNotEmpty) {
@@ -90,7 +92,17 @@ class InitPlan {
       final original =
           readUtf8OrNull(path) ??
           (throw InitFailure('$path is not valid UTF-8; nothing was changed.'));
-      var text = renameText(original, options);
+      var text = original;
+      if (options.sharedAppId && (path == gradlePath || path == pbxprojPath)) {
+        try {
+          text = path == gradlePath
+              ? shareAppIdInGradle(text)
+              : shareAppIdInPbxproj(text);
+        } on AppIdException catch (e) {
+          throw InitFailure('$path: ${e.message}; nothing was changed.');
+        }
+      }
+      text = renameText(text, options);
       try {
         for (final marker in checked) {
           final result = stripBlocks(text, marker);

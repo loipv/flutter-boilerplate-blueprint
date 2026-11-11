@@ -139,7 +139,7 @@ The router lives in a `@Riverpod(keepAlive: true)` provider. Auth and onboarding
 
 ## Flavors
 
-Two flavors: `staging` and `production`, selected at build time with `--flavor`. Each flavor has its own bundle/application id (`.staging` suffix), display name and Firebase project.
+Two flavors: `staging` and `production`, selected at build time with `--flavor`. Each flavor has its own display name and Firebase project, and by default its own bundle/application id (`.staging` suffix; init `--shared-app-id` makes staging use the production id, see `docs/release_guide.md`).
 
 One entry point, `lib/main.dart`, serves both flavors:
 

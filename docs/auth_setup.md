@@ -69,7 +69,7 @@ You do not need to hand-edit `Info.plist` with your Google client IDs. The Xcode
 
 ### Apple Developer Portal
 
-1. Register every iOS app ID you plan to run, usually both the staging and production bundle IDs.
+1. Register every iOS app ID you plan to run, usually both the staging and production bundle IDs (only one if you scaffolded with `--shared-app-id`).
 2. Enable the Sign in with Apple capability for each app ID that needs it.
 3. Make sure your team and signing settings are valid in Xcode for each build configuration.
 
@@ -162,6 +162,8 @@ Treat staging and production as two separate auth setups. Each needs its own:
 - SHA fingerprints
 - provider enablement
 - auth domain setup, if you use a custom one
+
+With `--shared-app-id`, both projects use the same Android package name, so a SHA-1 can be registered in only one of them. See "One store app for both flavors" in [docs/release_guide.md](./release_guide.md).
 
 ## 8. Related Guides
 

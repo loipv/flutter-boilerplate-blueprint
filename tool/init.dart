@@ -26,6 +26,8 @@ Run it from the repository root, before `make setup`.
   --no-apple              Remove Apple Sign-In
   --no-google             Remove Google Sign-In
   --no-anon               Remove anonymous sign-in
+  --shared-app-id         Staging uses the production bundle/application id
+                          (one store app; see docs/release_guide.md)
   --yes                   Accept defaults for anything not passed
 ''';
 
@@ -143,12 +145,21 @@ InitOptions _resolve(ParsedArgs p) {
       }
     }
   }
+  final sharedAppId =
+      p.sharedAppId ||
+      (!p.yes &&
+          _confirm(
+            'Use one bundle/application id for staging and production '
+            '(one store app; see docs/release_guide.md)?',
+            defaultYes: false,
+          ));
   return InitOptions(
     name: name,
     org: org,
     title: title,
     description: description,
     disabled: disabled,
+    sharedAppId: sharedAppId,
   );
 }
 
@@ -185,17 +196,19 @@ String _ask(
   }
 }
 
-/// Yes/no prompt, default yes; EOF on stdin takes the default.
-bool _confirm(String question) {
+/// Yes/no prompt; EOF on stdin or an empty answer takes [defaultYes].
+bool _confirm(String question, {bool defaultYes = true}) {
   while (true) {
-    stdout.write('$question [Y/n]: ');
+    stdout.write('$question ${defaultYes ? '[Y/n]' : '[y/N]'}: ');
     final line = stdin.readLineSync();
     if (line == null) {
       stdout.writeln();
-      return true;
+      return defaultYes;
     }
     switch (line.trim().toLowerCase()) {
-      case '' || 'y' || 'yes':
+      case '':
+        return defaultYes;
+      case 'y' || 'yes':
         return true;
       case 'n' || 'no':
         return false;
@@ -213,6 +226,12 @@ void _printNextSteps(InitOptions options) {
       removed.isEmpty
           ? 'All optional features kept.'
           : 'Removed: ${removed.join(', ')}.',
+    )
+    ..writeln(
+      options.sharedAppId
+          ? 'Staging and production share the app id '
+                '${options.org}.${options.name}.'
+          : 'Staging uses the app id ${options.org}.${options.name}.staging.',
     )
     ..writeln()
     ..writeln('Next steps:')

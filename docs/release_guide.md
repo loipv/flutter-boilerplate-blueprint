@@ -38,6 +38,21 @@ Never benchmark or performance-test in debug mode. Always do final QA in **relea
 
 Both flavors share one entry point, `lib/main.dart`. It reads the flavor from `--flavor` (Flutter's `appFlavor`) and picks the matching config, so always pass `--flavor`. All store submissions use the **production** flavor.
 
+### One store app for both flavors (`--shared-app-id`)
+
+A separate staging bundle id does not need a second store app on its own. You only need a second App Store Connect / Play Console app if you upload staging builds to TestFlight or a Play testing track. Local runs and Firebase App Distribution work with one store app.
+
+To upload staging builds to the **same** store app, scaffold with `--shared-app-id`. Staging then uses the production bundle/application id and keeps its `[S]` display name. Upload with `make build-staging-ipa` (TestFlight) or `make build-staging-aab` (Play internal testing). Register that same id for both Firebase projects (`flutterfire configure --ios-bundle-id=<id> --android-package-name=<id>` for each).
+
+Trade-offs:
+
+- **One flavor per device.** Installing one replaces the other, including its sign-in state and data.
+- **Shared build numbers.** Every upload, staging or production, needs a higher BUILD (`make bump-version`).
+- **Never submit a staging build for review.** Staging always uses App Check debug providers. When you submit, pick the production build; the staging build shows `[S]` in its name.
+- **Google Sign-In on Android.** Google Cloud does not let the same package name + SHA-1 pair be an Android OAuth client in two projects. Builds installed from Google Play are signed with the Play app signing key, which is registered in the production Firebase project, so Google Sign-In fails on staging builds installed from Play. If you need it there, distribute Android staging builds through Firebase App Distribution, signed with a key that is not registered in production (for example the debug key). TestFlight on iOS is not affected.
+
+To switch an existing app, delete `applicationIdSuffix = ".staging"` in `android/app/build.gradle.kts`, change the three `PRODUCT_BUNDLE_IDENTIFIER = <id>.staging;` lines in `ios/Runner.xcodeproj/project.pbxproj` to `<id>`, then register the new id in the staging Firebase project and replace the staging config files.
+
 ---
 
 ## 2. Version Management

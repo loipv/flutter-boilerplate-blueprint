@@ -130,6 +130,9 @@ Each prompt has a flag. `--yes` accepts the default for anything you do not pass
 | Apple Sign-In                | `--no-apple`         | on                               |
 | Google Sign-In               | `--no-google`        | on                               |
 | Anonymous sign-in            | `--no-anon`          | on                               |
+| One app id for both flavors  | `--shared-app-id`    | off (staging uses `<id>.staging`) |
+
+`--shared-app-id` lets staging builds go to the same TestFlight / Play Console app as production; see "One store app for both flavors" in `docs/release_guide.md` for the trade-offs.
 
 Invalid input re-prompts in interactive mode; with flags it exits non-zero with the reason, before any file is changed.
 

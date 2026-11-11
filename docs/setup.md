@@ -62,8 +62,8 @@ This project uses two flavors (staging, production), so you must run `flutterfir
 flutterfire configure \
   --project=<your-staging-firebase-project-id> \
   --out=lib/firebase_options_staging.dart \
-  --ios-bundle-id=<staging bundle id> \
-  --android-package-name=<staging package name> \
+  --ios-bundle-id=<staging bundle id, or the production id with --shared-app-id> \
+  --android-package-name=<staging package name, or the production id with --shared-app-id> \
   --platforms=ios,android \
   --yes
 ```

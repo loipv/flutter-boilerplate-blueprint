@@ -10,7 +10,7 @@ RELEASE_DEVICE ?=
 dart_defines = $$(for f in $(1); do if [ -f "$$f" ]; then grep -E '^[A-Za-z_][A-Za-z0-9_]*=' "$$f" | sed 's/^/--dart-define=/' | tr '\n' ' '; break; fi; done)
 
 .PHONY: help setup firebase-stubs run-staging run-prod run-prod-release \
-        build-staging-ios build-staging-apk \
+        build-staging-ios build-staging-apk build-staging-ipa build-staging-aab \
         build-prod-ios build-prod-apk build-prod-ipa build-prod-aab \
         deploy-staging deploy-prod deploy-storage-staging deploy-storage-prod \
         deploy-functions-staging deploy-functions-prod \
@@ -30,6 +30,8 @@ help:
 	@echo "  Build"
 	@echo "    make build-staging-ios"
 	@echo "    make build-staging-apk"
+	@echo "    make build-staging-ipa  (IPA for TestFlight)"
+	@echo "    make build-staging-aab  (AAB for Play internal testing)"
 	@echo "    make build-prod-ipa    (IPA for App Store / TestFlight)"
 	@echo "    make build-prod-aab    (AAB + symbols for Play Store)"
 	@echo ""
@@ -80,6 +82,15 @@ build-staging-ios:
 build-staging-apk:
 	@$(FLUTTER) build apk --flavor staging \
 	  $(call dart_defines,.env.staging .env)
+
+build-staging-ipa:
+	@$(FLUTTER) build ipa --flavor staging \
+	  $(call dart_defines,.env.staging .env)
+
+build-staging-aab:
+	@$(FLUTTER) build appbundle --flavor staging \
+	  $(call dart_defines,.env.staging .env) \
+	  --obfuscate --split-debug-info=build/app/outputs/symbols-staging
 
 build-prod-ios:
 	@$(FLUTTER) build ios --flavor production \

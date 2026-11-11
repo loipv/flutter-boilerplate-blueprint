@@ -18,6 +18,8 @@ The generated app's `pubspec.yaml` version is separate from the blueprint versio
 
 ### Added
 
+- `--shared-app-id` init option (and prompt, default off): staging uses the production bundle/application id so staging builds can go to the same TestFlight / Play Console app. Trade-offs are in `docs/release_guide.md`.
+- `make build-staging-ipa` and `make build-staging-aab`.
 - Complete `ios/` and `android/` platform folders.
 - Seed tests under `test/` and CI: `ci.yml` (analyze + test) and `blueprint.yml` (runs `tool/verify_init.sh` for three init combinations).
 
