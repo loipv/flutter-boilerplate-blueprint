@@ -99,7 +99,9 @@ class FakeUserRepository implements FirebaseUserRepository {
       final sub = _changes.stream
           .where((changed) => changed == uid)
           .listen((_) => controller.add(users[uid]));
-      controller.onCancel = sub.cancel;
+      // Not awaited: [_changes] may belong to a zone that testWidgets' fake
+      // async never flushes, so `.first` would wait on the cancel forever.
+      controller.onCancel = () => unawaited(sub.cancel());
     });
   }
 

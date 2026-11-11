@@ -108,13 +108,22 @@ class _NotificationSchedulerState extends ConsumerState<NotificationScheduler> {
 
     // Re-schedule with translated text when the app language changes.
     ref.listen(appLocalizationsProvider, (previous, next) {
+      if (previous?.localeName == next.localeName) return;
       final time = ref
           .read(userProfileStreamProvider)
           .value
           ?.preferences
           .notificationTime;
       if (time == null || time.isEmpty) return;
-      _schedule(time);
+      unawaited(
+        _schedule(time).onError(
+          (Object error, StackTrace stackTrace) => _log.error(
+            'Notification reschedule failed',
+            error: error,
+            stackTrace: stackTrace,
+          ),
+        ),
+      );
     });
 
     return widget.child;

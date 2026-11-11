@@ -105,4 +105,64 @@ void main() {
       },
     );
   });
+
+  group('yamlValue', () {
+    test('Given a plain value, When read, Then it is returned', () {
+      expect(yamlValue('arb-dir: lib/l10n\n', 'arb-dir'), 'lib/l10n');
+    });
+
+    test(
+      'Given a quoted value with a trailing comment, When read, Then quotes and comment are dropped',
+      () {
+        const yaml = '''
+arb-dir: "lib/l10n" # where the ARB files live
+template-arb-file: 'app_en.arb'
+''';
+        expect(yamlValue(yaml, 'arb-dir'), 'lib/l10n');
+        expect(yamlValue(yaml, 'template-arb-file'), 'app_en.arb');
+      },
+    );
+
+    test('Given a missing key, When read, Then null', () {
+      expect(yamlValue('arb-dir: lib/l10n\n', 'output-dir'), isNull);
+    });
+  });
+
+  group('decodeArb', () {
+    test('Given a JSON object, When decoded, Then the map is returned', () {
+      expect(decodeArb('{"a": "A"}', 'app_en.arb'), {'a': 'A'});
+    });
+
+    test(
+      'Given malformed JSON, When decoded, Then an ArbException names the file',
+      () {
+        expect(
+          () => decodeArb('{"a": ', 'app_vi.arb'),
+          throwsA(
+            isA<ArbException>().having(
+              (e) => e.message,
+              'message',
+              startsWith('app_vi.arb is not valid JSON'),
+            ),
+          ),
+        );
+      },
+    );
+
+    test(
+      'Given a JSON array, When decoded, Then an ArbException names the file',
+      () {
+        expect(
+          () => decodeArb('[]', 'app_vi.arb'),
+          throwsA(
+            isA<ArbException>().having(
+              (e) => e.message,
+              'message',
+              'app_vi.arb is not a JSON object',
+            ),
+          ),
+        );
+      },
+    );
+  });
 }

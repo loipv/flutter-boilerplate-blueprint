@@ -26,6 +26,9 @@ void main() {
     userRepo = MockUserRepository();
     when(() => userRepo.savePreferences(any(), any())).thenAnswer((_) async {});
     when(() => userRepo.markOnboardingComplete(any())).thenAnswer((_) async {});
+    when(
+      () => userRepo.getUserStream(any()),
+    ).thenAnswer((_) => Stream.value(null));
   });
 
   /// Creates a container with [initial] SharedPreferences values and waits
@@ -131,6 +134,41 @@ void main() {
               ).captured.single
               as UserPreferences;
       expect(saved.languageCode, 'vi');
+    },
+  );
+
+  test(
+    'Given stored preferences with haptics off, When onboarding completes, Then savePreferences keeps them and only updates the theme',
+    () async {
+      when(() => authRepo.currentUser).thenReturn(const UserEntity(id: 'u1'));
+      when(() => userRepo.getUserStream('u1')).thenAnswer(
+        (_) => Stream.value(
+          const UserEntity(
+            id: 'u1',
+            preferences: UserPreferences(
+              hapticsEnabled: false,
+              // BEGIN_NOTIFICATIONS_PREF
+              notificationTime: '08:30',
+              // END_NOTIFICATIONS_PREF
+            ),
+          ),
+        ),
+      );
+      final container = await buildContainer({});
+
+      await container
+          .read(onboardingControllerProvider.notifier)
+          .completeOnboarding();
+
+      final saved =
+          verify(
+                () => userRepo.savePreferences('u1', captureAny()),
+              ).captured.single
+              as UserPreferences;
+      expect(saved.hapticsEnabled, isFalse);
+      // BEGIN_NOTIFICATIONS_PREF
+      expect(saved.notificationTime, '08:30');
+      // END_NOTIFICATIONS_PREF
     },
   );
 

@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:blueprint_app/core/l10n/app_localizations_provider.dart';
 import 'package:blueprint_app/core/l10n/locale_provider.dart';
 import 'package:blueprint_app/core/services/notification_service.dart';
 import 'package:blueprint_app/features/auth/domain/user_entity.dart';
@@ -161,6 +162,29 @@ void main() {
             channelDescription: 'Lời nhắc định kỳ từ ứng dụng',
           ),
         ).called(1);
+      },
+    );
+
+    testWidgets(
+      'Given a reminder at 08:00 is set, When appLocalizationsProvider rebuilds with the same language, Then nothing is rescheduled',
+      (tester) async {
+        await pumpScheduler(tester);
+        await emit(tester, userWith('08:00'));
+        clearInteractions(service);
+
+        container.invalidate(appLocalizationsProvider);
+        await tester.runAsync(() => Future<void>.delayed(Duration.zero));
+        await tester.pumpAndSettle();
+
+        verifyNever(
+          () => service.scheduleDailyNotification(
+            time: any(named: 'time'),
+            title: any(named: 'title'),
+            body: any(named: 'body'),
+            channelName: any(named: 'channelName'),
+            channelDescription: any(named: 'channelDescription'),
+          ),
+        );
       },
     );
 

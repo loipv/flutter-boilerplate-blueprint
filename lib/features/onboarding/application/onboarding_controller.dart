@@ -57,11 +57,12 @@ class OnboardingController extends _$OnboardingController {
 
     _log.info('Persisting onboarding; theme: ${currentState.themeMode}');
 
-    // Keep the stored language so the merge does not wipe it in Firestore.
+    // Start from the stored preferences so a returning user keeps the ones
+    // onboarding does not ask about; the language comes from the device.
     final locale = await ref.read(localeProvider.future);
-    final prefs = UserPreferences(
+    final existing = await userRepo.getUserStream(user.id).first;
+    final prefs = (existing?.preferences ?? const UserPreferences()).copyWith(
       themeMode: currentState.themeMode,
-      hapticsEnabled: true,
       languageCode: locale?.languageCode,
     );
 

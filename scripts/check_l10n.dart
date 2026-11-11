@@ -61,16 +61,49 @@ List<String> compareArb(
   return problems;
 }
 
-String? _yamlValue(String yaml, String key) {
+/// The scalar value of top-level [key] in [yaml], without surrounding quotes
+/// or a trailing `# comment`; null when the key is absent.
+String? yamlValue(String yaml, String key) {
   final match = RegExp(
-    '^$key:\\s*(.+?)\\s*\$',
+    '^${RegExp.escape(key)}:\\s*(.*?)\\s*(?:\\s#.*)?\$',
     multiLine: true,
   ).firstMatch(yaml);
-  return match?.group(1);
+  final value = match?.group(1);
+  if (value == null || value.isEmpty) return null;
+  final quoted = RegExp(
+    r'^"(.*)"$|'
+    r"^'(.*)'$",
+  ).firstMatch(value);
+  return quoted == null ? value : (quoted.group(1) ?? quoted.group(2));
+}
+
+/// A malformed ARB file.
+class ArbException implements Exception {
+  ArbException(this.message);
+
+  final String message;
+
+  @override
+  String toString() => message;
+}
+
+/// Decodes the ARB [text] of the file [name]. Throws [ArbException] when it
+/// is not a JSON object.
+Map<String, dynamic> decodeArb(String text, String name) {
+  final Object? json;
+  try {
+    json = jsonDecode(text);
+  } on FormatException catch (e) {
+    throw ArbException('$name is not valid JSON: ${e.message}');
+  }
+  if (json is! Map<String, dynamic>) {
+    throw ArbException('$name is not a JSON object');
+  }
+  return json;
 }
 
 Map<String, dynamic> _readArb(File f) =>
-    jsonDecode(f.readAsStringSync()) as Map<String, dynamic>;
+    decodeArb(f.readAsStringSync(), f.uri.pathSegments.last);
 
 void main() {
   final config = File('l10n.yaml');
@@ -79,12 +112,21 @@ void main() {
     exit(1);
   }
   final yaml = config.readAsStringSync();
-  final dir = _yamlValue(yaml, 'arb-dir');
-  final templateName = _yamlValue(yaml, 'template-arb-file');
+  final dir = yamlValue(yaml, 'arb-dir');
+  final templateName = yamlValue(yaml, 'template-arb-file');
   if (dir == null || templateName == null) {
     stderr.writeln('l10n.yaml needs arb-dir and template-arb-file.');
     exit(1);
   }
+  try {
+    _check(dir, templateName);
+  } on ArbException catch (e) {
+    stderr.writeln(e.message);
+    exit(1);
+  }
+}
+
+void _check(String dir, String templateName) {
   final template = _readArb(File('$dir/$templateName'));
   final others = Directory(dir).listSync().whereType<File>().where((f) {
     final name = f.uri.pathSegments.last;

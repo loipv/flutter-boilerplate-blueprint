@@ -21,7 +21,7 @@ void main() {
         home: Builder(
           builder: (context) {
             name = context.l10n.languageNativeName;
-            return const SizedBox.shrink();
+            return const Placeholder();
           },
         ),
       ),

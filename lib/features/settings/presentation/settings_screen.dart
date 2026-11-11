@@ -469,20 +469,18 @@ class _AccountSummaryTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final guest = l10n.settingsGuest;
+    final name = [
+      user.displayName,
+      user.email,
+    ].firstWhere((s) => s != null && s.isNotEmpty, orElse: () => null);
+    final title = name ?? l10n.settingsGuest;
     final subtitle = user.isAnonymous
         ? l10n.settingsGuestSession
         : user.email ?? _providerLabel(l10n, user.signInProvider);
 
     return ListTile(
-      leading: CircleAvatar(
-        child: Text(
-          (user.displayName ?? user.email ?? guest)
-              .substring(0, 1)
-              .toUpperCase(),
-        ),
-      ),
-      title: Text(user.displayName ?? user.email ?? guest),
+      leading: CircleAvatar(child: Text(title.characters.first.toUpperCase())),
+      title: Text(title),
       subtitle: Text(subtitle),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
     );

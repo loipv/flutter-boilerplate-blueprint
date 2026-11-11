@@ -52,6 +52,23 @@ void main() {
   }
 
   group('SettingsScreen', () {
+    testWidgets('Given a user with an empty display name and no email, When '
+        'pumped, Then the account tile falls back to Guest', (tester) async {
+      const blankUser = UserEntity(id: 'u1', displayName: '');
+      when(
+        () => authRepo.authStateChanges(),
+      ).thenAnswer((_) => Stream.value(blankUser));
+      when(
+        () => userRepo.getUserStream(any()),
+      ).thenAnswer((_) => Stream.value(blankUser));
+
+      await pump(tester);
+
+      expect(tester.takeException(), isNull);
+      expect(find.text('Guest'), findsOneWidget);
+      expect(find.text('G'), findsOneWidget);
+    });
+
     testWidgets('Given English, When pumped, Then the Language tile shows '
         'System', (tester) async {
       await pump(tester);

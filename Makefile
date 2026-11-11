@@ -14,6 +14,8 @@ HOST = $(or $(EMULATOR_HOST),$(if $(filter emulator-%,$(DEVICE)),10.0.2.2,localh
 # Usage: $(call dart_defines,.env.staging .env)
 dart_defines = $$(for f in $(1); do if [ -f "$$f" ]; then grep -E '^[A-Za-z_][A-Za-z0-9_]*=' "$$f" | sed 's/^/--dart-define=/' | tr '\n' ' '; break; fi; done)
 
+.DEFAULT_GOAL := help
+
 # Pre-release checks that the build-prod-* targets and release-preflight run first.
 RELEASE_CHECKS :=
 RELEASE_CHECKS += check-l10n

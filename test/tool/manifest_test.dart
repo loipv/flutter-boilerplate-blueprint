@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../tool/src/fs.dart';
@@ -11,7 +13,14 @@ void main() {
     final unknown = <String>[];
     for (final path in listFiles(skipDirs)) {
       if (!isTextFile(path)) continue;
-      final text = readUtf8OrNull(path);
+      final String? text;
+      try {
+        text = readUtf8OrNull(path);
+      } on FileSystemException {
+        // Other tests in the same run may delete their scratch files (for
+        // example under coverage/) between the walk and this read.
+        continue;
+      }
       if (text == null) continue;
       for (final m in markerNames(text)) {
         if (!knownMarkers.contains(m.name)) {

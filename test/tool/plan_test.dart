@@ -112,12 +112,36 @@ void main() {
       expect(out, '{\n  "a": "Xin chào"\n}\n');
     });
 
-    test('Given invalid JSON, When dropped, Then it throws InitFailure', () {
-      expect(() => dropArbKeys('{', ['ads']), throwsA(isA<InitFailure>()));
-    });
+    test(
+      'Given invalid JSON, When dropped, Then the InitFailure names the file',
+      () {
+        expect(
+          () => dropArbKeys('{', ['ads'], path: 'lib/l10n/app_vi.arb'),
+          throwsA(
+            isA<InitFailure>().having(
+              (e) => e.message,
+              'message',
+              startsWith('lib/l10n/app_vi.arb: '),
+            ),
+          ),
+        );
+      },
+    );
 
-    test('Given a JSON array, When dropped, Then it throws InitFailure', () {
-      expect(() => dropArbKeys('[]', ['ads']), throwsA(isA<InitFailure>()));
-    });
+    test(
+      'Given a JSON array, When dropped, Then the InitFailure names the file',
+      () {
+        expect(
+          () => dropArbKeys('[]', ['ads'], path: 'lib/l10n/app_vi.arb'),
+          throwsA(
+            isA<InitFailure>().having(
+              (e) => e.message,
+              'message',
+              'lib/l10n/app_vi.arb is not a JSON object; nothing was changed.',
+            ),
+          ),
+        );
+      },
+    );
   });
 }
