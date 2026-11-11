@@ -125,7 +125,8 @@ List<Finding> checkAdsConfig({
     if (blank == entry.value.length) {
       warn(
         'All ${entry.key} ad unit IDs are blank; consider ADS_ENABLED=false '
-        'if you do not ship ads on ${entry.key}.',
+        'for this build if you do not ship ads on ${entry.key}. A store app '
+        'that never shows ads should be scaffolded with --no-ads.',
       );
     }
   }

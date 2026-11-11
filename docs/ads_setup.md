@@ -21,7 +21,7 @@ An App ID looks like `ca-app-pub-1234567890123456~1234567890`. It is not secret 
 
 **Android.** Set `manifestPlaceholders["admobAppId"]` for each flavor in `android/app/build.gradle.kts`. It feeds the `com.google.android.gms.ads.APPLICATION_ID` meta-data in `AndroidManifest.xml`.
 
-**iOS.** Set the build setting `ADMOB_APP_ID` per configuration: Xcode, Runner target, Build Settings, User-Defined. Set it on all six configurations (Debug, Profile, Release for each flavor). `Info.plist` reads it through `GADApplicationIdentifier = $(ADMOB_APP_ID)`.
+**iOS.** Set the build setting `ADMOB_APP_ID` per configuration: Xcode, Runner target, Build Settings, User-Defined. Set it on all nine Runner configurations (Debug, Profile, Release for each of the three flavors). The release guard checks only the three `-production` ones. `Info.plist` reads it through `GADApplicationIdentifier = $(ADMOB_APP_ID)`.
 
 Both default to Google's sample App IDs. Replace at least the production ones. The release guard fails while production still has a sample ID.
 
@@ -94,7 +94,7 @@ These answers are your responsibility and depend on how you configure AdMob.
 
 **At scaffold time.** `dart run tool/init.dart --no-ads` removes the code, config, dependency and this guide.
 
-**Per build.** Set `ADS_ENABLED=false` in the env file. The SDK is never initialized and the consent form never shows in that flavor.
+**Per build.** Set `ADS_ENABLED=false` in the env file. The SDK is never initialized and the consent form never shows in that flavor. The build still ships the SDK, the merged `AD_ID` permission, `NSUserTrackingUsageDescription` and the SKAdNetwork entries. A store app that will never show ads should be scaffolded with `--no-ads` instead.
 
 **Remotely.** With Remote Config, these keys switch ads without a release. All default to on:
 
@@ -107,28 +107,28 @@ These answers are your responsibility and depend on how you configure AdMob.
 | `ads_app_open_enabled`               | App open ads                                          |
 | `ads_full_screen_min_interval_seconds` | Minimum seconds between full-screen ads (default 90) |
 
-An app open ad is also blocked for 5 seconds after any full-screen ad closes.
+The minimum interval applies to interstitial and app open ads. A rewarded ad ignores it, because the user asked for it, but its close starts the interval for the next interstitial or app open ad. An app open ad is also blocked for a 5 second quiet period after any full-screen ad closes, which matters when the interval is set below 5.
 
-**Per user.** `adFreeProvider` (`lib/features/ads/application/ad_free_provider.dart`) is the hook for "remove ads" purchases. It defaults to false. Override it where you create the `ProviderScope`:
+**Per user.** `adFreeProvider` (`lib/features/ads/application/ad_free_provider.dart`) is the hook for "remove ads" purchases. It defaults to false. Override it where you create the `ProviderScope`. Treat "still loading" as ad-free, or the consent form and ATT prompt can run before the purchase state is known:
 
 ```dart
 ProviderScope(
   overrides: [
     adFreeProvider.overrideWith(
-      (ref) => ref.watch(purchaseProvider).value?.isPremium ?? false,
+      (ref) => ref.watch(purchaseProvider).value?.isPremium ?? true,
     ),
   ],
   child: const App(),
 )
 ```
 
-When it is true, no ad shows and the consent form is skipped.
+When it is true, no ad shows and the consent form is skipped. With `?? true` above, ads start only once the purchase state has resolved to not premium. The default `?? false` would let consent and ATT run while it is still loading.
 
 ---
 
 ## Showing interstitial and rewarded ads
 
-The blueprint places a banner on Home and registers app open ads in `MainScaffold`. It does not place interstitials or rewarded ads. Call them where your app needs them. Both go through `AdsController`, never throw, and respect the frequency cap.
+The blueprint places a banner on Home and registers app open ads in `MainScaffold`. It does not place interstitials or rewarded ads. Call them where your app needs them. Both go through `AdsController` and never throw. Interstitials respect the frequency cap; rewarded ads do not, since the user asked for them.
 
 Interstitial, at a natural break such as finishing a task:
 
@@ -151,15 +151,15 @@ switch (outcome) {
 }
 ```
 
-App open ads: `AppOpenAdObserver` calls `maybeShowAppOpen()` when the app returns to the foreground. They never show on cold start.
+App open ads: `AppOpenAdObserver` calls `maybeShowAppOpen()` only on a real return from the background (a `hidden` or `paused` state followed by `resumed`). System dialogs, permission prompts and Control Center do not count. They never show on cold start.
 
 ---
 
 ## Testing the EEA flow
 
 1. Run a staging build, or a non-release production build.
-2. Pass `ADS_DEBUG_GEOGRAPHY=eea` in the env file. The consent form behaves as in the EEA.
-3. Reset consent between runs: uninstall the app, or reinstall it.
+2. Pass `ADS_DEBUG_GEOGRAPHY=eea` in the env file. The consent form behaves as in the EEA. This works on emulators and simulators only. On a physical device, also register it as a UMP test device with the hashed device ID printed in the log.
+3. Reset consent between runs: uninstall and reinstall the app.
 4. `ADS_DEBUG_GEOGRAPHY` has no effect on production release builds.
 
 ---
@@ -185,7 +185,7 @@ App open ads: `AppOpenAdObserver` calls `maybeShowAppOpen()` when the app return
 
 ## Release guard
 
-`make check-ads-config` runs automatically before `release-preflight`, `build-prod-ipa` and `build-prod-aab`. It reads the first existing of `.env.production`, `.env`, plus the App IDs in `build.gradle.kts` and `project.pbxproj`. It exits 0 at once when `ADS_ENABLED` is not `true`. Otherwise:
+`make check-ads-config` runs automatically before `release-preflight`, `build-prod-ipa` and `build-prod-aab`. It reads the first existing of `.env.production`, `.env`, plus the App IDs in `build.gradle.kts` and `project.pbxproj`. It only reads env files, never your shell environment. With neither `.env.production` nor `.env` present it prints a skip message and exits 0. It also exits 0 at once when `ADS_ENABLED` is not `true`. Otherwise:
 
 | Case                                          | Result                                       |
 | --------------------------------------------- | -------------------------------------------- |
@@ -193,4 +193,4 @@ App open ads: `AppOpenAdObserver` calls `maybeShowAppOpen()` when the app return
 | A production ad unit ID is a Google test ID   | fail                                         |
 | The production App ID is missing              | fail                                         |
 | An ad unit ID is blank                        | warning, that format is off on that platform |
-| All four IDs of one platform are blank        | warning, consider `ADS_ENABLED=false`        |
+| All four IDs of one platform are blank        | warning, consider `ADS_ENABLED=false` for this build |
