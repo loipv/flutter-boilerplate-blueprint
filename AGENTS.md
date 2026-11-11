@@ -241,6 +241,8 @@ Do not hardcode these values in source. Keep them in env files and read them in 
 - **Mocking**: `mocktail` only; providers expose the concrete `Firebase*Repository` types, so mocks implement those classes (see `test/helpers/mocks.dart`); never mock Firebase SDK classes in controller tests. Repository tests use `fake_cloud_firestore` / `firebase_auth_mocks`, with errors injected through `mock_exceptions`
 - **Style**: Given-When-Then for all test descriptions (`'Given <state>, When <action>, Then <outcome>'`); `group()` names are the method or route under test
 - **Security rules**: Every change to `firestore.rules` or `storage.rules` updates `firebase_tests/`.
+- **Cloud Functions**: Every change to `functions/src` updates `functions/test`.
+- **Rules and functions tests**: run them with `make test-firebase` (Firebase Emulator; needs the Firebase CLI and Java 21+, not Flutter).
 - **Rule**: Never make real network calls in unit tests
 
 ```dart

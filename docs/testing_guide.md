@@ -9,7 +9,7 @@
 
 ## Structure
 
-Every source file under `lib/` has exactly one test file at the mirrored path: `lib/a/b/foo.dart` ↔ `test/a/b/foo_test.dart`. Scripts follow the same rule: `scripts/<name>.dart` ↔ `test/scripts/<name>_test.dart`.
+Test files mirror source files: `lib/a/b/foo.dart` ↔ `test/a/b/foo_test.dart`, at most one test file per source file. Scripts follow the same rule: `scripts/<name>.dart` ↔ `test/scripts/<name>_test.dart`. `make check-test-layout` enforces that every test file maps to a source file that exists; it does not require a test for every source file (the coverage gate fails on a gated file no test loads).
 
 ```
 test/
@@ -136,6 +136,8 @@ Repository tests run the real `Firebase*Repository` against in-memory Firebase f
 - `fake_cloud_firestore`: `FakeFirebaseFirestore()` stands in for `FirebaseFirestore`
 - `firebase_auth_mocks`: `MockFirebaseAuth()` and `MockUser(...)` stand in for `FirebaseAuth` and `User`
 - `mock_exceptions`: injects an error on a single call
+
+These test dev dependencies constrain dependency resolution: for example, they hold `equatable` at 2.x, and a FlutterFire major upgrade may have to wait until they support it.
 
 ```dart
 late FakeFirebaseFirestore firestore;
@@ -302,6 +304,8 @@ The security rules and Cloud Functions are tested in Node with `vitest`, against
 
 The first run downloads the emulator jars to `~/.cache/firebase/emulators`.
 
+The `firebase_tests/` lockfile currently has `npm audit` findings through `firebase` 13 → `@grpc/grpc-js`. They are accepted: the package is dev-only test tooling that talks only to the local emulators, and npm's suggested fix is a downgrade.
+
 ### Running
 
 ```sh
@@ -310,7 +314,7 @@ make test-firebase
 
 It checks for the Firebase CLI and Java 21+, runs `npm ci` in `firebase_tests/` (and in `functions/` when `functions/test/` exists), then runs `firebase emulators:exec --project demo-test --only firestore,storage` with `npm test` in each package. A `demo-` project id has no real Firebase project behind it: every call stays on the local emulators, and no credentials are needed.
 
-The functions tests run after the rules tests on the same emulators. An app generated with `--no-functions` has no `functions/`, so only the rules tests run.
+The functions tests run after the rules tests on the same emulators. If your app has no `functions/` directory, only the rules tests run.
 
 `npm test` on its own fails fast in the functions package (no `FIRESTORE_EMULATOR_HOST`); always go through `make test-firebase`.
 

@@ -19,6 +19,8 @@ make analyze              # Static analysis
 make test                 # Unit + widget tests
 make check-test-layout    # Every test file mirrors a source file
 make coverage             # Tests + per-layer coverage gate
+make test-firebase        # Rules + Cloud Functions tests on the Firebase Emulator
+make test-integration DEVICE=<id>  # App flow on a simulator/emulator against the Firebase Emulator
 make codegen              # Run build_runner (freezed + riverpod)
 make deploy-staging       # Deploy Firestore rules to staging
 make deploy-prod          # Deploy Firestore rules to production

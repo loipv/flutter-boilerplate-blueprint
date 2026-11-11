@@ -38,6 +38,8 @@ make analyze              # fvm flutter analyze
 make test                 # fvm flutter test
 make check-test-layout    # every test file mirrors a source file
 make coverage             # tests + per-layer coverage gate
+make test-firebase        # rules + Cloud Functions tests on the Firebase Emulator
+make test-integration DEVICE=<id>  # app flow on a simulator/emulator against the Firebase Emulator
 make codegen              # build_runner (freezed + riverpod)
 make deploy-staging       # Deploy Firestore rules to staging
 make deploy-prod          # Deploy Firestore rules to production

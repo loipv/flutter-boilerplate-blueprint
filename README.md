@@ -201,7 +201,12 @@ Read it left to right: UI in `presentation` talks to controllers in `application
 │       ├── settings/
 │       └── user_profile/
 ├── test/
-├── .github/workflows/ci.yml
+├── integration_test/           # app flow on a simulator/emulator + Firebase Emulator
+├── firebase_tests/             # Firestore and Storage rules tests (vitest)
+├── scripts/                    # test layout check, coverage gate, integration stubs
+├── .github/workflows/
+│   ├── ci.yml
+│   └── integration.yml         # manual Android emulator run
 ├── docs/
 │   ├── next_steps.md
 │   ├── setup.md
@@ -295,7 +300,7 @@ PRs are welcome. Keep the template focused on patterns that most apps actually n
 This repo is a runnable app. Clone it and work on it directly:
 
 ```bash
-make setup            # pub get, code generation, functions deps
+make setup            # pub get, code generation, functions and firebase_tests/ deps
 make analyze          # static analysis
 make test             # unit tests, including tool/ tests
 make check-test-layout # every test file mirrors a source file
