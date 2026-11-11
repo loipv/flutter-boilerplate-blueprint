@@ -152,6 +152,16 @@ void main() {
           'displayName': 'Ada',
           'preferences': {'themeMode': 'light', 'hapticsEnabled': true},
         });
+        // Fails the write if the map passed to set() has a dotted key, the
+        // shape the old savePreferences sent.
+        whenCalling(
+          Invocation.method(#set, [
+            predicate<Map<String, dynamic>>(
+              (data) => data.keys.any((k) => k.contains('.')),
+              'a map with a dotted key',
+            ),
+          ]),
+        ).on(userDoc).thenThrow(firestoreError());
 
         await repository.savePreferences(
           _uid,
@@ -162,6 +172,11 @@ void main() {
         );
 
         final data = (await readDoc())!;
+        // fake_cloud_firestore expands dotted keys in set(), so this check
+        // alone cannot catch the old bug (real Firestore stores them
+        // literally). The guard on the set() argument above does, and the
+        // integration test in integration_test/app_flow_test.dart checks the
+        // stored shape against the Firestore emulator.
         expect(data.keys.where((k) => k.contains('.')), isEmpty);
         expect(data['displayName'], 'Ada');
         final prefs = data['preferences'] as Map;
