@@ -122,6 +122,12 @@ class InitPlan {
       if (path == 'firebase.json' && disabled.contains(Feature.functions)) {
         text = dropFunctions(text);
       }
+      if (path.startsWith('lib/l10n/') && path.endsWith('.arb')) {
+        final prefixes = [
+          for (final f in disabled) ...featureRules[f]!.arbKeyPrefixes,
+        ];
+        if (prefixes.isNotEmpty) text = dropArbKeys(text, prefixes);
+      }
       if (path == pbxprojPath && disabled.contains(Feature.ads)) {
         text = dropAdmobAppId(text);
       }
@@ -222,6 +228,35 @@ String dropFunctions(String text) {
   json.remove('functions');
   final emulators = json['emulators'];
   if (emulators is Map<String, dynamic>) emulators.remove('functions');
+  return '${const JsonEncoder.withIndent('  ').convert(json)}\n';
+}
+
+/// Removes every key of the ARB [text] that equals one of [prefixes] or
+/// starts with one followed by an uppercase ASCII letter, together with its
+/// `@key` metadata. Throws [InitFailure] when it is not a JSON object.
+String dropArbKeys(String text, List<String> prefixes) {
+  final Object? json;
+  try {
+    json = jsonDecode(text);
+  } on FormatException catch (e) {
+    throw InitFailure('ARB file: ${e.message}; nothing was changed.');
+  }
+  if (json is! Map<String, dynamic>) {
+    throw InitFailure('ARB file is not a JSON object; nothing was changed.');
+  }
+  bool matches(String key) {
+    final name = key.startsWith('@') && !key.startsWith('@@')
+        ? key.substring(1)
+        : key;
+    return prefixes.any((p) {
+      if (name == p) return true;
+      if (!name.startsWith(p) || name.length == p.length) return false;
+      final c = name.codeUnitAt(p.length);
+      return c >= 0x41 && c <= 0x5A;
+    });
+  }
+
+  json.removeWhere((key, _) => matches(key));
   return '${const JsonEncoder.withIndent('  ').convert(json)}\n';
 }
 

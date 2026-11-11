@@ -71,6 +71,13 @@ else
   echo "Ads: kept"
 fi
 
+for name in notifications ads apple google anon; do
+  if [[ " $* " == *" --no-$name "* ]]; then
+    ! grep -qE "\"@?$name[A-Z]" lib/l10n/*.arb || fail "lib/l10n/*.arb still has $name keys"
+    echo "ARB: $name keys removed"
+  fi
+done
+
 make setup analyze check-test-layout coverage || fail "make setup analyze check-test-layout coverage"
 
 if [ -n "${VERIFY_KEEP:-}" ]; then

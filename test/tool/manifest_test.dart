@@ -52,4 +52,14 @@ void main() {
     expect(featureRules[Feature.remoteConfig]!.markers, ['REMOTE_CONFIG']);
     expect(featureRules[Feature.remoteConfig]!.paths, isEmpty);
   });
+
+  test('Given an .arb path, When isTextFile, Then true', () {
+    expect(isTextFile('lib/l10n/app_en.arb'), isTrue);
+  });
+
+  test('Given featureRules, When read, Then ads has arbKeyPrefixes [ads] '
+      'and posthog has none', () {
+    expect(featureRules[Feature.ads]!.arbKeyPrefixes, ['ads']);
+    expect(featureRules[Feature.posthog]!.arbKeyPrefixes, isEmpty);
+  });
 }

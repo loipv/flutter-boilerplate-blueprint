@@ -9,7 +9,7 @@ const Set<String> textExtensions = {
   '.dart', '.yaml', '.yml', '.json', '.md', '.rules', '.plist', //
   '.entitlements', '.xcprivacy', '.pbxproj', '.xcscheme', '.xcconfig',
   '.storyboard', '.xml', '.kts', '.gradle', '.properties', '.kt', '.swift',
-  '.ts', '.sh', '.iml',
+  '.ts', '.sh', '.iml', '.arb',
 };
 
 /// Exact file names treated as text. Names starting with `.env` also count.
@@ -35,13 +35,21 @@ const Set<String> skipDirs = {
 
 /// Marker blocks and paths removed when a feature is disabled.
 class FeatureRule {
-  const FeatureRule({this.markers = const [], this.paths = const []});
+  const FeatureRule({
+    this.markers = const [],
+    this.paths = const [],
+    this.arbKeyPrefixes = const [],
+  });
 
   /// Marker names whose `BEGIN_X` ... `END_X` blocks are removed.
   final List<String> markers;
 
   /// Repo-relative paths that must exist and are deleted.
   final List<String> paths;
+
+  /// ARB key prefixes removed (with their `@key` metadata) from
+  /// `lib/l10n/*.arb`. ARB is JSON, so it cannot hold markers.
+  final List<String> arbKeyPrefixes;
 }
 
 /// Spec 4.2 feature table.
@@ -60,13 +68,14 @@ const Map<Feature, FeatureRule> featureRules = {
       'lib/core/services/timezone_sync_service.dart',
       'lib/features/notifications',
     ],
+    arbKeyPrefixes: ['notifications'],
   ),
   Feature.posthog: FeatureRule(markers: ['POSTHOG']),
   Feature.sentry: FeatureRule(markers: ['SENTRY']),
   Feature.functions: FeatureRule(paths: ['functions']),
-  Feature.apple: FeatureRule(markers: ['APPLE']),
-  Feature.google: FeatureRule(markers: ['GOOGLE']),
-  Feature.anon: FeatureRule(markers: ['ANON']),
+  Feature.apple: FeatureRule(markers: ['APPLE'], arbKeyPrefixes: ['apple']),
+  Feature.google: FeatureRule(markers: ['GOOGLE'], arbKeyPrefixes: ['google']),
+  Feature.anon: FeatureRule(markers: ['ANON'], arbKeyPrefixes: ['anon']),
   Feature.remoteConfig: FeatureRule(markers: ['REMOTE_CONFIG']),
   Feature.ads: FeatureRule(
     markers: ['ADS'],
@@ -76,6 +85,7 @@ const Map<Feature, FeatureRule> featureRules = {
       'test/scripts/check_ads_config_test.dart',
       'docs/ads_setup.md',
     ],
+    arbKeyPrefixes: ['ads'],
   ),
 };
 

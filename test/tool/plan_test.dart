@@ -84,4 +84,40 @@ void main() {
       expect(() => dropFunctions('[]'), throwsA(isA<InitFailure>()));
     });
   });
+
+  group('dropArbKeys', () {
+    test('Given adsPrivacyOptions and @adsPrivacyOptions, '
+        'When dropped with [ads], Then both are gone and other keys remain '
+        'in their original order', () {
+      const input =
+          '{"@@locale": "en", "appTitle": "A", "adsPrivacyOptions": "P", '
+          '"@adsPrivacyOptions": {"description": "d"}, "zebra": "z"}';
+      final json = jsonDecode(dropArbKeys(input, ['ads'])) as Map;
+
+      expect(json.keys.toList(), ['@@locale', 'appTitle', 'zebra']);
+    });
+
+    test('Given a key address, When dropped with [ads], Then it is kept', () {
+      final json =
+          jsonDecode(dropArbKeys('{"address": "a", "ads": "x"}', ['ads']))
+              as Map;
+
+      expect(json.keys.toList(), ['address']);
+    });
+
+    test('Given non-ASCII values, When dropped, Then they are written '
+        'unescaped with 2-space indentation and a trailing newline', () {
+      final out = dropArbKeys('{"a": "Xin chào", "adsX": "y"}', ['ads']);
+
+      expect(out, '{\n  "a": "Xin chào"\n}\n');
+    });
+
+    test('Given invalid JSON, When dropped, Then it throws InitFailure', () {
+      expect(() => dropArbKeys('{', ['ads']), throwsA(isA<InitFailure>()));
+    });
+
+    test('Given a JSON array, When dropped, Then it throws InitFailure', () {
+      expect(() => dropArbKeys('[]', ['ads']), throwsA(isA<InitFailure>()));
+    });
+  });
 }
