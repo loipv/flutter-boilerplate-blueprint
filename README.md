@@ -303,7 +303,7 @@ tool/verify_init.sh   # run the init tool on a copy and check the result
 
 `lib/firebase_options_staging.dart` and `lib/firebase_options_production.dart` are committed stubs. Before running `flutterfire configure` here, run `git update-index --skip-worktree` on both files so your generated config is not committed.
 
-`tool/verify_init.sh` copies the working tree, runs `tool/init.dart` non-interactively, then analyzes, tests, and checks for leftover tokens. It deletes its temporary copy on success (set `VERIFY_KEEP=1` to keep it) and keeps it on failure. Pass init flags to try a combination, for example `tool/verify_init.sh --yes --name acme_notes --org io.acme --no-sentry`. CI runs three combinations on every push (`.github/workflows/blueprint.yml`), and `.github/workflows/ci.yml` runs analyze and test, and stays in generated apps.
+`tool/verify_init.sh` copies the working tree, runs `tool/init.dart` non-interactively, checks the result, then runs `make setup analyze check-test-layout coverage` in the copy. It deletes its temporary copy on success (set `VERIFY_KEEP=1` to keep it) and keeps it on failure. Pass init flags to try a combination, for example `tool/verify_init.sh --yes --name acme_notes --org io.acme --no-sentry`. CI runs three combinations on every push (`.github/workflows/blueprint.yml`), and `.github/workflows/ci.yml` runs analyze, the test layout check and the coverage gate, and stays in generated apps.
 
 Anything that only makes sense in the blueprint (this README, release notes) sits between `<!-- BEGIN_BLUEPRINT -->` and `<!-- END_BLUEPRINT -->` lines in Markdown, or is a blueprint-only file; init removes both.
 

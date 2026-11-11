@@ -228,9 +228,19 @@ Do not hardcode these values in source. Keep them in env files and read them in 
 
 ### 3.4 Testing Standards
 
-- **Coverage**: 100% for domain + data layers, 80% for application layer
-- **Mocking**: `mocktail` only; providers expose the concrete `Firebase*Repository` types, so mocks implement those classes (see `test/helpers/mocks.dart`); never mock Firebase SDK classes in controller tests
-- **Style**: Given-When-Then for all test descriptions
+- **Coverage** (`make coverage` fails below these; `*.g.dart` and `*.freezed.dart` are excluded):
+  - domain (`lib/**/domain/**`): 100%
+  - data (`lib/**/data/**`): ≥ 90%
+  - application (`lib/**/application/**`, `lib/core/router/**`, `lib/core/config/**`, `lib/core/providers/**`): ≥ 80%
+  - A gated file with executable code that no test loads fails the gate
+- **Layout** (`make check-test-layout`): `lib/a/b/foo.dart` ↔ `test/a/b/foo_test.dart`, exactly one test file per source file. `scripts/<name>.dart` ↔ `test/scripts/<name>_test.dart`. Exempt: `test/helpers/**`, `test/flutter_test_config.dart`, `integration_test/**`
+<!-- BEGIN_BLUEPRINT -->
+- **Layout (blueprint only)**: `tool/src/<name>.dart` ↔ `test/tool/<name>_test.dart`
+<!-- END_BLUEPRINT -->
+- **Markers**: feature-specific tests, imports and helpers go inside the same `BEGIN_<NAME>` / `END_<NAME>` blocks as the `lib/` code they test. Every test file must still compile and keep at least one test after any combination of features is stripped
+- **Mocking**: `mocktail` only; providers expose the concrete `Firebase*Repository` types, so mocks implement those classes (see `test/helpers/mocks.dart`); never mock Firebase SDK classes in controller tests. Repository tests use `fake_cloud_firestore` / `firebase_auth_mocks`, with errors injected through `mock_exceptions`
+- **Style**: Given-When-Then for all test descriptions (`'Given <state>, When <action>, Then <outcome>'`); `group()` names are the method or route under test
+- **Security rules**: Every change to `firestore.rules` or `storage.rules` updates `firebase_tests/`.
 - **Rule**: Never make real network calls in unit tests
 
 ```dart

@@ -5,9 +5,9 @@
 #
 # Copies the working tree (tracked and untracked, not ignored) to a temporary
 # directory, runs init there with the given flags, checks the result, then runs
-# `make setup analyze test`. Prints `OK` on success and deletes the temporary
-# directory (set VERIFY_KEEP=1 to keep it); any failed check exits non-zero and
-# keeps the directory for inspection.
+# `make setup analyze check-test-layout coverage`. Prints `OK` on success and
+# deletes the temporary directory (set VERIFY_KEEP=1 to keep it); any failed
+# check exits non-zero and keeps the directory for inspection.
 set -euo pipefail
 
 fail() {
@@ -59,7 +59,7 @@ else
   echo "App id: staging uses the .staging suffix"
 fi
 
-make setup analyze test || fail "make setup analyze test"
+make setup analyze check-test-layout coverage || fail "make setup analyze check-test-layout coverage"
 
 if [ -n "${VERIFY_KEEP:-}" ]; then
   echo "OK: $dir"

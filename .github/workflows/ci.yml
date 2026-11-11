@@ -22,5 +22,5 @@ jobs:
         run: make setup
       - name: Analyze
         run: make analyze
-      - name: Test
-        run: make test
+      - name: Test layout and coverage gate
+        run: make check-test-layout coverage

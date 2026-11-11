@@ -22,7 +22,10 @@ The generated app's `pubspec.yaml` version is separate from the blueprint versio
 - `make build-staging-ipa` and `make build-staging-aab`.
 - init refuses to turn off all three sign-in methods (Apple, Google, anonymous), and fails before any write on a marker name it does not know (for example a typo like `BEGIN_POSTHOGG`). A test checks that every marker in the repo has a known name.
 - Complete `ios/` and `android/` platform folders.
-- Seed tests under `test/` and CI: `ci.yml` (analyze + test) and `blueprint.yml` (runs `tool/verify_init.sh` for three init combinations).
+- Seed tests under `test/` and CI: `ci.yml` (analyze, test layout check, coverage gate) and `blueprint.yml` (runs `tool/verify_init.sh` for three init combinations).
+- Test suite: one test file per `lib/` source file (`lib/a/b/foo.dart` ↔ `test/a/b/foo_test.dart`), with repository tests on `fake_cloud_firestore` / `firebase_auth_mocks` / `mock_exceptions`, router, widget and app flow tests, and shared helpers in `test/helpers/` (`fakes.dart`, `mocks.dart`, `pump_app.dart`).
+- `make check-test-layout` (`scripts/check_test_layout.dart`): fails on a test file whose source file does not exist.
+- `make coverage` (`scripts/coverage_gate.dart`): runs the tests with coverage and fails below domain 100%, data 90%, application 80%, or on a gated file no test loads. `ci.yml` and `tool/verify_init.sh` run both.
 
 ### Fixed
 
