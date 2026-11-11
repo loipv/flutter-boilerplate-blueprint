@@ -37,24 +37,21 @@ void main() {
       expect(UserEntity.fromJson(json), user);
     });
 
-    test(
-      'Given non-default preferences, When toJson is read directly, Then '
-      'preferences is a plain map and fromJson restores it',
-      () {
-        const user = UserEntity(
-          id: 'u1',
-          preferences: UserPreferences(
-            themeMode: ThemeMode.dark,
-            hapticsEnabled: false,
-          ),
-        );
+    test('Given non-default preferences, When toJson is read directly, Then '
+        'preferences is a plain map and fromJson restores it', () {
+      const user = UserEntity(
+        id: 'u1',
+        preferences: UserPreferences(
+          themeMode: ThemeMode.dark,
+          hapticsEnabled: false,
+        ),
+      );
 
-        final json = user.toJson();
+      final json = user.toJson();
 
-        expect(json['preferences'], isA<Map<String, dynamic>>());
-        expect(UserEntity.fromJson(json), user);
-      },
-    );
+      expect(json['preferences'], isA<Map<String, dynamic>>());
+      expect(UserEntity.fromJson(json), user);
+    });
   });
 
   group('isSignedIn', () {
