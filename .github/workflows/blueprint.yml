@@ -13,7 +13,7 @@ jobs:
       matrix:
         flags:
           - --yes --name blueprint_ci
-          - --yes --name blueprint_ci --no-notifications --no-posthog --no-sentry --no-functions --no-apple --no-google --no-anon
+          - --yes --name blueprint_ci --no-notifications --no-posthog --no-sentry --no-functions --no-apple --no-google
           - --yes --name acme_notes --org io.acme --title "Acme Notes" --description "Notes for Acme" --shared-app-id
     steps:
       - uses: actions/checkout@v4

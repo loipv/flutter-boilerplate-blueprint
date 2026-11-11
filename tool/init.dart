@@ -137,12 +137,20 @@ InitOptions _resolve(ParsedArgs p) {
   );
 
   final disabled = {...p.disabled};
+  final flagError = validateSignIn(disabled);
+  if (flagError != null) throw _InputError(flagError);
   if (!p.yes) {
     for (final feature in Feature.values) {
       if (disabled.contains(feature)) continue;
-      if (!_confirm('Include ${_featureLabels[feature]}?')) {
-        disabled.add(feature);
+      if (_confirm('Include ${_featureLabels[feature]}?')) continue;
+      if (validateSignIn({...disabled, feature}) != null) {
+        stderr.writeln(
+          'Keeping ${_featureLabels[feature]}: at least one sign-in method '
+          'must stay on.',
+        );
+        continue;
       }
+      disabled.add(feature);
     }
   }
   final sharedAppId =

@@ -102,6 +102,13 @@ class InitPlan {
           throw InitFailure('$path: ${e.message}; nothing was changed.');
         }
       }
+      for (final m in markerNames(original)) {
+        if (!knownMarkers.contains(m.name)) {
+          throw InitFailure(
+            '$path:${m.line}: unknown marker ${m.name}; nothing was changed.',
+          );
+        }
+      }
       text = renameText(text, options);
       try {
         for (final marker in checked) {

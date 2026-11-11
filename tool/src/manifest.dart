@@ -69,6 +69,13 @@ const Map<Feature, FeatureRule> featureRules = {
   Feature.anon: FeatureRule(markers: ['ANON']),
 };
 
+/// Every marker name init understands: the feature markers plus
+/// `BLUEPRINT` (blueprint-only text, always stripped).
+final Set<String> knownMarkers = {
+  for (final rule in featureRules.values) ...rule.markers,
+  'BLUEPRINT',
+};
+
 /// Paths that belong to the blueprint repository, not to a generated app.
 const List<String> blueprintOnlyPaths = [
   '.github/workflows/blueprint.yml',

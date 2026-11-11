@@ -136,6 +136,8 @@ Each prompt has a flag. `--yes` accepts the default for anything you do not pass
 
 Invalid input re-prompts in interactive mode; with flags it exits non-zero with the reason, before any file is changed.
 
+At least one sign-in method (Apple, Google or anonymous) must stay on, since the app cannot leave onboarding without one. Turning all three off with flags exits with an error; interactively, init keeps the last one.
+
 Bottom nav tab count, brand colors, the AI tool file, and FVM are not asked. Edit them by hand after scaffolding; `docs/next_steps.md` in the generated app covers each one. The Flutter SDK is pinned to `3.41.4` in `.fvmrc`.
 
 ## 10. Architecture at a glance

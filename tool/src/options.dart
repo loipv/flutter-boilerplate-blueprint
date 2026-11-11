@@ -4,6 +4,22 @@ library;
 /// Optional features that can be removed from the generated app.
 enum Feature { notifications, posthog, sentry, functions, apple, google, anon }
 
+/// Sign-in methods; at least one must stay on or the app cannot leave
+/// onboarding.
+const Set<Feature> signInFeatures = {
+  Feature.apple,
+  Feature.google,
+  Feature.anon,
+};
+
+/// Returns null when [disabled] keeps at least one sign-in method, else the
+/// message.
+String? validateSignIn(Set<Feature> disabled) =>
+    disabled.containsAll(signInFeatures)
+    ? 'At least one sign-in method (Apple, Google, anonymous) must stay on; '
+          'without one the app cannot leave onboarding.'
+    : null;
+
 /// Fully resolved answers used to rename the boilerplate.
 class InitOptions {
   const InitOptions({

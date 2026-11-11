@@ -58,3 +58,12 @@ String stripMarkerLines(String text) =>
 
 /// Whether [text] contains at least one marker line.
 bool hasMarkerLines(String text) => text.split('\n').any(_markerLine.hasMatch);
+
+/// Every marker line in [text]: its 1-based line number and marker name.
+Iterable<({int line, String name})> markerNames(String text) sync* {
+  final lines = text.split('\n');
+  for (var i = 0; i < lines.length; i++) {
+    final match = _markerLine.firstMatch(lines[i]);
+    if (match != null) yield (line: i + 1, name: match.group(2)!);
+  }
+}

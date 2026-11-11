@@ -20,6 +20,7 @@ The generated app's `pubspec.yaml` version is separate from the blueprint versio
 
 - `--shared-app-id` init option (and prompt, default off): staging uses the production bundle/application id so staging builds can go to the same TestFlight / Play Console app. Trade-offs are in `docs/release_guide.md`.
 - `make build-staging-ipa` and `make build-staging-aab`.
+- init refuses to turn off all three sign-in methods (Apple, Google, anonymous), and fails before any write on a marker name it does not know (for example a typo like `BEGIN_POSTHOGG`). A test checks that every marker in the repo has a known name.
 - Complete `ios/` and `android/` platform folders.
 - Seed tests under `test/` and CI: `ci.yml` (analyze + test) and `blueprint.yml` (runs `tool/verify_init.sh` for three init combinations).
 

@@ -75,4 +75,18 @@ void main() {
     expect(() => parseArgs(['--name', '--yes']), throwsFormatException);
     expect(() => parseArgs(['stray']), throwsFormatException);
   });
+
+  test('validateSignIn requires at least one sign-in method', () {
+    expect(validateSignIn({}), isNull);
+    expect(validateSignIn({Feature.apple, Feature.google}), isNull);
+    expect(validateSignIn({Feature.apple, Feature.anon}), isNull);
+    expect(
+      validateSignIn({Feature.apple, Feature.google, Feature.anon}),
+      contains('At least one sign-in method'),
+    );
+  });
+
+  test('signInFeatures are Apple, Google and anonymous', () {
+    expect(signInFeatures, {Feature.apple, Feature.google, Feature.anon});
+  });
 }

@@ -90,4 +90,15 @@ void main() {
     expect(hasMarkerLines('  # END_POSTHOG\n'), isTrue);
     expect(hasMarkerLines('plain\n'), isFalse);
   });
+
+  test('markerNames lists every marker line with its 1-based line number', () {
+    const input =
+        'a\n// BEGIN_SENTRY\n# END_SENTRY\n<!-- BEGIN_BLUEPRINT -->\n'
+        'x // BEGIN_NOT_A_MARKER\n';
+    expect(markerNames(input).toList(), [
+      (line: 2, name: 'SENTRY'),
+      (line: 3, name: 'SENTRY'),
+      (line: 4, name: 'BLUEPRINT'),
+    ]);
+  });
 }
