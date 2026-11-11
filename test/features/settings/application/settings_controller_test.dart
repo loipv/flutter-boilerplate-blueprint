@@ -1,0 +1,214 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:blueprint_app/features/auth/application/auth_controller.dart';
+import 'package:blueprint_app/features/auth/data/firebase_auth_repository.dart';
+import 'package:blueprint_app/features/auth/domain/user_entity.dart';
+import 'package:blueprint_app/features/auth/domain/user_preferences.dart';
+import 'package:blueprint_app/features/settings/application/settings_controller.dart';
+import 'package:blueprint_app/features/user_profile/data/firebase_user_repository.dart';
+
+import '../../../helpers/mocks.dart';
+
+void main() {
+  late MockAuthRepository authRepo;
+  late MockUserRepository userRepo;
+  late ProviderContainer container;
+
+  const user = UserEntity(id: 'u1');
+
+  setUpAll(() {
+    registerFallbackValue(const UserPreferences());
+  });
+
+  setUp(() {
+    authRepo = MockAuthRepository();
+    userRepo = MockUserRepository();
+    container = ProviderContainer(
+      overrides: [
+        authRepositoryProvider.overrideWithValue(authRepo),
+        userRepositoryProvider.overrideWithValue(userRepo),
+      ],
+    );
+    addTearDown(container.dispose);
+    when(() => userRepo.savePreferences(any(), any())).thenAnswer((_) async {});
+    when(
+      () => userRepo.getUserStream(any()),
+    ).thenAnswer((_) => Stream.value(null));
+  });
+
+  Future<void> signIn(UserEntity? u) async {
+    when(() => authRepo.authStateChanges()).thenAnswer((_) => Stream.value(u));
+    container.listen(authControllerProvider, (_, _) {});
+    await container.read(authControllerProvider.future);
+  }
+
+  group('updateThemeMode', () {
+    test(
+      'Given a signed-in user, When updateThemeMode(dark) is called, Then preferences with the dark theme are saved',
+      () async {
+        await signIn(user);
+
+        await container
+            .read(settingsControllerProvider.notifier)
+            .updateThemeMode(ThemeMode.dark);
+
+        verify(
+          () => userRepo.savePreferences(
+            'u1',
+            const UserPreferences(themeMode: ThemeMode.dark),
+          ),
+        ).called(1);
+        expect(container.read(settingsControllerProvider).hasError, isFalse);
+      },
+    );
+
+    test(
+      'Given stored preferences, When updateThemeMode is called, Then other preferences are preserved',
+      () async {
+        await signIn(user);
+        when(() => userRepo.getUserStream('u1')).thenAnswer(
+          (_) => Stream.value(
+            const UserEntity(
+              id: 'u1',
+              preferences: UserPreferences(hapticsEnabled: false),
+            ),
+          ),
+        );
+
+        await container
+            .read(settingsControllerProvider.notifier)
+            .updateThemeMode(ThemeMode.light);
+
+        verify(
+          () => userRepo.savePreferences(
+            'u1',
+            const UserPreferences(
+              themeMode: ThemeMode.light,
+              hapticsEnabled: false,
+            ),
+          ),
+        ).called(1);
+      },
+    );
+
+    test(
+      'Given no user, When updateThemeMode is called, Then nothing is saved',
+      () async {
+        await signIn(null);
+
+        await container
+            .read(settingsControllerProvider.notifier)
+            .updateThemeMode(ThemeMode.dark);
+
+        verifyNever(() => userRepo.savePreferences(any(), any()));
+      },
+    );
+
+    test(
+      'Given saving fails, When updateThemeMode is called, Then the state holds the error',
+      () async {
+        await signIn(user);
+        when(
+          () => userRepo.savePreferences(any(), any()),
+        ).thenThrow(StateError('x'));
+
+        await container
+            .read(settingsControllerProvider.notifier)
+            .updateThemeMode(ThemeMode.dark);
+
+        expect(container.read(settingsControllerProvider).hasError, isTrue);
+      },
+    );
+  });
+
+  group('updateHaptics', () {
+    test(
+      'Given a signed-in user, When updateHaptics(false) is called, Then preferences with haptics off are saved',
+      () async {
+        await signIn(user);
+
+        await container
+            .read(settingsControllerProvider.notifier)
+            .updateHaptics(false);
+
+        verify(
+          () => userRepo.savePreferences(
+            'u1',
+            const UserPreferences(hapticsEnabled: false),
+          ),
+        ).called(1);
+      },
+    );
+
+    test(
+      'Given no user, When updateHaptics is called, Then nothing is saved',
+      () async {
+        await signIn(null);
+
+        await container
+            .read(settingsControllerProvider.notifier)
+            .updateHaptics(false);
+
+        verifyNever(() => userRepo.savePreferences(any(), any()));
+      },
+    );
+  });
+
+  // BEGIN_NOTIFICATIONS
+  group('updateNotificationTime', () {
+    test(
+      'Given a signed-in user, When updateNotificationTime(08:30) is called, Then preferences with that time are saved',
+      () async {
+        await signIn(user);
+
+        await container
+            .read(settingsControllerProvider.notifier)
+            .updateNotificationTime('08:30');
+
+        verify(
+          () => userRepo.savePreferences(
+            'u1',
+            const UserPreferences(notificationTime: '08:30'),
+          ),
+        ).called(1);
+      },
+    );
+
+    test(
+      'Given no user, When updateNotificationTime is called, Then nothing is saved',
+      () async {
+        await signIn(null);
+
+        await container
+            .read(settingsControllerProvider.notifier)
+            .updateNotificationTime('08:30');
+
+        verifyNever(() => userRepo.savePreferences(any(), any()));
+      },
+    );
+  });
+  // END_NOTIFICATIONS
+
+  group('deleteAccount', () {
+    test(
+      'Given a signed-in user, When deleteAccount is called, Then it delegates to the auth controller',
+      () async {
+        SharedPreferences.setMockInitialValues({});
+        await signIn(user);
+        when(() => userRepo.deleteUserData(any())).thenAnswer((_) async {});
+        when(() => authRepo.deleteAuthAccount()).thenAnswer((_) async {});
+
+        await container
+            .read(settingsControllerProvider.notifier)
+            .deleteAccount();
+
+        verify(() => userRepo.deleteUserData('u1')).called(1);
+        verify(() => authRepo.deleteAuthAccount()).called(1);
+        expect(container.read(settingsControllerProvider).hasError, isFalse);
+      },
+    );
+  });
+}

@@ -43,53 +43,65 @@ void main() {
     return container;
   }
 
-  test('starts incomplete when nothing is stored', () async {
-    final container = await buildContainer({});
+  test(
+    'Given nothing is stored, When the controller builds, Then onboarding is incomplete at step 0',
+    () async {
+      final container = await buildContainer({});
 
-    final state = container.read(onboardingControllerProvider).requireValue;
-    expect(state.isComplete, isFalse);
-    expect(state.currentStep, 0);
-  });
-
-  test('starts complete when the flag is stored', () async {
-    final container = await buildContainer({
-      AppConstants.onboardingCompleteKey: true,
-    });
-
-    expect(
-      container.read(onboardingControllerProvider).requireValue.isComplete,
-      isTrue,
-    );
-  });
-
-  test('nextStep increments currentStep', () async {
-    final container = await buildContainer({});
-
-    container.read(onboardingControllerProvider.notifier).nextStep();
-
-    expect(
-      container.read(onboardingControllerProvider).requireValue.currentStep,
-      1,
-    );
-  });
-
-  test('markLocallyComplete persists the flag', () async {
-    final container = await buildContainer({});
-
-    await container
-        .read(onboardingControllerProvider.notifier)
-        .markLocallyComplete();
-
-    expect(
-      container.read(onboardingControllerProvider).requireValue.isComplete,
-      isTrue,
-    );
-    final prefs = await SharedPreferences.getInstance();
-    expect(prefs.getBool(AppConstants.onboardingCompleteKey), isTrue);
-  });
+      final state = container.read(onboardingControllerProvider).requireValue;
+      expect(state.isComplete, isFalse);
+      expect(state.currentStep, 0);
+    },
+  );
 
   test(
-    'completeOnboarding writes preferences and the flag for the current user',
+    'Given the complete flag is stored, When the controller builds, Then onboarding is complete',
+    () async {
+      final container = await buildContainer({
+        AppConstants.onboardingCompleteKey: true,
+      });
+
+      expect(
+        container.read(onboardingControllerProvider).requireValue.isComplete,
+        isTrue,
+      );
+    },
+  );
+
+  test(
+    'Given step 0, When nextStep is called, Then currentStep is 1',
+    () async {
+      final container = await buildContainer({});
+
+      container.read(onboardingControllerProvider.notifier).nextStep();
+
+      expect(
+        container.read(onboardingControllerProvider).requireValue.currentStep,
+        1,
+      );
+    },
+  );
+
+  test(
+    'Given incomplete onboarding, When markLocallyComplete is called, Then the flag is persisted',
+    () async {
+      final container = await buildContainer({});
+
+      await container
+          .read(onboardingControllerProvider.notifier)
+          .markLocallyComplete();
+
+      expect(
+        container.read(onboardingControllerProvider).requireValue.isComplete,
+        isTrue,
+      );
+      final prefs = await SharedPreferences.getInstance();
+      expect(prefs.getBool(AppConstants.onboardingCompleteKey), isTrue);
+    },
+  );
+
+  test(
+    'Given a signed-in user, When completeOnboarding is called, Then preferences and the flag are written for that user',
     () async {
       when(() => authRepo.currentUser).thenReturn(const UserEntity(id: 'u1'));
       final container = await buildContainer({});
@@ -103,36 +115,42 @@ void main() {
     },
   );
 
-  test('completeOnboarding skips Firestore when there is no user', () async {
-    when(() => authRepo.currentUser).thenReturn(null);
-    final container = await buildContainer({});
+  test(
+    'Given no user, When completeOnboarding is called, Then Firestore is skipped and onboarding is complete',
+    () async {
+      when(() => authRepo.currentUser).thenReturn(null);
+      final container = await buildContainer({});
 
-    await container
-        .read(onboardingControllerProvider.notifier)
-        .completeOnboarding();
+      await container
+          .read(onboardingControllerProvider.notifier)
+          .completeOnboarding();
 
-    verifyNever(() => userRepo.savePreferences(any(), any()));
-    verifyNever(() => userRepo.markOnboardingComplete(any()));
-    expect(
-      container.read(onboardingControllerProvider).requireValue.isComplete,
-      isTrue,
-    );
-  });
+      verifyNever(() => userRepo.savePreferences(any(), any()));
+      verifyNever(() => userRepo.markOnboardingComplete(any()));
+      expect(
+        container.read(onboardingControllerProvider).requireValue.isComplete,
+        isTrue,
+      );
+    },
+  );
 
-  test('resetOnboarding clears the flag', () async {
-    final container = await buildContainer({
-      AppConstants.onboardingCompleteKey: true,
-    });
+  test(
+    'Given a stored complete flag, When resetOnboarding is called, Then the flag is cleared',
+    () async {
+      final container = await buildContainer({
+        AppConstants.onboardingCompleteKey: true,
+      });
 
-    await container
-        .read(onboardingControllerProvider.notifier)
-        .resetOnboarding();
+      await container
+          .read(onboardingControllerProvider.notifier)
+          .resetOnboarding();
 
-    expect(
-      container.read(onboardingControllerProvider).requireValue.isComplete,
-      isFalse,
-    );
-    final prefs = await SharedPreferences.getInstance();
-    expect(prefs.containsKey(AppConstants.onboardingCompleteKey), isFalse);
-  });
+      expect(
+        container.read(onboardingControllerProvider).requireValue.isComplete,
+        isFalse,
+      );
+      final prefs = await SharedPreferences.getInstance();
+      expect(prefs.containsKey(AppConstants.onboardingCompleteKey), isFalse);
+    },
+  );
 }
