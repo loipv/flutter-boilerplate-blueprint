@@ -7,17 +7,26 @@ enum AppEnv {
     sentryTracesSampleRate: 0.5,
     verboseSdksInDebug: true,
     alwaysUseDebugAppCheck: true,
+    // BEGIN_REMOTE_CONFIG
+    remoteConfigMinFetchInterval: Duration(minutes: 5),
+    // END_REMOTE_CONFIG
   ),
   production(
     sentryTracesSampleRate: 0.2,
     verboseSdksInDebug: false,
     alwaysUseDebugAppCheck: false,
+    // BEGIN_REMOTE_CONFIG
+    remoteConfigMinFetchInterval: Duration(hours: 1),
+    // END_REMOTE_CONFIG
   );
 
   const AppEnv({
     required this.sentryTracesSampleRate,
     required this.verboseSdksInDebug,
     required this.alwaysUseDebugAppCheck,
+    // BEGIN_REMOTE_CONFIG
+    required this.remoteConfigMinFetchInterval,
+    // END_REMOTE_CONFIG
   });
 
   /// Fraction of transactions Sentry traces.
@@ -29,6 +38,12 @@ enum AppEnv {
   /// Uses App Check debug providers even in release builds. Staging builds
   /// must never be submitted to the stores.
   final bool alwaysUseDebugAppCheck;
+  // BEGIN_REMOTE_CONFIG
+
+  /// Minimum time between Remote Config network fetches. Shorter in staging so
+  /// changes show up quickly during testing.
+  final Duration remoteConfigMinFetchInterval;
+  // END_REMOTE_CONFIG
 
   /// Throws [StateError] when [projectId] comes from the committed stub
   /// options file (`projectId: 'stub'`), i.e. `flutterfire configure` has not

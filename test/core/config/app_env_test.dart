@@ -87,5 +87,21 @@ void main() {
         expect(env.alwaysUseDebugAppCheck, isFalse);
       },
     );
+    // BEGIN_REMOTE_CONFIG
+
+    test(
+      'Given each env, When remoteConfigMinFetchInterval is read, Then staging is 5 min and production 1 h',
+      () {
+        expect(
+          AppEnv.staging.remoteConfigMinFetchInterval,
+          const Duration(minutes: 5),
+        );
+        expect(
+          AppEnv.production.remoteConfigMinFetchInterval,
+          const Duration(hours: 1),
+        );
+      },
+    );
+    // END_REMOTE_CONFIG
   });
 }
