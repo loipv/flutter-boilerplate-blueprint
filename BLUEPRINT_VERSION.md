@@ -1,1 +1,1 @@
-Blueprint version: v1.3.0
+Blueprint version: v1.4.0

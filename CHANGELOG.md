@@ -4,11 +4,33 @@ All notable changes to the `flutter-boilerplate-blueprint` template should be do
 
 The generated app's `pubspec.yaml` version is separate from the blueprint version. Use this changelog to track scaffold and template changes between blueprint tags.
 
-## Unreleased
+## v1.4.0 - 2026-11-12
 
 ### Added
 
-- Localization: gen-l10n with English and Vietnamese, Settings language picker, `make check-l10n`, init strips feature keys from ARB files. See `docs/localization.md`.
+- Localization with Flutter `gen-l10n`: English (`app_en.arb`, template and fallback) and Vietnamese (`app_vi.arb`), `l10n.yaml`, and `lib/core/l10n/` (`resolveAppLocale`, `localeProvider`, `appLocalizationsProvider`, `context.l10n`). Every user-facing string, the auth failure messages and the daily reminder notifications are translated. The background timezone isolate resolves the language from the stored preference. See `docs/localization.md`.
+- Settings > Appearance > Language: System (matches the device language, falls back to `en`) or a supported locale. The choice is stored in SharedPreferences (`locale_code`) and written to `users/{uid}.preferences.languageCode` (`null` for System) for server-side use.
+- `make check-l10n` (`scripts/check_l10n.dart`): fails on missing or extra keys and on placeholder mismatches between ARB files. It is part of the release checks and `ci.yml`.
+- `init --no-<feature>` removes that feature's ARB keys (`notifications*`, `ads*`, `apple*`, `google*`, `anon*`) and their `@key` metadata. `--title` / `--description` rename `appTitle` / `appDescription` in every ARB. `blueprint.yml` scaffolds a `--no-anon` variant.
+
+### Changed
+
+- `make setup` and `make codegen` run `fvm flutter gen-l10n` before `build_runner`. `lib/l10n/generated/` is gitignored.
+- `pubspec.yaml` adds `flutter_localizations` and `generate: true`. `ios/Runner/Info.plist` lists `CFBundleLocalizations` (`en`, `vi`); add every new locale there.
+- `UserPreferences` has a nullable `languageCode` field.
+- `init` rejects `{` and `}` in `--title` and `--description`, since both end up in ARB messages.
+- Bare `make` shows `help`.
+
+### Fixed
+
+- Completing onboarding keeps the stored preferences. Before, it reset `notificationTime` and turned `hapticsEnabled` back on.
+- Settings no longer crashes for a user with an empty display name; the account tile falls back to the email, then to "Guest".
+- Daily reminders are rescheduled only when the language actually changes, and reschedule errors are logged.
+
+### Upgrading from v1.3.0
+
+- Apps generated from v1.3.0 or earlier do not get localization automatically. To port it, copy `l10n.yaml`, `lib/l10n/`, `lib/core/l10n/` and `scripts/check_l10n.dart`, apply the `pubspec.yaml`, `Info.plist`, `Makefile` and `.gitignore` changes above, and move hardcoded strings to the ARB files.
+- The onboarding and empty display name fixes apply to older apps too; port `onboarding_controller.dart` and `settings_screen.dart` if needed.
 
 ## v1.3.0 - 2026-11-11
 

@@ -37,7 +37,7 @@ This repo is designed for teams who want to scaffold a real app foundation quick
 
 ## 4. Quick start
 
-Latest stable blueprint version: `v1.3.0`
+Latest stable blueprint version: `v1.4.0`
 
 Review the script before running it. This scaffold requires `bash`; do not run it with `sh`. The `bash -c "$(curl ...)"` form downloads the whole script first, so nothing executes until the download finishes.
 
@@ -48,10 +48,10 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/loipv/flutter-boilerplat
 If you need to reproduce an older blueprint version exactly, pin a tag. `BLUEPRINT_REF` selects the ref that gets cloned, so set it to the same tag as the script URL:
 
 ```bash
-BLUEPRINT_REF=v1.3.0 bash -c "$(curl -fsSL https://raw.githubusercontent.com/loipv/flutter-boilerplate-blueprint/v1.3.0/scaffold.sh)"
+BLUEPRINT_REF=v1.4.0 bash -c "$(curl -fsSL https://raw.githubusercontent.com/loipv/flutter-boilerplate-blueprint/v1.4.0/scaffold.sh)"
 ```
 
-The script prints the ref it uses. `BLUEPRINT_REF` also works with a local clone (`BLUEPRINT_REF=v1.3.0 bash scaffold.sh my_app`), picking a tag or branch from that clone instead of its `HEAD`.
+The script prints the ref it uses. `BLUEPRINT_REF` also works with a local clone (`BLUEPRINT_REF=v1.4.0 bash scaffold.sh my_app`), picking a tag or branch from that clone instead of its `HEAD`.
 
 The `v0.x` one-liners (tags `v0.6.0` to `v0.9.0`) no longer work: their script always clones `main` and reads a `template/` directory that `main` no longer has. This script cannot scaffold those tags either, since they have no `tool/init.dart`. To reproduce a `v0.x` version, clone that tag and run its own script:
 
@@ -331,14 +331,14 @@ When you cut a new blueprint version:
 5. Create an annotated tag for the new version.
 6. Push the branch and the tag.
 
-Example for `v1.3.0`:
+Example for `v1.4.0`:
 
 ```bash
 git add BLUEPRINT_VERSION.md CHANGELOG.md README.md
-git commit -m "Release blueprint v1.3.0"
-git tag -a v1.3.0 -m "Blueprint 1.3.0"
+git commit -m "Release blueprint v1.4.0"
+git tag -a v1.4.0 -m "Blueprint 1.4.0"
 git push origin main
-git push origin v1.3.0
+git push origin v1.4.0
 ```
 
 The default quick-start command should point at `main`, which stays aligned with the latest stable blueprint. Tags are for reproducible snapshots when someone needs an older exact version. Users can check [`CHANGELOG.md`](./CHANGELOG.md) to see what changed between blueprint versions.
