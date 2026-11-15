@@ -329,8 +329,8 @@ How a release happens (`.github/workflows/release.yml`):
 
 1. Merge changes to `main` with [conventional commit](https://www.conventionalcommits.org/) messages.
 2. release-please opens, then keeps updating, a PR titled "Release blueprint vX.Y.Z" with the next version and the new changelog entry.
-3. Edit the changelog text in that PR if the generated notes need polish.
-4. Merge the PR. release-please tags `vX.Y.Z` and publishes a GitHub Release with the same notes.
+3. To polish the notes, edit both the PR description and `CHANGELOG.md` on the PR branch right before merging, with nothing else merged to `main` in between. The GitHub Release takes its notes from the PR description, and release-please rebuilds the PR, dropping manual edits, on every push to `main`.
+4. Merge the PR. release-please tags `vX.Y.Z` and publishes a GitHub Release.
 
 How the next version is chosen:
 

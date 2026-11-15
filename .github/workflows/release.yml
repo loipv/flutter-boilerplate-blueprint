@@ -8,6 +8,7 @@ on:
 
 permissions:
   contents: write
+  issues: write # release-please labels its PR autorelease: pending
   pull-requests: write
 
 jobs:
