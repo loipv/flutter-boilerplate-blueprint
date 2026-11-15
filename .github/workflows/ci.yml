@@ -38,7 +38,7 @@ jobs:
           java-version: 21
       - name: Install Firebase CLI
         run: npm i -g firebase-tools@15.13.0
-      - uses: actions/cache@v4
+      - uses: actions/cache@v6
         with:
           path: ~/.cache/firebase/emulators
           key: firebase-emulators-15.13.0
