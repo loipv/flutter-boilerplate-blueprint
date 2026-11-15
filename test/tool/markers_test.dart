@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../tool/src/markers.dart';
@@ -124,5 +126,27 @@ void main() {
   test('stripReleaseMarkers leaves text without markers unchanged', () {
     const input = 'Blueprint version: v1.4.0\n<!-- BEGIN_ADS -->\n';
     expect(stripReleaseMarkers(input), input);
+  });
+
+  // release-please's generic updater rewrites only the first version on each
+  // line, so a line with two versions would be half-updated on release.
+  test('Given release-please marked lines in the repo, When versions are '
+      'counted, Then each line holds at most one', () {
+    final version = RegExp(r'\d+\.\d+\.\d+');
+    final offenders = <String>[];
+    for (final path in ['README.md', 'BLUEPRINT_VERSION.md']) {
+      var inBlock = false;
+      final lines = File(path).readAsLinesSync();
+      for (var i = 0; i < lines.length; i++) {
+        final line = lines[i];
+        if (line.contains('x-release-please-start-version')) inBlock = true;
+        if (line.contains('x-release-please-end')) inBlock = false;
+        final marked = inBlock || line.contains('x-release-please-version');
+        if (marked && version.allMatches(line).length > 1) {
+          offenders.add('$path:${i + 1}');
+        }
+      }
+    }
+    expect(offenders, isEmpty);
   });
 }

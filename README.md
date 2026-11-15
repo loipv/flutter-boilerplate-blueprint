@@ -49,7 +49,8 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/loipv/flutter-boilerplat
 If you need to reproduce an older blueprint version exactly, pin a tag. `BLUEPRINT_REF` selects the ref that gets cloned, so set it to the same tag as the script URL:
 
 ```bash
-BLUEPRINT_REF=v1.4.0 bash -c "$(curl -fsSL https://raw.githubusercontent.com/loipv/flutter-boilerplate-blueprint/v1.4.0/scaffold.sh)"
+BLUEPRINT_REF=v1.4.0 bash -c "$(curl -fsSL \
+  https://raw.githubusercontent.com/loipv/flutter-boilerplate-blueprint/v1.4.0/scaffold.sh)"
 ```
 
 The script prints the ref it uses. `BLUEPRINT_REF` also works with a local clone (`BLUEPRINT_REF=v1.4.0 bash scaffold.sh my_app`), picking a tag or branch from that clone instead of its `HEAD`.
