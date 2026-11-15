@@ -101,4 +101,28 @@ void main() {
       (line: 4, name: 'BLUEPRINT'),
     ]);
   });
+
+  test('stripReleaseMarkers removes an inline version marker', () {
+    expect(
+      stripReleaseMarkers(
+        'Blueprint version: v1.4.0 <!-- x-release-please-version -->\n',
+      ),
+      'Blueprint version: v1.4.0\n',
+    );
+  });
+
+  test('stripReleaseMarkers drops block marker lines and keeps content', () {
+    expect(
+      stripReleaseMarkers(
+        'a\n<!-- x-release-please-start-version -->\nv1.4.0\n'
+        '<!-- x-release-please-end -->\nb\n',
+      ),
+      'a\nv1.4.0\nb\n',
+    );
+  });
+
+  test('stripReleaseMarkers leaves text without markers unchanged', () {
+    const input = 'Blueprint version: v1.4.0\n<!-- BEGIN_ADS -->\n';
+    expect(stripReleaseMarkers(input), input);
+  });
 }

@@ -67,3 +67,20 @@ Iterable<({int line, String name})> markerNames(String text) sync* {
     if (match != null) yield (line: i + 1, name: match.group(2)!);
   }
 }
+
+final RegExp _releaseInlineMarker = RegExp(
+  r'\s*<!--\s*x-release-please-version\s*-->',
+);
+final RegExp _releaseBlockMarkerLine = RegExp(
+  r'^\s*<!--\s*x-release-please-(?:start-version|end)\s*-->\s*$',
+);
+
+/// Removes release-please version markers: inline
+/// `<!-- x-release-please-version -->` comments and whole
+/// `<!-- x-release-please-start-version -->` / `<!-- x-release-please-end -->`
+/// lines. They only drive blueprint releases, so apps never see them.
+String stripReleaseMarkers(String text) => text
+    .split('\n')
+    .where((line) => !_releaseBlockMarkerLine.hasMatch(line))
+    .map((line) => line.replaceAll(_releaseInlineMarker, ''))
+    .join('\n');

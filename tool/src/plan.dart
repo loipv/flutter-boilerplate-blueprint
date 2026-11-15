@@ -119,6 +119,7 @@ class InitPlan {
         throw InitFailure('$path: ${e.message}; nothing was changed.');
       }
       text = stripMarkerLines(text);
+      text = stripReleaseMarkers(text);
       if (path == 'firebase.json' && disabled.contains(Feature.functions)) {
         text = dropFunctions(text);
       }
