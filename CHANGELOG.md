@@ -4,6 +4,21 @@ All notable changes to the `flutter-boilerplate-blueprint` template should be do
 
 The generated app's `pubspec.yaml` version is separate from the blueprint version. Use this changelog to track scaffold and template changes between blueprint tags.
 
+## [1.5.0](https://github.com/loipv/flutter-boilerplate-blueprint/compare/v1.4.0...v1.5.0) (2026-11-15)
+
+
+### Features
+
+* **init:** strip release-please version markers ([b0a7ab2](https://github.com/loipv/flutter-boilerplate-blueprint/commit/b0a7ab2e6c37901f122393d875fab26f78c13629))
+* **make:** add project clean targets ([3dba67d](https://github.com/loipv/flutter-boilerplate-blueprint/commit/3dba67d43a968732cc8483fa77f2d69c498bf4b0))
+
+
+### Bug Fixes
+
+* **ci:** address release automation review minors ([357f3a3](https://github.com/loipv/flutter-boilerplate-blueprint/commit/357f3a3fe883350fce4d2983d03c35ef8bca09f7))
+* **ci:** let release-please label its PR and document editing release notes ([9685871](https://github.com/loipv/flutter-boilerplate-blueprint/commit/96858719413000412ccbf61678aa65ed1d23c3a4))
+* **readme:** keep one version per line in release-please blocks ([6228b4c](https://github.com/loipv/flutter-boilerplate-blueprint/commit/6228b4ce68c4a863de667fd0bf3e5af947d23746))
+
 ## v1.4.0 - 2026-11-12
 
 ### Added
