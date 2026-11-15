@@ -38,7 +38,7 @@ This repo is designed for teams who want to scaffold a real app foundation quick
 ## 4. Quick start
 
 <!-- x-release-please-start-version -->
-Latest stable blueprint version: `v1.4.0`
+Latest stable blueprint version: `v1.5.0`
 
 Review the script before running it. This scaffold requires `bash`; do not run it with `sh`. The `bash -c "$(curl ...)"` form downloads the whole script first, so nothing executes until the download finishes.
 
@@ -49,11 +49,11 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/loipv/flutter-boilerplat
 If you need to reproduce an older blueprint version exactly, pin a tag. `BLUEPRINT_REF` selects the ref that gets cloned, so set it to the same tag as the script URL:
 
 ```bash
-BLUEPRINT_REF=v1.4.0 bash -c "$(curl -fsSL \
-  https://raw.githubusercontent.com/loipv/flutter-boilerplate-blueprint/v1.4.0/scaffold.sh)"
+BLUEPRINT_REF=v1.5.0 bash -c "$(curl -fsSL \
+  https://raw.githubusercontent.com/loipv/flutter-boilerplate-blueprint/v1.5.0/scaffold.sh)"
 ```
 
-The script prints the ref it uses. `BLUEPRINT_REF` also works with a local clone (`BLUEPRINT_REF=v1.4.0 bash scaffold.sh my_app`), picking a tag or branch from that clone instead of its `HEAD`.
+The script prints the ref it uses. `BLUEPRINT_REF` also works with a local clone (`BLUEPRINT_REF=v1.5.0 bash scaffold.sh my_app`), picking a tag or branch from that clone instead of its `HEAD`.
 <!-- x-release-please-end -->
 
 The `v0.x` one-liners (tags `v0.6.0` to `v0.9.0`) no longer work: their script always clones `main` and reads a `template/` directory that `main` no longer has. This script cannot scaffold those tags either, since they have no `tool/init.dart`. To reproduce a `v0.x` version, clone that tag and run its own script:
