@@ -33,7 +33,7 @@ echo "Running: ${DART[*]} tool/init.dart $*"
 "${DART[@]}" tool/init.dart "$@" || fail "init exited with $?"
 
 for path in tool scaffold.sh CHANGELOG.md LICENSE docs/superpowers docs/repo-assets test/tool .github/workflows/blueprint.yml \
-  .github/workflows/release.yml release-please-config.json .release-please-manifest.json; do
+  .github/dependabot.yml .github/workflows/release.yml release-please-config.json .release-please-manifest.json; do
   [ ! -e "$path" ] || fail "$path still exists"
 done
 ! grep -rIl 'x-release-please' . --exclude-dir=.git || fail "release-please markers left in the app"

@@ -98,6 +98,7 @@ final Set<String> knownMarkers = {
 
 /// Paths that belong to the blueprint repository, not to a generated app.
 const List<String> blueprintOnlyPaths = [
+  '.github/dependabot.yml',
   '.github/workflows/blueprint.yml',
   '.github/workflows/release.yml',
   '.release-please-manifest.json',
