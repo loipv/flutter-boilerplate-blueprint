@@ -36,7 +36,8 @@ check-ads-config:
         deploy-functions-staging deploy-functions-prod \
         set-secret-staging set-secret-prod \
         release-preflight bump-version changelog tag-release \
-        analyze test test-firebase test-integration codegen icons splash check-test-layout coverage
+        analyze test test-firebase test-integration codegen icons splash check-test-layout coverage \
+        clean clean-codegen clean-ios clean-android clean-node clean-all reset
 
 help:
 	@echo ""
@@ -88,6 +89,15 @@ help:
 # END_ADS
 	@echo "    make icons    (regenerate launcher icons from assets/icons/app_logo.png)"
 	@echo "    make splash   (regenerate native splash from pubspec.yaml config)"
+	@echo ""
+	@echo "  Clean"
+	@echo "    make clean          (flutter clean + coverage/ + emulator logs)"
+	@echo "    make clean-codegen  (delete *.g.dart, *.freezed.dart, lib/l10n/generated/)"
+	@echo "    make clean-ios      (delete ios/Pods, .symlinks, Flutter/ephemeral)"
+	@echo "    make clean-android  (delete android/.gradle, app/.cxx)"
+	@echo "    make clean-node     (delete node_modules + functions/lib)"
+	@echo "    make clean-all      (every clean target above)"
+	@echo "    make reset          (clean-all, then setup)"
 	@echo ""
 
 run-staging:
@@ -274,3 +284,28 @@ icons:
 
 splash:
 	$(FLUTTER) pub run flutter_native_splash:create
+
+# Clean targets only touch gitignored build output, caches and generated code.
+clean:
+	$(FLUTTER) clean
+	rm -rf coverage
+	rm -f firebase-debug.log firestore-debug.log storage-debug.log ui-debug.log
+
+clean-codegen:
+	find lib test integration_test -type f \( -name '*.g.dart' -o -name '*.freezed.dart' \) -delete 2>/dev/null || true
+	rm -rf lib/l10n/generated .dart_tool/build
+
+clean-ios:
+	rm -rf ios/Pods ios/.symlinks ios/Flutter/ephemeral
+
+clean-android:
+	rm -rf android/.gradle android/app/.cxx
+
+clean-node:
+	rm -rf functions/node_modules functions/lib firebase_tests/node_modules
+
+clean-all: clean-codegen clean clean-ios clean-android clean-node
+
+# Wipes every generated artifact and rebuilds from scratch.
+reset: clean-all
+	$(MAKE) setup
