@@ -18,7 +18,7 @@ jobs:
           - --yes --name blueprint_ci --no-remote-config --no-anon
           - --yes --name acme_notes --org io.acme --title "Acme Notes" --description "Notes for Acme" --shared-app-id
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: 3.41.4
