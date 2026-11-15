@@ -58,7 +58,7 @@ make tag-release VERSION=1.0.0
 Use the `make` target; where none exists, `fvm flutter`. Never use bare `flutter`.
 
 <!-- BEGIN_BLUEPRINT -->
-`make bump-version` and `make tag-release` are app commands, not blueprint release commands. For blueprint releases, follow the process in `README.md` and use `BLUEPRINT_VERSION.md` as the source of truth.
+`make bump-version` and `make tag-release` are app commands, not blueprint release commands. For blueprint releases, follow README section 18 (merge the release-please PR); `.release-please-manifest.json` is the version source of truth.
 
 <!-- END_BLUEPRINT -->
 ## Critical Bans (Quick Reference)

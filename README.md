@@ -316,32 +316,38 @@ tool/verify_init.sh   # run the init tool on a copy and check the result
 
 `tool/verify_init.sh` copies the working tree, runs `tool/init.dart` non-interactively, checks the result, then runs `make setup analyze check-test-layout coverage` in the copy. It deletes its temporary copy on success (set `VERIFY_KEEP=1` to keep it) and keeps it on failure. Pass init flags to try a combination, for example `tool/verify_init.sh --yes --name acme_notes --org io.acme --no-sentry`. CI runs three combinations on every push (`.github/workflows/blueprint.yml`).
 
-Generated apps keep two workflows: `.github/workflows/ci.yml` runs on every push and pull request, with a `test` job (analyze, test layout check, coverage gate) and a `firebase` job (`make test-firebase`), and `.github/workflows/integration.yml` is started by hand and runs `make test-integration` on an Android emulator (see `docs/testing_guide.md`).
+Generated apps keep two workflows: `.github/workflows/ci.yml` runs on every push and pull request, with a `test` job (analyze, test layout check, coverage gate) and a `firebase` job (`make test-firebase`), and `.github/workflows/integration.yml` is started by hand and runs `make test-integration` on an Android emulator (see `docs/testing_guide.md`). The blueprint's own `blueprint.yml`, `release.yml` and `dependabot.yml` are removed.
 
 Anything that only makes sense in the blueprint (this README, release notes) sits between `<!-- BEGIN_BLUEPRINT -->` and `<!-- END_BLUEPRINT -->` lines in Markdown, or is a blueprint-only file; init removes both.
 
 ## 18. Releasing blueprint updates
 
-The generated app has its own app version in `pubspec.yaml`. The blueprint itself has a separate version, defined in [`BLUEPRINT_VERSION.md`](./BLUEPRINT_VERSION.md).
+The generated app has its own app version in `pubspec.yaml`. The blueprint itself has a separate version. Its source of truth is [`.release-please-manifest.json`](./.release-please-manifest.json); [release-please](https://github.com/googleapis/release-please) mirrors it into [`BLUEPRINT_VERSION.md`](./BLUEPRINT_VERSION.md) and the Quick start version lines, and writes [`CHANGELOG.md`](./CHANGELOG.md). Do not edit those by hand.
 
-When you cut a new blueprint version:
+How a release happens (`.github/workflows/release.yml`):
 
-1. Update [`BLUEPRINT_VERSION.md`](./BLUEPRINT_VERSION.md).
-2. Update the "Latest stable blueprint version" line in [`README.md`](./README.md).
-3. Add a new entry to [`CHANGELOG.md`](./CHANGELOG.md) describing what changed in that blueprint release.
-4. Commit the blueprint changes.
-5. Create an annotated tag for the new version.
-6. Push the branch and the tag.
+1. Merge changes to `main` with [conventional commit](https://www.conventionalcommits.org/) messages.
+2. release-please opens, then keeps updating, a PR titled "Release blueprint vX.Y.Z" with the next version and the new changelog entry.
+3. Edit the changelog text in that PR if the generated notes need polish.
+4. Merge the PR. release-please tags `vX.Y.Z` and publishes a GitHub Release with the same notes.
 
-Example for `v1.4.0`:
+How the next version is chosen:
 
-```bash
-git add BLUEPRINT_VERSION.md CHANGELOG.md README.md
-git commit -m "Release blueprint v1.4.0"
-git tag -a v1.4.0 -m "Blueprint 1.4.0"
-git push origin main
-git push origin v1.4.0
-```
+| Commit | Version bump | In the changelog |
+|---|---|---|
+| `feat: …` | minor | Features |
+| `fix: …` | patch | Bug Fixes |
+| `feat!: …` or a `BREAKING CHANGE:` footer | major | yes |
+| `perf`, `refactor`, `docs` | patch | own section |
+| `chore`, `ci`, `test` (including Dependabot's `chore(deps)`) | none on their own | hidden |
+
+To force a version, add a `Release-As: 2.0.0` footer to a commit.
+
+One-time repo setting: Settings → Actions → General → enable "Allow GitHub Actions to create and approve pull requests". Without it, release-please cannot open the release PR.
+
+The release PR is opened with `GITHUB_TOKEN`, so `blueprint.yml` does not run on it; it runs on `main` after the merge. The PR only changes version lines and `CHANGELOG.md`.
+
+Dependabot (`.github/dependabot.yml`) opens weekly PRs for the pub, `functions/` and `firebase_tests/` npm, and GitHub Actions dependencies, with minor and patch updates grouped per ecosystem. `blueprint.yml` scaffolds and tests each one.
 
 The default quick-start command should point at `main`, which stays aligned with the latest stable blueprint. Tags are for reproducible snapshots when someone needs an older exact version. Users can check [`CHANGELOG.md`](./CHANGELOG.md) to see what changed between blueprint versions.
 

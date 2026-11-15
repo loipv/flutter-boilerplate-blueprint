@@ -43,7 +43,7 @@
 
 This repository is the blueprint: a runnable app that `tool/init.dart` renames into a new app. It has two separate versioning concerns:
 
-- The **blueprint version**, defined in `BLUEPRINT_VERSION.md`
+- The **blueprint version**, with `.release-please-manifest.json` as the source of truth (release-please mirrors it into `BLUEPRINT_VERSION.md` and the README Quick start)
 - The **app version** in `pubspec.yaml`
 
 JSON/ARB files cannot hold `BEGIN_<NAME>` / `END_<NAME>` markers, so keys used only by an optional feature use that feature's prefix (`notifications`, `ads`, `apple`, `google`, `anon`); `tool/init.dart` strips them with the feature. See `docs/localization.md`.
@@ -53,7 +53,7 @@ For blueprint release work:
 1. Read `README.md` and `CHANGELOG.md` first
 2. Treat `main` as the default install path for the latest stable blueprint
 3. Treat Git tags as reproducible snapshots for older exact blueprint versions
-4. Update `BLUEPRINT_VERSION.md`, the "Latest stable blueprint version" line in `README.md`, and `CHANGELOG.md` together; then commit, tag, and push
+4. Do not edit the version lines or `CHANGELOG.md` by hand, and do not tag by hand: use conventional commit messages and merge the "Release blueprint vX.Y.Z" PR that release-please opens (README section 18)
 5. Do not use app Makefile release commands (`make bump-version`, `make tag-release`) as the source of truth for blueprint releases
 
 `lib/firebase_options_staging.dart` and `lib/firebase_options_production.dart` are committed as stubs so the repo analyzes and tests without Firebase projects. Before running `flutterfire configure` in this repo, run:
