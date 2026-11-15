@@ -339,14 +339,16 @@ How the next version is chosen:
 | `feat: …` | minor | Features |
 | `fix: …` | patch | Bug Fixes |
 | `feat!: …` or a `BREAKING CHANGE:` footer | major | yes |
-| `perf`, `refactor`, `docs` | patch | own section |
-| `chore`, `ci`, `test` (including Dependabot's `chore(deps)`) | none on their own | hidden |
+| `perf`, `refactor` | patch | own section |
+| `docs`, `chore`, `ci`, `test`, `build`, `style`, `revert` (including Dependabot's `chore(deps)`) | none on their own | hidden |
 
-To force a version, add a `Release-As: 2.0.0` footer to a commit.
+To force a version, add a `Release-As: 2.0.0` footer to a commit. With a squash merge, the PR title becomes the commit message, so the PR title is what release-please reads: give it a conventional prefix.
+
+Entries from v1.5.0 on are generated (Features, Bug Fixes, …) and their headings link to the compare view; older entries are hand-written. `last-release-sha` in `release-please-config.json` points at the v1.4.0 release commit for the first automated release; remove it once v1.5.0 is out.
 
 One-time repo setting: Settings → Actions → General → enable "Allow GitHub Actions to create and approve pull requests". Without it, release-please cannot open the release PR.
 
-The release PR is opened with `GITHUB_TOKEN`, so `blueprint.yml` does not run on it; it runs on `main` after the merge. The PR only changes version lines and `CHANGELOG.md`.
+The release PR is opened with `GITHUB_TOKEN`, so `blueprint.yml` does not run on it; it runs on `main` after the merge. The PR only changes `.release-please-manifest.json`, the version lines and `CHANGELOG.md`.
 
 Dependabot (`.github/dependabot.yml`) opens weekly PRs for the pub, `functions/` and `firebase_tests/` npm, and GitHub Actions dependencies, with minor and patch updates grouped per ecosystem. `blueprint.yml` scaffolds and tests each one.
 

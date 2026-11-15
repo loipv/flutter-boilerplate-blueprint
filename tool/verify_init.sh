@@ -36,7 +36,14 @@ for path in tool scaffold.sh CHANGELOG.md LICENSE docs/superpowers docs/repo-ass
   .github/dependabot.yml .github/workflows/release.yml release-please-config.json .release-please-manifest.json; do
   [ ! -e "$path" ] || fail "$path still exists"
 done
-! grep -rIl 'x-release-please' . --exclude-dir=.git || fail "release-please markers left in the app"
+# grep exits 1 for no match; 2 means it could not read something.
+status=0
+leftover="$(grep -rIl 'x-release-please' . --exclude-dir=.git)" || status=$?
+case "$status" in
+  0) fail "release-please markers left in the app: $leftover" ;;
+  1) ;;
+  *) fail "grep for release-please markers failed (exit $status)" ;;
+esac
 for path in .git .env.staging .env.production BLUEPRINT_VERSION.md .github/workflows/ci.yml .github/workflows/integration.yml; do
   [ -e "$path" ] || fail "$path is missing"
 done
